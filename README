@@ -1,0 +1,57 @@
+### Conceptual model
+
+An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those.
+
+### Application
+
+An application is just a Ruby script:
+
+    #!/usr/bin/env ruby
+
+    require 'resources/posts'
+    require 'resources/users'
+
+    Raptor.new([Posts, Users]).attack!
+
+Running this script will start a server, just like Sinatra would. There's no autoloader and no discovery of your code: you explicitly require your resources and give them to Raptor.
+
+### Raptor request process
+
+- Step through routes, choosing the first that matches
+- Delegate to the domain object, inferring arguments as needed
+  - If an exception is raised, route it and end this process
+- Instantiate the presenter with the domain object
+- Pass the presenter to the template
+
+### Implementation
+
+It's as you'd expect:
+
+    class App
+      def call(env)
+        route = routes.find { |r| r.matches?(env) }
+        route.call(env)
+      end
+    end
+
+    class Route
+      def call(env)
+        begin
+          domain_object = route.build_domain_object
+        rescue Exception => e
+          presenter = route.handle_exception(exception)
+        end
+        presenter = route.build_presenter(domain_object)
+        render(presenter)
+      end
+    end
+
+### Argument inference
+
+Domain objects, presenters, and requirements can 
+
+### Sanity
+
+- Mutating a record in a presenter is an error
+- A resource may not be named "params"
+
