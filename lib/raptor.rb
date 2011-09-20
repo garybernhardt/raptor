@@ -3,8 +3,8 @@ require 'erb'
 module Raptor
   def self.routes(resource)
     Router.new(resource, [
-               Route.new('/posts/new', 'Posts::Record#new', 'new', resource),
-               Route.new('/posts/:id', 'Posts::Record#find_by_id', 'show', resource)
+               Route.new(RoutePath.new('/posts/new'), 'Posts::Record#new', 'new', resource),
+               Route.new(RoutePath.new('/posts/:id'), 'Posts::Record#find_by_id', 'show', resource)
 
     ])
   end
@@ -33,7 +33,7 @@ module Raptor
 
     def call(env)
       incoming_path = env['PATH_INFO']
-      args = args_from_incoming_path(incoming_path)
+      args = @path.extract_args(incoming_path)
       record = record_class.send(domain_method(@domain_spec), *args)
       presenter = one_presenter.new(record)
       render(presenter, template_name)
@@ -49,19 +49,7 @@ module Raptor
 
 
     def matches?(path)
-      zip_with_path(path).map do |route_component, path_component|
-        (route_component[0] == ':' || route_component == path_component)
-      end.all?
-    end
-
-    def args_from_incoming_path(path)
-      zip_with_path(path).select do |route_component, path_component|
-        route_component[0] == ':'
-      end.map {|x| x[1].to_i } # all url args are numbers for now
-    end
-
-    def zip_with_path(path)
-      @path.split('/').zip(path.split('/'))
+      @path.matches?(path)
     end
 
     def render(presenter, template_name)
@@ -84,6 +72,28 @@ module Raptor
 
     def one_presenter
       @resource.const_get(:PresentsOne)
+    end
+  end
+
+  class RoutePath
+    def initialize(path)
+      @path = path
+    end
+
+    def matches?(path)
+      zip_with_path(path).map do |route_component, path_component|
+        (route_component[0] == ':' || route_component == path_component)
+      end.all?
+    end
+
+    def extract_args(path)
+      zip_with_path(path).select do |route_component, path_component|
+        route_component[0] == ':'
+      end.map {|x| x[1].to_i } # all url args are numbers for now
+    end
+
+    def zip_with_path(path)
+      @path.split('/').zip(path.split('/'))
     end
   end
 

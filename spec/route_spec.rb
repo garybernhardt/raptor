@@ -56,25 +56,25 @@ end
 
 describe "Route matching" do
   it "matches if the paths are the same" do
-    Raptor::Route.new('/posts/new', stub, stub, stub).matches?('/posts/new').should be_true
+    Raptor::RoutePath.new('/posts/new').matches?('/posts/new').should be_true
   end
 
   it "does not match when the paths are different" do
-    Raptor::Route.new('/posts/new', stub, stub, stub).matches?('/foo/bar').should be_false
+    Raptor::RoutePath.new('/posts/new').matches?('/foo/bar').should be_false
   end
 
   it "matches any component when a path has a param" do
-    Raptor::Route.new('/posts/:id', stub, stub, stub).matches?('/posts/5').should be_true
+    Raptor::RoutePath.new('/posts/:id').matches?('/posts/5').should be_true
   end
 
   it "does not a path with params when the path does not match" do
-    Raptor::Route.new('/posts/:id', stub, stub, stub).matches?('/users/2').should be_false
+    Raptor::RoutePath.new('/posts/:id').matches?('/users/2').should be_false
   end
 end
 
 describe "pulling the args out of a route spec and an incoming path" do
   it "pulls out args that match with keywords" do
-    Raptor::Route.new('/posts/:id', stub, stub, stub).args_from_incoming_path('/posts/5').should == [5]
+    Raptor::RoutePath.new('/posts/:id').extract_args('/posts/5').should == [5]
   end
 end
 
