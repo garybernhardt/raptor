@@ -2,9 +2,10 @@ require 'erb'
 
 module Raptor
   def self.routes(resource)
+    wrapped = Resource.wrap(resource)
     Router.new(resource, [
-               Route.new(RoutePath.new('/posts/new'), 'Posts::Record#new', 'new', resource),
-               Route.new(RoutePath.new('/posts/:id'), 'Posts::Record#find_by_id', 'show', resource)
+               Route.new(RoutePath.new('/posts/new'), 'Posts::Record#new', 'new', wrapped),
+               Route.new(RoutePath.new('/posts/:id'), 'Posts::Record#find_by_id', 'show', wrapped)
 
     ])
   end
@@ -34,9 +35,37 @@ module Raptor
     def call(env)
       incoming_path = env['PATH_INFO']
       args = @path.extract_args(incoming_path)
-      record = record_class.send(domain_method(@domain_spec), *args)
-      presenter = one_presenter.new(record)
+      record = @resource.record_class.send(domain_method(@domain_spec), *args)
+      presenter = @resource.one_presenter.new(record)
       render(presenter, template_name)
+    end
+
+    def matches?(path)
+      @path.matches?(path)
+    end
+
+    def render(presenter, template_name)
+      template = template_named(template_name)
+      template_binder = TemplateBinder.new(@resource.resource_name.to_sym => presenter)
+      template.result(template_binder.get_binding)
+    end
+
+    def template_named(route)
+      template = ERB.new(File.new("views/#{@resource.resource_name}/#{route}.html.erb").read)
+    end
+
+    def domain_method(domain_description)
+      domain_description.split('#').last.to_sym
+    end
+  end
+
+  class Resource
+    def self.wrap(resource)
+      new(resource)
+    end
+
+    def initialize(resource)
+      @resource = resource
     end
 
     def resource_name
@@ -47,27 +76,8 @@ module Raptor
       string.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
 
-
-    def matches?(path)
-      @path.matches?(path)
-    end
-
-    def render(presenter, template_name)
-      template = template_named(template_name)
-      template_binder = TemplateBinder.new(resource_name.to_sym => presenter)
-      template.result(template_binder.get_binding)
-    end
-
-    def template_named(route)
-      template = ERB.new(File.new("views/#{resource_name}/#{route}.html.erb").read)
-    end
-
     def record_class
       @resource.const_get(:Record)
-    end
-
-    def domain_method(domain_description)
-      domain_description.split('#').last.to_sym
     end
 
     def one_presenter

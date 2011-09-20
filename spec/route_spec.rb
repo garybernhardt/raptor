@@ -41,10 +41,6 @@ describe "Router" do
     rendered.strip.should == "It's FIRST POST!"
   end
 
-  it "knows the name of resources with camel cased names" do
-    Raptor::Route.new(stub, stub, stub, stub(:name => 'CamelCase')).resource_name.should == 'camel_case'
-  end
-
   it "routes requests to new" do
     env = {'PATH_INFO' => '/posts/new'}
     rendered = FakeResources::Post::Routes.call(env)
@@ -78,3 +74,16 @@ describe "pulling the args out of a route spec and an incoming path" do
   end
 end
 
+describe Raptor::Resource do
+  it "knows the name of resources with camel cased names" do
+    Raptor::Resource.new(stub(:name => 'CamelCase')).resource_name.should == 'camel_case'
+  end
+
+  it "knows how to get the record class" do
+    Raptor::Resource.new(FakeResources::Post).record_class.should == FakeResources::Post::Record
+  end
+
+  it "knows how to get the presenter" do
+    Raptor::Resource.new(FakeResources::Post).one_presenter.should == FakeResources::Post::PresentsOne
+  end
+end
