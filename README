@@ -48,7 +48,24 @@ It's as you'd expect:
 
 ### Argument inference
 
-Domain objects, presenters, and requirements can 
+Domain objects, presenters, and requirements can infer certain arguments. For example, consider this presenter:
+
+    class PresentsUsers
+      def initialize(params, user)
+        @params = params
+        @user = user
+      end
+
+      ...
+    end
+
+Because the Presenter's initializer takes an argument named `params`, the router will automatically be populated with the params hash when the router instantiates it.
+
+From the application's point of view, this achieves roughly the same result as a Rails controller: you can access the params, or plenty of other request-related state, if you need to. But has some additional benefits:
+
+* More than just request-state can be inferred. If your presenter method takes an argument named `post`, and there's a resource named Post, and there's a param value at `params[:post][:id]`, then Raptor will automatically retrieve that post for you. By simply naming your argument `post`, you're telling the Raptor router that you want the relevant post record injected.
+
+* Testability: the presenter (or domain object or requirement) is still just a regular object with a regular initializer. When you test it, you can just new it up with appropriate arguments. There are no controller classes full of implicit interactions.
 
 ### Sanity
 
