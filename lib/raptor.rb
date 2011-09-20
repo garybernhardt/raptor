@@ -2,10 +2,10 @@ require 'erb'
 
 module Raptor
   def self.routes(resource)
-    Routes.new(resource)
+    Router.new(resource)
   end
 
-  class Routes
+  class Router
     def initialize(resource)
       @resource = resource
     end

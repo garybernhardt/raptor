@@ -41,7 +41,7 @@ describe "Router" do
   end
 
   it "knows the name of resources with camel cased names" do
-    Raptor::Routes.new(stub(:name => 'CamelCase')).resource_name.should == 'camel_case'
+    Raptor::Router.new(stub(:name => 'CamelCase')).resource_name.should == 'camel_case'
   end
 
   it "raises an error when templates access undefined variables"
