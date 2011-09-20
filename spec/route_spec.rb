@@ -29,12 +29,13 @@ module FakeResources::Post
 end
 
 describe "Router" do
-  it "routes requests through the model and back" do
+  it "routes requests through the record, presenter, and template" do
     env = {'PATH_INFO' => '5'}
     rendered = FakeResources::Post::Routes.call(env)
-    rendered.should == "BOB"
+    rendered.strip.should == "BOB"
   end
 
   it "knows the name of resources with camel cased names"
+  it "raises an error when templates access undefined variables"
 end
 
