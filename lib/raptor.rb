@@ -24,7 +24,6 @@ module Raptor
   end
 
   class Route
-    attr_reader :template_name
     def initialize(path, domain_spec, template_name, resource)
       @path = path
       @domain_spec = domain_spec
@@ -37,21 +36,21 @@ module Raptor
       args = @path.extract_args(incoming_path)
       record = @resource.record_class.send(domain_method(@domain_spec), *args)
       presenter = @resource.one_presenter.new(record)
-      render(presenter, template_name)
+      render(presenter)
     end
 
     def matches?(path)
       @path.matches?(path)
     end
 
-    def render(presenter, template_name)
-      template = template_named(template_name)
+    def render(presenter)
+      template = template_path
       template_binder = TemplateBinder.new(@resource.resource_name.to_sym => presenter)
       template.result(template_binder.get_binding)
     end
 
-    def template_named(route)
-      template = ERB.new(File.new("views/#{@resource.resource_name}/#{route}.html.erb").read)
+    def template_path
+      template = ERB.new(File.new("views/#{@resource.resource_name}/#{@template_name}.html.erb").read)
     end
 
     def domain_method(domain_description)
