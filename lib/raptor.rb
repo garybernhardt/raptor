@@ -19,7 +19,7 @@ module Raptor
     end
 
     def call(env)
-      id = env['PATH_INFO'].to_i
+      id = extract_id(env['PATH_INFO'])
       record = record_class.find_by_id(id)
       template = ERB.new(File.new("views/#{resource_name}/show.html.erb").read)
       presenter = one_presenter.new(record)
@@ -29,6 +29,10 @@ module Raptor
 
     def record_class
       @resource.const_get(:Record)
+    end
+
+    def extract_id(path)
+      path.split('/').last.to_i
     end
 
     def one_presenter

@@ -35,7 +35,7 @@ end
 
 describe "Router" do
   it "routes requests through the record, presenter, and template" do
-    env = {'PATH_INFO' => '5'}
+    env = {'PATH_INFO' => 'posts/5'}
     rendered = FakeResources::Post::Routes.call(env)
     rendered.strip.should == "It's FIRST POST!"
   end
