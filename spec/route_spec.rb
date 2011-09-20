@@ -3,9 +3,9 @@ require 'raptor'
 module FakeResources; end
 module FakeResources::Post
   # A resource with:
-  #   - One record, ID 5, whose name is "bob"
-  #   - A presenter that upcases records' names
-  #   - A template that says "Hello, #{post.name}!"
+  #   - One record, ID 5, whose title is "first post"
+  #   - A presenter that upcases records' titles
+  #   - A template that says "It's #{post.title}!"
 
   Routes = Raptor.routes(self) do
     show 'Posts::Record#find_by_id'
@@ -16,14 +16,14 @@ module FakeResources::Post
       @post = post
     end
 
-    def name
-      @post.name.upcase
+    def title
+      @post.title.upcase
     end
   end
 
   class Record
-    def name
-      "bob"
+    def title
+      "first post"
     end
 
     def self.find_by_id(id)
@@ -37,7 +37,7 @@ describe "Router" do
   it "routes requests through the record, presenter, and template" do
     env = {'PATH_INFO' => '5'}
     rendered = FakeResources::Post::Routes.call(env)
-    rendered.strip.should == "Hello, BOB!"
+    rendered.strip.should == "It's FIRST POST!"
   end
 
   it "knows the name of resources with camel cased names"
