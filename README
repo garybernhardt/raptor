@@ -1,6 +1,10 @@
 ### Conceptual model
 
-An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those.
+An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those. Not all resources can be accessed directly through HTTP, and not all resources map directly onto database records.
+
+Resources are composed of plain old Ruby objects. Sometimes, Raptor uses convention-based methods to instantiate or interact with them, but the objects themselves are simple. There are no base classes to inherit from.
+
+The one exception to this is routing, because it's pure configuration.
 
 ### Application
 
