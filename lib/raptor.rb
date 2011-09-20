@@ -11,7 +11,11 @@ module Raptor
     end
 
     def resource_name
-      @resource.name.split('::').last.downcase
+      underscore(@resource.name.split('::').last)
+    end
+
+    def underscore(string)
+      string.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
 
     def call(env)
