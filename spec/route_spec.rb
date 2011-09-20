@@ -2,6 +2,11 @@ require 'raptor'
 
 module FakeResources; end
 module FakeResources::Post
+  # A resource with:
+  #   - One record, ID 5, whose name is "bob"
+  #   - A presenter that upcases records' names
+  #   - A template that says "Hello, #{post.name}!"
+
   Routes = Raptor.routes(self) do
     show 'Posts::Record#find_by_id'
   end
