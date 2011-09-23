@@ -76,3 +76,7 @@ From the application's point of view, this achieves roughly the same result as a
 - Mutating a record in a presenter is an error
 - A resource may not be named "params"
 
+### Possible database layer primitives
+
+https://github.com/nateware/redis-objects
+
