@@ -6,10 +6,25 @@ module Raptor
     Router.new(resource, &block)
   end
 
+  class App
+    def initialize(resources)
+      @resources = resources
+    end
+
+    def call(env)
+      @resources.each do |resource|
+        begin
+          return resource::Routes.call(env)
+        rescue NoRouteMatches
+        end
+      end
+    end
+  end
+
   class Router
-    ROUTE_PATHS = {:show => "/posts/:id",
-                   :new => "/posts/new",
-                   :index => "/posts"}
+    ROUTE_PATHS = {:show => "/%s/:id",
+                   :new => "/%s/new",
+                   :index => "/%s"}
     def initialize(resource, &block)
       @resource = resource
       @routes = []
@@ -27,7 +42,8 @@ module Raptor
 
     [:show, :new, :index].each do |method_name|
       define_method(method_name) do |delegate_name=nil|
-        @routes << Route.new(ROUTE_PATHS.fetch(method_name),
+        route_path = ROUTE_PATHS.fetch(method_name) % @resource.resource_name
+        @routes << Route.new(route_path,
                              delegate_name,
                              method_name,
                              @resource)

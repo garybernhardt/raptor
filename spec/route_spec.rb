@@ -1,15 +1,27 @@
 require 'raptor'
 require 'fake_resources'
 
+describe Raptor::App do
+  it "routes to multiple resources" do
+    app = Raptor::App.new([FakeResources::Post, FakeResources::WithNoBehavior])
+    env = {'PATH_INFO' => '/post/5'}
+    app.call(env).strip.should == "It's FIRST POST!"
+    env = {'PATH_INFO' => '/with_no_behavior/5'}
+    app.call(env).strip.should == "The index!"
+  end
+
+  it "raises an error if no route matches"
+end
+
 describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
-    env = {'PATH_INFO' => '/posts/5'}
+    env = {'PATH_INFO' => '/post/5'}
     rendered = FakeResources::Post::Routes.call(env)
     rendered.strip.should == "It's FIRST POST!"
   end
 
   it "routes requests to new" do
-    env = {'PATH_INFO' => '/posts/new'}
+    env = {'PATH_INFO' => '/post/new'}
     rendered = FakeResources::Post::Routes.call(env)
     rendered.strip.should == "<form>\n</form>"
   end
@@ -24,37 +36,35 @@ describe Raptor::Router do
   end
 
   it "has an index" do
-    env = {'PATH_INFO' => '/posts/index'}
+    env = {'PATH_INFO' => '/with_no_behavior/index'}
     FakeResources::WithNoBehavior::Routes.call(env).strip.should == "The index!"
   end
 
   it "raises an error when templates access undefined methods" do
-    env = {'PATH_INFO' => '/posts/index'}
+    env = {'PATH_INFO' => '/with_undefined_method_call_in_index/index'}
     expect do
       FakeResources::WithUndefinedMethodCallInIndex::Routes.call(env)
     end.to raise_error(NameError,
                        /undefined local variable or method `undefined_method'/)
   end
-
-  it "handles resources other than /post"
 end
 
 describe Raptor::RoutePath do
   context "route matching" do
     it "matches if the paths are the same" do
-      matches?('/posts/new', '/posts/new').should be_true
+      matches?('/post/new', '/post/new').should be_true
     end
 
     it "does not match when the paths are different" do
-      matches?('/posts/new', '/foo/bar').should be_false
+      matches?('/post/new', '/foo/bar').should be_false
     end
 
     it "matches any component when a path has a param" do
-      matches?('/posts/:id', '/posts/5').should be_true
+      matches?('/post/:id', '/post/5').should be_true
     end
 
     it "does not a path with params when the path does not match" do
-      matches?('/posts/:id', '/users/2').should be_false
+      matches?('/post/:id', '/users/2').should be_false
     end
 
     def matches?(route, url)
@@ -64,7 +74,7 @@ describe Raptor::RoutePath do
 
   context "pulling the args out of a route spec and an incoming path" do
     it "pulls out args that match with keywords" do
-      Raptor::RoutePath.new('/posts/:id').extract_args('/posts/5').should == [5]
+      Raptor::RoutePath.new('/post/:id').extract_args('/post/5').should == [5]
     end
   end
 end
