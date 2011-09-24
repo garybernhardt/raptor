@@ -52,19 +52,23 @@ end
 
 describe "Route matching" do
   it "matches if the paths are the same" do
-    Raptor::RoutePath.new('/posts/new').matches?('/posts/new').should be_true
+    matches?('/posts/new', '/posts/new').should be_true
   end
 
   it "does not match when the paths are different" do
-    Raptor::RoutePath.new('/posts/new').matches?('/foo/bar').should be_false
+    matches?('/posts/new', '/foo/bar').should be_false
   end
 
   it "matches any component when a path has a param" do
-    Raptor::RoutePath.new('/posts/:id').matches?('/posts/5').should be_true
+    matches?('/posts/:id', '/posts/5').should be_true
   end
 
   it "does not a path with params when the path does not match" do
-    Raptor::RoutePath.new('/posts/:id').matches?('/users/2').should be_false
+    matches?('/posts/:id', '/users/2').should be_false
+  end
+
+  def matches?(route, url)
+    Raptor::RoutePath.new(route).matches?(url)
   end
 end
 
