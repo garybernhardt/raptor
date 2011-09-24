@@ -4,8 +4,8 @@ module Raptor
   def self.routes(resource)
     wrapped = Resource.wrap(resource)
     Router.new(resource, [
-               Route.new(RoutePath.new('/posts/new'), 'Posts::Record#new', 'new', wrapped),
-               Route.new(RoutePath.new('/posts/:id'), 'Posts::Record#find_by_id', 'show', wrapped)
+               Route.new('/posts/new', 'Posts::Record#new', 'new', wrapped),
+               Route.new('/posts/:id', 'Posts::Record#find_by_id', 'show', wrapped)
 
     ])
   end
@@ -25,7 +25,7 @@ module Raptor
 
   class Route
     def initialize(path, domain_spec, template_name, resource)
-      @path = path
+      @path = RoutePath.new(path)
       @domain_spec = domain_spec
       @template_name = template_name
       @resource = resource
