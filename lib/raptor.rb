@@ -17,8 +17,11 @@ module Raptor
 
     def call(env)
       incoming_path = env['PATH_INFO']
-      route = @routes.find {|r| r.matches?(incoming_path) }
-      route.call(env)
+      route_for_path(incoming_path).call(env)
+    end
+
+    def route_for_path(incoming_path)
+      @routes.find {|r| r.matches?(incoming_path) }
     end
 
     [:show, :new].each do |method_name|
