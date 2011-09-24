@@ -21,7 +21,7 @@ module Raptor
     end
 
     def route_for_path(incoming_path)
-      @routes.find {|r| r.matches?(incoming_path) }
+      @routes.find {|r| r.matches?(incoming_path) } or raise NoRouteMatches
     end
 
     [:show, :new].each do |method_name|
@@ -33,6 +33,8 @@ module Raptor
       end
     end
   end
+
+  class NoRouteMatches < RuntimeError; end
 
   class Route
     def initialize(path, domain_spec, template_name, resource)

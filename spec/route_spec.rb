@@ -14,6 +14,15 @@ describe Raptor::Router do
     rendered.strip.should == "<form>\n</form>"
   end
 
+  context "when a route isn't defined" do
+    it "raises an error" do
+      env = {'PATH_INFO' => '/doesnt_exist'}
+      expect do
+        FakeResources::Post::Routes.call(env)
+      end.to raise_error(Raptor::NoRouteMatches)
+    end
+  end
+
   it "raises an error when templates access undefined variables"
 end
 
@@ -45,8 +54,6 @@ describe Raptor::RoutePath do
       Raptor::RoutePath.new('/posts/:id').extract_args('/posts/5').should == [5]
     end
   end
-
-  it "raises an appropriate error when a route isn't defined (currently NoMethodError on nil)"
 end
 
 describe Raptor::Resource do
