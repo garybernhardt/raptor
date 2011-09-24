@@ -2,10 +2,10 @@ require 'erb'
 
 module Raptor
   def self.routes(resource)
-    wrapped = Resource.wrap(resource)
+    resource = Resource.wrap(resource)
     Router.new(resource, [
-               Route.new('/posts/new', 'Posts::Record#new', 'new', wrapped),
-               Route.new('/posts/:id', 'Posts::Record#find_by_id', 'show', wrapped)
+               Route.new('/posts/new', 'Posts::Record#new', 'new', resource),
+               Route.new('/posts/:id', 'Posts::Record#find_by_id', 'show', resource)
 
     ])
   end
