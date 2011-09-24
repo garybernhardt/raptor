@@ -32,3 +32,9 @@ module FakeResources::Post
   end
 end
 
+module FakeResources::WithNoBehavior
+  Routes = Raptor.routes(self) do
+    index
+  end
+end
+

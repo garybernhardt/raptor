@@ -23,6 +23,11 @@ describe Raptor::Router do
     end
   end
 
+  it "has an index" do
+    env = {'PATH_INFO' => '/posts/index'}
+    FakeResources::WithNoBehavior::Routes.call(env).strip.should == "The index!"
+  end
+
   it "raises an error when templates access undefined variables"
   it "handles resources other than /post"
 end

@@ -8,7 +8,8 @@ module Raptor
 
   class Router
     ROUTE_PATHS = {:show => "/posts/:id",
-                   :new => "/posts/new"}
+                   :new => "/posts/new",
+                   :index => "/posts"}
     def initialize(resource, &block)
       @resource = resource
       @routes = []
@@ -24,8 +25,8 @@ module Raptor
       @routes.find {|r| r.matches?(incoming_path) } or raise NoRouteMatches
     end
 
-    [:show, :new].each do |method_name|
-      define_method(method_name) do |delegate_name|
+    [:show, :new, :index].each do |method_name|
+      define_method(method_name) do |delegate_name=nil|
         @routes << Route.new(ROUTE_PATHS.fetch(method_name),
                              delegate_name,
                              method_name,
@@ -47,8 +48,12 @@ module Raptor
     def call(env)
       incoming_path = env['PATH_INFO']
       args = @path.extract_args(incoming_path)
-      record = @resource.record_class.send(domain_method(@domain_spec), *args)
-      presenter = @resource.one_presenter.new(record)
+      if @domain_spec
+        record = @resource.record_class.send(domain_method(@domain_spec), *args)
+      end
+      if record
+        presenter = @resource.one_presenter.new(record)
+      end
       render(presenter)
     end
 
