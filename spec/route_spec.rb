@@ -28,6 +28,14 @@ describe Raptor::Router do
     FakeResources::WithNoBehavior::Routes.call(env).strip.should == "The index!"
   end
 
+  it "raises an error when templates access undefined methods" do
+    env = {'PATH_INFO' => '/posts/index'}
+    expect do
+      FakeResources::WithUndefinedMethodCallInIndex::Routes.call(env)
+    end.to raise_error(NameError,
+                       /undefined local variable or method `undefined_method'/)
+  end
+
   it "handles resources other than /post"
 end
 

@@ -38,3 +38,9 @@ module FakeResources::WithNoBehavior
   end
 end
 
+module FakeResources::WithUndefinedMethodCallInIndex
+  Routes = Raptor.routes(self) do
+    index
+  end
+end
+
