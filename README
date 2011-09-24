@@ -84,6 +84,11 @@ From the application's point of view, this achieves roughly the same result as a
 - Mutating a record in a presenter is an error
 - A resource may not be named "params"
 
+### Testing
+
+- Running request tests generates transcripts of the requests as text files. Reviewing these on commit can reveal unintended changes.
+- Add request metatests that duplicate requests that should be idempotent (everything except POSTs) and verify that they actually are. (Good idea?)
+
 ### Possible database layer primitives
 
 https://github.com/nateware/redis-objects
