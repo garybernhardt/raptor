@@ -71,7 +71,15 @@ From the application's point of view, this achieves roughly the same result as a
 
 * Testability: the presenter (or domain object or requirement) is still just a regular object with a regular initializer. When you test it, you can just new it up with appropriate arguments. There are no controller classes full of implicit interactions.
 
-### Sanity
+### Design Notes / Constraints
+
+- All scripts will comform to Unix argument conventions
+- All scripts will die immediately on ^C
+- All scripts, and framework loads, will take less than 100 ms
+- Autoreload will happen by killing and restarting, not in-place
+- Releases will follow semantic versioning
+
+### Sanity Notes
 
 - Mutating a record in a presenter is an error
 - A resource may not be named "params"
