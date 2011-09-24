@@ -28,7 +28,6 @@ describe Raptor::Router do
     FakeResources::WithNoBehavior::Routes.call(env).strip.should == "The index!"
   end
 
-  it "raises an error when templates access undefined variables"
   it "handles resources other than /post"
 end
 
