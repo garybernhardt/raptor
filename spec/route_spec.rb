@@ -79,15 +79,18 @@ describe "pulling the args out of a route spec and an incoming path" do
 end
 
 describe Raptor::Resource do
+  let(:camel_case_resource) { Raptor::Resource.new(stub(:name => 'CamelCase')) }
+  let(:resource) { Raptor::Resource.new(FakeResources::Post) }
+
   it "knows the name of resources with camel cased names" do
-    Raptor::Resource.new(stub(:name => 'CamelCase')).resource_name.should == 'camel_case'
+    camel_case_resource.resource_name.should == 'camel_case'
   end
 
   it "knows how to get the record class" do
-    Raptor::Resource.new(FakeResources::Post).record_class.should == FakeResources::Post::Record
+    resource.record_class.should == FakeResources::Post::Record
   end
 
   it "knows how to get the presenter" do
-    Raptor::Resource.new(FakeResources::Post).one_presenter.should == FakeResources::Post::PresentsOne
+    resource.one_presenter.should == FakeResources::Post::PresentsOne
   end
 end
