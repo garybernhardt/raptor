@@ -8,8 +8,8 @@ module FakeResources::Post
   #   - A template that says "It's #{post.title}!"
 
   Routes = Raptor.routes(self) do
-    show 'Posts::Record#find_by_id'
     new 'Posts::Record#new'
+    show 'Posts::Record#find_by_id'
   end
 
   class PresentsOne
@@ -70,6 +70,9 @@ describe "Route matching" do
   def matches?(route, url)
     Raptor::RoutePath.new(route).matches?(url)
   end
+
+  it "raises an appropriate error when a route isn't defined (currently NoMethodError on nil)"
+  it "chooses the correct route even if one with a variable appears before one without"
 end
 
 describe "pulling the args out of a route spec and an incoming path" do
@@ -94,3 +97,4 @@ describe Raptor::Resource do
     resource.one_presenter.should == FakeResources::Post::PresentsOne
   end
 end
+

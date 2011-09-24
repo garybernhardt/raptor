@@ -1,25 +1,30 @@
 require 'erb'
 
 module Raptor
-  def self.routes(resource)
+  def self.routes(resource, &block)
     resource = Resource.wrap(resource)
-    Router.new(resource, [
-               Route.new('/posts/new', 'Posts::Record#new', 'new', resource),
-               Route.new('/posts/:id', 'Posts::Record#find_by_id', 'show', resource)
-
-    ])
+    Router.new(resource, &block)
   end
 
   class Router
-    def initialize(resource, routes)
+    def initialize(resource, &block)
       @resource = resource
-      @routes = routes
+      @routes = []
+      instance_eval(&block)
     end
 
     def call(env)
       incoming_path = env['PATH_INFO']
       route = @routes.find {|r| r.matches?(incoming_path) }
       route.call(env)
+    end
+
+    def show(delegate_name)
+      @routes << Route.new('/posts/:id', delegate_name, 'show', @resource)
+    end
+
+    def new(delegate_name)
+      @routes << Route.new('/posts/new', delegate_name, 'new', @resource)
     end
   end
 
