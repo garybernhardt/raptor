@@ -47,7 +47,6 @@ describe Raptor::RoutePath do
   end
 
   it "raises an appropriate error when a route isn't defined (currently NoMethodError on nil)"
-  it "chooses the correct route even if one with a variable appears before one without"
 end
 
 describe Raptor::Resource do
