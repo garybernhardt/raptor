@@ -2,15 +2,23 @@ require 'raptor'
 require 'fake_resources'
 
 describe Raptor::App do
+  let(:app) do
+    Raptor::App.new([FakeResources::Post, FakeResources::WithNoBehavior])
+  end
+
   it "routes to multiple resources" do
-    app = Raptor::App.new([FakeResources::Post, FakeResources::WithNoBehavior])
     env = {'PATH_INFO' => '/post/5'}
     app.call(env).strip.should == "It's FIRST POST!"
     env = {'PATH_INFO' => '/with_no_behavior/5'}
     app.call(env).strip.should == "The index!"
   end
 
-  it "raises an error if no route matches"
+  it "raises an error if no route matches" do
+    env = {'PATH_INFO' => '/resource_that_doesnt_exist/5'}
+    expect do
+      app.call(env)
+    end.to raise_error(Raptor::NoRouteMatches)
+  end
 end
 
 describe Raptor::Router do

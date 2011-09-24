@@ -18,6 +18,7 @@ module Raptor
         rescue NoRouteMatches
         end
       end
+      raise NoRouteMatches
     end
   end
 
