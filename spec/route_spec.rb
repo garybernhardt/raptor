@@ -55,6 +55,14 @@ describe Raptor::Router do
     end.to raise_error(NameError,
                        /undefined local variable or method `undefined_method'/)
   end
+
+  it "knows when a route matches" do
+    FakeResources::Post::Routes.matches?("/post/new").should be_true
+  end
+
+  it "knows when routes don't match" do
+    FakeResources::Post::Routes.matches?("/not_a_post/new").should be_false
+  end
 end
 
 describe Raptor::RoutePath do
