@@ -24,6 +24,7 @@ describe Raptor::Router do
   end
 
   it "raises an error when templates access undefined variables"
+  it "handles resources other than /post"
 end
 
 describe Raptor::RoutePath do
