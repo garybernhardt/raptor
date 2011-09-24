@@ -1,3 +1,4 @@
 #!/bin/bash
 
-rspec %
+rspec spec
+
