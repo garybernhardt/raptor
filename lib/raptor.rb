@@ -90,19 +90,24 @@ module Raptor
     end
 
     def matches?(path)
-      zip_with_path(path).map do |route_component, path_component|
-        (route_component[0] == ':' || route_component == path_component)
+      path_component_pairs(path).map do |route_component, path_component|
+        route_component[0] == ':' || route_component == path_component
       end.all?
     end
 
     def extract_args(path)
-      zip_with_path(path).select do |route_component, path_component|
+      path_component_pairs(path).select do |route_component, path_component|
         route_component[0] == ':'
       end.map {|x| x[1].to_i } # all url args are numbers for now
     end
 
-    def zip_with_path(path)
-      @path.split('/').zip(path.split('/'))
+    def path_component_pairs(path)
+      path_components = path.split('/')
+      self.components.zip(path_components)
+    end
+
+    def components
+      @path.split('/')
     end
   end
 
