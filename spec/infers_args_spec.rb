@@ -1,4 +1,5 @@
 require './spec/spec_helper'
+require 'mocha'
 
 describe Raptor::InfersArgs do
   it "infers required arguments for delegate methods" do
