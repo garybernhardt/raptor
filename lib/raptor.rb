@@ -156,8 +156,8 @@ module Raptor
       end
     end
 
-    def delegate_method(domain_description)
-      domain_description.split('.').last.to_sym
+    def delegate_method(delegate_name)
+      delegate_name.split('.').last.to_sym
     end
   end
 
