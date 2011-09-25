@@ -40,9 +40,19 @@ end
 
 module FakeResources::WithNoBehavior
   Routes = Raptor.routes(self) do
+    show "WithNoBehavior::Record#find_by_id"
     index
-    show
     new
+  end
+
+  class PresentsOne
+    def initialize(record)
+      @record = record
+    end
+
+    def name
+      "record #{@record.id}"
+    end
   end
 
   class PresentsMany
@@ -53,7 +63,11 @@ module FakeResources::WithNoBehavior
 
   class Record < Struct.new(:id)
     def self.all
-      [Record.new(1)]
+      [Record.new(1), Record.new(2)]
+    end
+
+    def self.find_by_id(id)
+      Record.new(id)
     end
   end
 end

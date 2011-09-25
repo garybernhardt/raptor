@@ -43,7 +43,13 @@ describe Raptor::Router do
 
     it "has an index" do
       request = request('/with_no_behavior')
-      router.call(request).strip.must_equal "record 1"
+      router.call(request).strip.must_match /record 1\s+record 2/
+    end
+
+
+    it "has a show" do
+      request = request('/with_no_behavior/2')
+      router.call(request).strip.must_equal "record 2"
     end
   end
 end

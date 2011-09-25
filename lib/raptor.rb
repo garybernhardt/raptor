@@ -187,7 +187,7 @@ module Raptor
 
     def matches?(path)
       path_component_pairs(path).map do |route_component, path_component|
-        route_component[0] == ':' || route_component == path_component
+        route_component[0] == ':' && path_component || route_component == path_component
       end.all?
     end
 
