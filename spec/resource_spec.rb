@@ -13,8 +13,12 @@ describe Raptor::Resource do
     resource.record_class.must_equal FakeResources::Post::Record
   end
 
-  it "knows how to get the presenter" do
+  it "knows how to get the one presenter" do
     resource.one_presenter.must_equal FakeResources::Post::PresentsOne
+  end
+
+  it "knows how to get the many presenter" do
+    resource.many_presenter.must_equal FakeResources::Post::PresentsMany
   end
 end
 

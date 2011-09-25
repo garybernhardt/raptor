@@ -20,6 +20,9 @@ module FakeResources::Post
     end
   end
 
+  class PresentsMany
+  end
+
   class Record
     def title
       "first post"

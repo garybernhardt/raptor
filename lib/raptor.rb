@@ -122,6 +122,10 @@ module Raptor
     def one_presenter
       @resource.const_get(:PresentsOne)
     end
+
+    def many_presenter
+      @resource.const_get(:PresentsMany)
+    end
   end
 
   class RoutePath
