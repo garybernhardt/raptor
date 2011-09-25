@@ -114,7 +114,10 @@ module Raptor
     end
 
     def delegate_args
-      InfersArgs.for(@request, delegate_method, @route_path)
+      inference_sources = InferenceSources.sources(@request,
+                                                   @route_path.path,
+                                                   @request.path_info)
+      InfersArgs.for(delegate_method, inference_sources)
     end
 
     def delegate_method
@@ -168,13 +171,13 @@ module Raptor
   end
 
   class InfersArgs
-    def self.for(request, method, path)
+    def self.for(method, sources)
       method = method_for_inference(method)
       parameters = method.parameters
       if parameters == [[:rest]] || parameters == []
         return []
       else
-        self.for_required_params(request, parameters, path)
+        self.for_required_params(parameters, sources)
       end
     end
 
@@ -186,11 +189,9 @@ module Raptor
       end
     end
 
-    def self.for_required_params(request, parameters, path)
-      other_arg_sources = {:params => request.params}
-      path_args = path.extract_args(request.path_info).merge(other_arg_sources)
+    def self.for_required_params(parameters, sources)
       parameters.map do |type, name|
-        path_args.fetch(name)
+        sources.fetch(name)
       end
     end
   end
@@ -226,6 +227,8 @@ module Raptor
   end
 
   class RoutePath
+    attr_reader :path
+
     def initialize(path)
       @path = path
     end

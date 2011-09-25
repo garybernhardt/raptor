@@ -8,12 +8,13 @@ describe Raptor::InfersArgs do
   def method_taking_nothing; end
 
   before do
-    @request = Rack::Request.new('PATH_INFO' => '/post/5', 'rack.input' => '')
-    @path = stub(:extract_args => {:id => 5})
+    @params = stub
+    @sources = {:params => @params,
+                :id => 5}
   end
 
   def infer(method_name)
-    Raptor::InfersArgs.for(@request, method(method_name), @path)
+    Raptor::InfersArgs.for(method(method_name), @sources)
   end
 
   it "infers required arguments for delegate methods" do
@@ -21,7 +22,7 @@ describe Raptor::InfersArgs do
   end
 
   it "infers :params" do
-    infer(:method_taking_params).must_equal [@request.params]
+    infer(:method_taking_params).must_equal [@params]
   end
 
   it "infers [] when the method only takes optional parameters" do
