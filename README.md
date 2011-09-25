@@ -2,6 +2,17 @@
 
 https://github.com/garybernhardt/raptor
 
+## DESCRIPTION
+
+R-A-P-T-O-R, taken in order of importance:
+
+A: Application
+R: Routes
+O: [plain old] Objects
+R: Records
+P: Presenter
+T: Template
+
 ## Application structure
 
 An application is just a Ruby script:
@@ -23,7 +34,7 @@ Resources are composed of plain old Ruby objects. Sometimes, Raptor uses convent
 
 ## Routes
 
-Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects [TODO], enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example:
+Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects [TODO], enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
 
     module Posts
       Routes = Raptor.routes(self) do
@@ -60,7 +71,7 @@ Each of these is customizable, and each of the seven standard actions has a slig
 1. Match PUT "/posts/:id"
 1. Extract the ID
 1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-1. Enforce the :admin requirement. If the user isn't an admin, it return HTTP 403 Forbidden and end this process.
+1. Enforce the `:admin` requirement. If the user isn't an admin, return HTTP 403 Forbidden and end this process.
 1. Call `record.update_attributes`, passing in the incoming params
 1. Redirect to `/posts/:id` with the ID filled in
 
@@ -78,18 +89,26 @@ If your `show` route needs to do more than simply retrieve a record, that's not 
       Routes = Raptor.routes(self) do
         show "Profile.from_user"
       end
+
+      class Profile
+        def self.from_user(user)
+          ...
+        end
+      end
     end
 
-The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. This is where some magic happens. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::OnePresenter from the profile and renders `views/profiles/show.html.erb` with it.
+The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::OnePresenter from the profile and renders `views/profiles/show.html.erb` with it.
 
-This is much of the magic of Raptor. It will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will magically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
+Raptor will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
 ## Specifying the authentication mechanism
 
-## Raptor request process
+## General raptor request process
+
+The seven routes' exact behavior differs, but shares this skeleton:
 
 - Step through all routes, choosing the first that matches.
-- Delegate to the domain object, inferring arguments as needed.
+- Delegate to the domain object, which may be a record, inferring arguments as needed.
   - If an exception is raised, route it and end this process
 - Instantiate the presenter with the domain object
 - Pass the presenter to the template
