@@ -42,7 +42,7 @@ describe Raptor::Router do
     def router; FakeResources::WithNoBehavior::Routes; end
 
     it "has an index" do
-      request = request('/with_no_behavior/index')
+      request = request('/with_no_behavior')
       router.call(request).strip.must_equal "record 1"
     end
   end
