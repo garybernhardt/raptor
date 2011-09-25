@@ -61,12 +61,6 @@ module Raptor
                              @resource)
       end
     end
-
-    def index(delegate_name=nil)
-      route_path = ROUTE_PATHS[:index] % @resource.resource_name
-      delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(:index)
-      @routes << Route.new(route_path, delegate_name, :index, @resource)
-    end
   end
 
   class NoRouteMatches < RuntimeError; end
