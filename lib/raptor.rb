@@ -76,7 +76,7 @@ module Raptor
       incoming_path = request.path_info
       args = @path.extract_args(incoming_path)
       if @delegate_name
-        record = @resource.record_class.send(domain_method(@delegate_name), *args)
+        record = @resource.record_class.send(delegate_method(@delegate_name), *args)
       end
       presenter = presenter_class.new(record)
       render(presenter)
@@ -110,7 +110,7 @@ module Raptor
       "views/#{@resource.resource_name}/#{@template_name}.html.erb"
     end
 
-    def domain_method(domain_description)
+    def delegate_method(domain_description)
       domain_description.split('#').last.to_sym
     end
   end
