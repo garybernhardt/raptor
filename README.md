@@ -124,7 +124,6 @@ The seven routes' exact behavior differs, but shares this skeleton:
 ## Sanity Notes
 
 - Mutating a record in a presenter is an error
-- A resource may not be named "params"
 - No two injectables may register the same name
 
 ## Testing
