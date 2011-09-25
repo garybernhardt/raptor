@@ -1,4 +1,8 @@
 #!/bin/bash
 
-rspec $*
+ruby -e `
+  find spec -iname '*_spec.rb' | sed 's/\.rb$//' | while read spec_name; do
+    echo "require(\"./${spec_name}\");"
+  done
+`
 

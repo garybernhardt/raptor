@@ -11,51 +11,51 @@ describe Raptor::App do
   end
 
   it "routes to multiple resources" do
-    env = {'PATH_INFO' => '/post/5'}
-    app.call(env).strip.must_equal "It's FIRST POST!"
-    env = {'PATH_INFO' => '/with_no_behavior/5'}
-    app.call(env).strip.must_equal "The index!"
+    request = Rack::Request.new({'PATH_INFO' => '/post/5'})
+    app.call(request).strip.must_equal "It's FIRST POST!"
+    request = Rack::Request.new({'PATH_INFO' => '/with_no_behavior/5'})
+    app.call(request).strip.must_equal "The index!"
   end
 
   it "raises an error if no route matches" do
-    env = {'PATH_INFO' => '/resource_that_doesnt_exist/5'}
+    request = Rack::Request.new({'PATH_INFO' => '/resource_that_doesnt_exist/5'})
     Proc.new do
-      app.call(env)
+      app.call(request)
     end.must_raise(Raptor::NoRouteMatches)
   end
 end
 
 describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
-    env = {'PATH_INFO' => '/post/5'}
-    rendered = FakeResources::Post::Routes.call(env)
+    request = Rack::Request.new({'PATH_INFO' => '/post/5'})
+    rendered = FakeResources::Post::Routes.call(request)
     rendered.strip.must_equal "It's FIRST POST!"
   end
 
   it "routes requests to new" do
-    env = {'PATH_INFO' => '/post/new'}
-    rendered = FakeResources::Post::Routes.call(env)
+    request = Rack::Request.new({'PATH_INFO' => '/post/new'})
+    rendered = FakeResources::Post::Routes.call(request)
     rendered.strip.must_equal "<form>\n</form>"
   end
 
   describe "when a route isn't defined" do
     it "raises an error" do
-      env = {'PATH_INFO' => '/doesnt_exist'}
+      request = Rack::Request.new({'PATH_INFO' => '/doesnt_exist'})
       Proc.new do
-        FakeResources::Post::Routes.call(env)
+        FakeResources::Post::Routes.call(request)
       end.must_raise(Raptor::NoRouteMatches)
     end
   end
 
   it "has an index" do
-    env = {'PATH_INFO' => '/with_no_behavior/index'}
-    FakeResources::WithNoBehavior::Routes.call(env).strip.must_equal "The index!"
+    request = Rack::Request.new({'PATH_INFO' => '/with_no_behavior/index'})
+    FakeResources::WithNoBehavior::Routes.call(request).strip.must_equal "The index!"
   end
 
   it "raises an error when templates access undefined methods" do
-    env = {'PATH_INFO' => '/with_undefined_method_call_in_index/index'}
+    request = Rack::Request.new({'PATH_INFO' => '/with_undefined_method_call_in_index/index'})
     Proc.new do
-      FakeResources::WithUndefinedMethodCallInIndex::Routes.call(env)
+      FakeResources::WithUndefinedMethodCallInIndex::Routes.call(request)
     end.must_raise(NameError,
                    /undefined local variable or method `undefined_method'/)
   end

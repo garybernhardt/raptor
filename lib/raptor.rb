@@ -1,4 +1,5 @@
 require 'erb'
+require 'rack'
 
 module Raptor
   def self.routes(resource, &block)
@@ -11,10 +12,10 @@ module Raptor
       @resources = resources
     end
 
-    def call(env)
+    def call(request)
       @resources.each do |resource|
         begin
-          return resource::Routes.call(env)
+          return resource::Routes.call(request)
         rescue NoRouteMatches
           raise if resource == @resources.last
         end
@@ -32,9 +33,9 @@ module Raptor
       instance_eval(&block)
     end
 
-    def call(env)
-      incoming_path = env['PATH_INFO']
-      route_for_path(incoming_path).call(env)
+    def call(request)
+      incoming_path = request.path_info
+      route_for_path(incoming_path).call(request)
     end
 
     def matches?(path)
@@ -66,8 +67,8 @@ module Raptor
       @resource = resource
     end
 
-    def call(env)
-      incoming_path = env['PATH_INFO']
+    def call(request)
+      incoming_path = request.path_info
       args = @path.extract_args(incoming_path)
       if @domain_spec
         record = @resource.record_class.send(domain_method(@domain_spec), *args)
