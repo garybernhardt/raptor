@@ -114,15 +114,7 @@ module Raptor
     end
 
     def delegate_args
-      InfersArgs.for(@request, delegate_method_for_inference, @route_path)
-    end
-
-    def delegate_method_for_inference
-      if method_name == :new
-        @resource.record_class.instance_method(:initialize)
-      else
-        @resource.record_class.method(method_name)
-      end
+      InfersArgs.for(@request, delegate_method, @route_path)
     end
 
     def delegate_method
@@ -156,11 +148,20 @@ module Raptor
 
   class InfersArgs
     def self.for(request, method, path)
+      method = method_for_inference(method)
       parameters = method.parameters
       if parameters == [[:rest]]
         return []
       else
         self.for_required_params(request, parameters, path)
+      end
+    end
+
+    def self.method_for_inference(method)
+      if method.name == :new
+        method.receiver.instance_method(:initialize)
+      else
+        method
       end
     end
 
