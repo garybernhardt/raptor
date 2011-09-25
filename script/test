@@ -1,8 +1,12 @@
 #!/bin/bash
 
-ruby -e "`
-  find spec -iname '*_spec.rb' | sed 's/\.rb$//' | while read spec_name; do
-    echo "require('./${spec_name}');"
-  done
-`"
+if [ $# -ne 0 ]; then
+  ruby $1 -v
+else
+  ruby -e "`
+    find spec -iname '*_spec.rb' | sed 's/\.rb$//' | while read spec_name; do
+      echo "require('./${spec_name}');"
+    done
+  `"
+fi
 
