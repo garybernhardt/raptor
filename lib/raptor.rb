@@ -74,12 +74,21 @@ module Raptor
 
     def call(request)
       incoming_path = request.path_info
-      args = @path.extract_args(incoming_path)
       if @delegate_name
-        record = @resource.record_class.send(delegate_method(@delegate_name), *args)
+        args = infer_args(request)
+        record = find_delegate_method.call(*args)
       end
       presenter = presenter_class.new(record)
       render(presenter)
+    end
+
+    def infer_args(request)
+      InfersArgs.for(request, find_delegate_method, @path)
+    end
+
+    def find_delegate_method
+      delegate_method = @delegate_name.split('#').last.to_sym
+      @resource.record_class.method(delegate_method)
     end
 
     def presenter_class
@@ -109,9 +118,23 @@ module Raptor
     def template_path
       "views/#{@resource.resource_name}/#{@template_name}.html.erb"
     end
+  end
 
-    def delegate_method(domain_description)
-      domain_description.split('#').last.to_sym
+  class InfersArgs
+    def self.for(request, method, path)
+      parameters = method.parameters
+      if parameters == [[:rest]]
+        return []
+      else
+        self.for_required_params(request, parameters, path)
+      end
+    end
+
+    def self.for_required_params(request, parameters, path)
+        path_args = path.extract_args(request.path_info)
+        parameters.map do |type, name|
+          path_args.fetch(name)
+        end
     end
   end
 
@@ -157,9 +180,13 @@ module Raptor
     end
 
     def extract_args(path)
+      args = {}
       path_component_pairs(path).select do |route_component, path_component|
         route_component[0] == ':'
-      end.map {|x| x[1].to_i } # all url args are numbers for now
+      end.each do |x,y|
+        args[x[1..-1].to_sym] = y.to_i
+      end
+      args
     end
 
     def path_component_pairs(path)

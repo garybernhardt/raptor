@@ -25,7 +25,7 @@ describe Raptor::RoutePath do
 
   describe "pulling the args out of a route spec and an incoming path" do
     it "pulls out args that match with keywords" do
-      Raptor::RoutePath.new('/post/:id').extract_args('/post/5').must_equal [5]
+      Raptor::RoutePath.new('/post/:id').extract_args('/post/5').must_equal({:id => 5})
     end
   end
 end
