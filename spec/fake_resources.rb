@@ -40,7 +40,7 @@ end
 
 module FakeResources::WithNoBehavior
   Routes = Raptor.routes(self) do
-    show "WithNoBehavior::Record#find_by_id"
+    show
     index
     new
   end

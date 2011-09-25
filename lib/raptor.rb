@@ -27,6 +27,11 @@ module Raptor
     ROUTE_PATHS = {:show => "/%s/:id",
                    :new => "/%s/new",
                    :index => "/%s"}
+
+    DEFAULT_DELEGATE_NAMES = {:show => "Record#find_by_id",
+                              :new => "Record#initialize",
+                              :index => "Record#all"}
+
     def initialize(resource, &block)
       @resource = resource
       @routes = []
@@ -49,6 +54,7 @@ module Raptor
     ROUTE_PATHS.each_pair do |method_name, path_template|
       define_method(method_name) do |delegate_name=nil|
         route_path = path_template % @resource.resource_name
+        delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(method_name)
         @routes << Route.new(route_path,
                              delegate_name,
                              method_name,
@@ -58,6 +64,7 @@ module Raptor
 
     def index(delegate_name=nil)
       route_path = ROUTE_PATHS[:index] % @resource.resource_name
+      delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(:index)
       @routes << Route.new(route_path, delegate_name, :index, @resource)
     end
   end
