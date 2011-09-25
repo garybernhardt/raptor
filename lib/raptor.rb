@@ -127,7 +127,19 @@ module Raptor
     end
 
     def render(presenter)
-      template.result(presenter.instance_eval { binding })
+      Template.new(presenter, @resource.resource_name, @template_name).render
+    end
+  end
+
+  class Template
+    def initialize(presenter, resource_name, template_name)
+      @presenter = presenter
+      @resource_name = resource_name
+      @template_name = template_name
+    end
+
+    def render
+      template.result(@presenter.instance_eval { binding })
     end
 
     def template
@@ -135,7 +147,7 @@ module Raptor
     end
 
     def template_path
-      "views/#{@resource.resource_name}/#{@template_name}.html.erb"
+      "views/#{@resource_name}/#{@template_name}.html.erb"
     end
   end
 
