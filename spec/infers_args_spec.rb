@@ -8,7 +8,7 @@ describe Raptor::InfersArgs do
   def method_taking_nothing; end
 
   before do
-    @request = stub(:path_info => '/post/5', :params => stub)
+    @request = Rack::Request.new('PATH_INFO' => '/post/5', 'rack.input' => '')
     @path = stub(:extract_args => {:id => 5})
   end
 
