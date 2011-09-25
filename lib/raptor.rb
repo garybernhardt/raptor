@@ -76,32 +76,10 @@ module Raptor
     def call(request)
       incoming_path = request.path_info
       if @delegate_name
-        args = infer_args(request)
-        record = delegate_method.call(*args)
+        record = Delegator.new(request, @path, @resource, @delegate_name).delegate
       end
       presenter = presenter_class.new(record)
       render(presenter)
-    end
-
-    def infer_args(request)
-      InfersArgs.for(request, delegate_method_for_inference, @path)
-    end
-
-    def delegate_method
-      @resource.record_class.method(delegate_method_name)
-    end
-
-    def delegate_method_name
-      @delegate_name.split('.').last.to_sym
-    end
-
-    def delegate_method_for_inference
-      method_name = delegate_method_name
-      if method_name == :new
-        @resource.record_class.instance_method(:initialize)
-      else
-        @resource.record_class.method(method_name)
-      end
     end
 
     def presenter_class
@@ -122,6 +100,39 @@ module Raptor
 
     def render(presenter)
       Template.new(presenter, @resource.resource_name, @template_name).render
+    end
+  end
+
+  class Delegator
+    def initialize(request, route_path, resource, delegate_name)
+      @request = request
+      @route_path = route_path
+      @resource = resource
+      @delegate_name = delegate_name
+    end
+
+    def delegate
+      record = delegate_method.call(*delegate_args)
+    end
+
+    def delegate_args
+      InfersArgs.for(@request, delegate_method_for_inference, @route_path)
+    end
+
+    def delegate_method_for_inference
+      if method_name == :new
+        @resource.record_class.instance_method(:initialize)
+      else
+        @resource.record_class.method(method_name)
+      end
+    end
+
+    def delegate_method
+      @resource.record_class.method(method_name)
+    end
+
+    def method_name
+      @delegate_name.split('.').last.to_sym
     end
   end
 
