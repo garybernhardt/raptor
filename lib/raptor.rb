@@ -150,7 +150,7 @@ module Raptor
     def self.for(request, method, path)
       method = method_for_inference(method)
       parameters = method.parameters
-      if parameters == [[:rest]]
+      if parameters == [[:rest]] || parameters == []
         return []
       else
         self.for_required_params(request, parameters, path)

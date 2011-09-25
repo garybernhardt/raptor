@@ -5,6 +5,7 @@ describe Raptor::InfersArgs do
   def method_taking_id(id); end
   def method_taking_params(params); end
   def method_taking_splat(*); end
+  def method_taking_nothing; end
 
   it "infers required arguments for delegate methods" do
     Raptor::InfersArgs.for(stub(:path_info => 'post/5', :params => stub),
@@ -22,6 +23,12 @@ describe Raptor::InfersArgs do
   it "infers [] when the method only takes optional parameters" do
     Raptor::InfersArgs.for(stub,
                            method(:method_taking_splat),
+                           stub).must_equal []
+  end
+
+  it "infers [] when the method takes nothing" do
+    Raptor::InfersArgs.for(stub,
+                           method(:method_taking_nothing),
                            stub).must_equal []
   end
 end
