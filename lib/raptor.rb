@@ -46,9 +46,9 @@ module Raptor
       @routes.find {|r| r.matches?(incoming_path) } or raise NoRouteMatches
     end
 
-    ROUTE_PATHS.keys.each do |method_name|
+    ROUTE_PATHS.each_pair do |method_name, path_template|
       define_method(method_name) do |delegate_name=nil|
-        route_path = ROUTE_PATHS.fetch(method_name) % @resource.resource_name
+        route_path = path_template % @resource.resource_name
         @routes << Route.new(route_path,
                              delegate_name,
                              method_name,
