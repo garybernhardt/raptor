@@ -60,9 +60,9 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class Route
-    def initialize(path, domain_spec, template_name, resource)
+    def initialize(path, delegate_name, template_name, resource)
       @path = RoutePath.new(path)
-      @domain_spec = domain_spec
+      @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource
     end
@@ -70,8 +70,8 @@ module Raptor
     def call(request)
       incoming_path = request.path_info
       args = @path.extract_args(incoming_path)
-      if @domain_spec
-        record = @resource.record_class.send(domain_method(@domain_spec), *args)
+      if @delegate_name
+        record = @resource.record_class.send(domain_method(@delegate_name), *args)
       end
       if record
         presenter = @resource.one_presenter.new(record)
