@@ -28,9 +28,9 @@ module Raptor
                    :new => "/%s/new",
                    :index => "/%s"}
 
-    DEFAULT_DELEGATE_NAMES = {:show => "Record#find_by_id",
-                              :new => "Record#initialize",
-                              :index => "Record#all"}
+    DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
+                              :new => "Record.initialize",
+                              :index => "Record.all"}
 
     def initialize(resource, &block)
       @resource = resource
@@ -97,7 +97,7 @@ module Raptor
     end
 
     def delegate_method_name
-      @delegate_name.split('#').last.to_sym
+      @delegate_name.split('.').last.to_sym
     end
 
     def delegate_method_for_inference
@@ -154,6 +154,10 @@ module Raptor
       parameters.map do |type, name|
         path_args.fetch(name)
       end
+    end
+
+    def delegate_method(domain_description)
+      domain_description.split('.').last.to_sym
     end
   end
 

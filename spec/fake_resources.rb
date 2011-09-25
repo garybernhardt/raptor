@@ -6,8 +6,8 @@ module FakeResources::Post
   #   - A template that says "It's #{post.title}!"
 
   Routes = Raptor.routes(self) do
-    new 'Posts::Record#new'
-    show 'Posts::Record#find_by_id'
+    new 'Posts::Record.new'
+    show 'Posts::Record.find_by_id'
   end
 
   class PresentsOne
