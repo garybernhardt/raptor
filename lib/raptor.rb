@@ -99,12 +99,15 @@ module Raptor
     end
 
     def render(presenter)
-      template = template_path
       template.result(presenter.instance_eval { binding })
     end
 
+    def template
+      ERB.new(File.new(template_path).read)
+    end
+
     def template_path
-      template = ERB.new(File.new("views/#{@resource.resource_name}/#{@template_name}.html.erb").read)
+      "views/#{@resource.resource_name}/#{@template_name}.html.erb"
     end
 
     def domain_method(domain_description)
