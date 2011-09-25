@@ -85,8 +85,7 @@ module Raptor
 
     def render(presenter)
       template = template_path
-      template_binder = TemplateBinder.new(@resource.resource_name.to_sym => presenter)
-      template.result(template_binder.get_binding)
+      template.result(presenter.instance_eval { binding })
     end
 
     def template_path
@@ -152,20 +151,6 @@ module Raptor
 
     def components
       @path.split('/')
-    end
-  end
-
-  class TemplateBinder
-    def initialize(params)
-      @params = params
-    end
-
-    def method_missing(name)
-      @params[name] or super
-    end
-
-    def get_binding
-      binding
     end
   end
 end
