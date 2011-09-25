@@ -1,29 +1,4 @@
-require 'minitest/autorun'
-require 'mocha'
-
-$LOAD_PATH << "lib" << "spec"
-require 'raptor'
-require 'fake_resources'
-
-describe Raptor::App do
-  def app
-    Raptor::App.new([FakeResources::Post, FakeResources::WithNoBehavior])
-  end
-
-  it "routes to multiple resources" do
-    request = request('/post/5')
-    app.call(request).strip.must_equal "It's FIRST POST!"
-    request = request('/with_no_behavior/5')
-    app.call(request).strip.must_equal "The index!"
-  end
-
-  it "raises an error if no route matches" do
-    request = request('/resource_that_doesnt_exist/5')
-    Proc.new do
-      app.call(request)
-    end.must_raise(Raptor::NoRouteMatches)
-  end
-end
+require './spec/spec_helper'
 
 describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
@@ -67,56 +42,5 @@ describe Raptor::Router do
   it "knows when routes don't match" do
     FakeResources::Post::Routes.matches?("/not_a_post/new").must_equal false
   end
-end
-
-describe Raptor::RoutePath do
-  describe "route matching" do
-    it "matches if the paths are the same" do
-      matches?('/post/new', '/post/new').must_equal true
-    end
-
-    it "does not match when the paths are different" do
-      matches?('/post/new', '/foo/bar').must_equal false
-    end
-
-    it "matches any component when a path has a param" do
-      matches?('/post/:id', '/post/5').must_equal true
-    end
-
-    it "does not a path with params when the path does not match" do
-      matches?('/post/:id', '/users/2').must_equal false
-    end
-
-    def matches?(route, url)
-      Raptor::RoutePath.new(route).matches?(url)
-    end
-  end
-
-  describe "pulling the args out of a route spec and an incoming path" do
-    it "pulls out args that match with keywords" do
-      Raptor::RoutePath.new('/post/:id').extract_args('/post/5').must_equal [5]
-    end
-  end
-end
-
-describe Raptor::Resource do
-  def camel_case_resource; Raptor::Resource.new(stub(:name => 'CamelCase')); end
-  def resource; Raptor::Resource.new(FakeResources::Post); end
-
-  it "knows the name of resources with camel cased names" do
-    camel_case_resource.resource_name.must_equal 'camel_case'
-  end
-
-  it "knows how to get the record class" do
-    resource.record_class.must_equal FakeResources::Post::Record
-  end
-
-  it "knows how to get the presenter" do
-    resource.one_presenter.must_equal FakeResources::Post::PresentsOne
-  end
-end
-
-def request(path)
-  Rack::Request.new('PATH_INFO' => path)
 end
 
