@@ -168,10 +168,6 @@ module Raptor
         path_args.fetch(name)
       end
     end
-
-    def delegate_method(delegate_name)
-      delegate_name.split('.').last.to_sym
-    end
   end
 
   class Resource
