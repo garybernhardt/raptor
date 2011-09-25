@@ -22,11 +22,6 @@ describe Raptor::Router do
     end
   end
 
-  it "has an index" do
-    request = request('/with_no_behavior/index')
-    FakeResources::WithNoBehavior::Routes.call(request).strip.must_equal "The index!"
-  end
-
   it "raises an error when templates access undefined methods" do
     request = request('/with_undefined_method_call_in_index/index')
     Proc.new do
@@ -41,6 +36,15 @@ describe Raptor::Router do
 
   it "knows when routes don't match" do
     FakeResources::Post::Routes.matches?("/not_a_post/new").must_equal false
+  end
+
+  describe "default routes" do
+    def router; FakeResources::WithNoBehavior::Routes; end
+
+    it "has an index" do
+      request = request('/with_no_behavior/index')
+      router.call(request).strip.must_equal "record 1"
+    end
   end
 end
 

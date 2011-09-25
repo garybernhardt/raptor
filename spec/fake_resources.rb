@@ -38,6 +38,20 @@ end
 module FakeResources::WithNoBehavior
   Routes = Raptor.routes(self) do
     index
+    show
+    new
+  end
+
+  class PresentsMany
+    def all
+      FakeResources::WithNoBehavior::Record.all
+    end
+  end
+
+  class Record < Struct.new(:id)
+    def self.all
+      [Record.new(1)]
+    end
   end
 end
 

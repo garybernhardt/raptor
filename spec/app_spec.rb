@@ -9,7 +9,7 @@ describe Raptor::App do
     request = request('/post/5')
     app.call(request).strip.must_equal "It's FIRST POST!"
     request = request('/with_no_behavior/5')
-    app.call(request).strip.must_equal "The index!"
+    app.call(request).strip.must_equal "record 1"
   end
 
   it "raises an error if no route matches" do

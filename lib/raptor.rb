@@ -55,6 +55,11 @@ module Raptor
                              @resource)
       end
     end
+
+    def index(delegate_name=nil)
+      route_path = ROUTE_PATHS[:index] % @resource.resource_name
+      @routes << Route.new(route_path, delegate_name, :index, @resource)
+    end
   end
 
   class NoRouteMatches < RuntimeError; end
@@ -73,10 +78,20 @@ module Raptor
       if @delegate_name
         record = @resource.record_class.send(domain_method(@delegate_name), *args)
       end
-      if record
-        presenter = @resource.one_presenter.new(record)
-      end
+      presenter = presenter_class.new(record)
       render(presenter)
+    end
+
+    def presenter_class
+      if plural?
+        @resource.many_presenter
+      else
+        @resource.one_presenter
+      end
+    end
+
+    def plural?
+      @template_name == :index
     end
 
     def matches?(path)
