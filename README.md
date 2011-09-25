@@ -21,7 +21,7 @@ Resources are composed of plain old Ruby objects. Sometimes, Raptor uses convent
 
 Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects [TODO], enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example:
 
-    class Posts
+    module Posts
       Routes = Raptor.routes(self) do
         show
         edit
@@ -65,6 +65,20 @@ Each of these is customizable, and each of the seven standard actions has a slig
 [TODO choose name of these things]
 
 Requirements are always enforced immediately after record retrieval.
+
+### Complex behavior and the injector
+
+If your `show` route needs to do more than simply retrieve a record, that's not a problem. You can route to any method:
+
+    module Profiles
+      Routes = Raptor.routes(self) do
+        show "Profile.from_user"
+      end
+    end
+
+The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. This is where some magic happens. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::OnePresenter from the profile and renders `views/profiles/show.html.erb` with it.
+
+This is much of the magic of Raptor. It will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will magically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
 ### Specifying the authentication mechanism
 
@@ -132,6 +146,7 @@ From the application's point of view, this achieves roughly the same result as a
 
 - Mutating a record in a presenter is an error
 - A resource may not be named "params"
+- No two injectables may register the same name
 
 ### Testing
 
