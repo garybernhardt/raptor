@@ -75,9 +75,7 @@ module Raptor
 
     def call(request)
       incoming_path = request.path_info
-      if @delegate_name
-        record = Delegator.new(request, @path, @resource, @delegate_name).delegate
-      end
+      record = Delegator.new(request, @path, @resource, @delegate_name).delegate
       presenter = presenter_class.new(record)
       render(presenter)
     end
