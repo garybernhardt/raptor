@@ -41,11 +41,11 @@ Routes are the core of Raptor, and are much more powerful than in most web frame
 
 `show` has no arguments, so it inherits the default show behavior:
 
-    1. Match GET "/posts/:id"
-    1. Extract the ID
-    1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-    1. Instantiate a `Posts::OnePresenter.new(record)`
-    1. Render `views/posts/show.html.erb` with the presenter as its context
+1. Match GET "/posts/:id"
+1. Extract the ID
+1. Call `Posts::Record.find_by_id` with the ID, returning `record`
+1. Instantiate a `Posts::OnePresenter.new(record)`
+1. Render `views/posts/show.html.erb` with the presenter as its context
 
 Each of these is customizable, and each of the seven standard actions has a slightly different set of defaults, mostly in steps 2 and 3.
 
@@ -53,12 +53,12 @@ Each of these is customizable, and each of the seven standard actions has a slig
 
 `update` is more interesting. It has an admin requirement, so the request lifecycle is:
 
-    1. Match PUT "/posts/:id"
-    1. Extract the ID
-    1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-    1. Enforce the :admin requirement. If the user isn't an admin, it return HTTP 403 Forbidden and end this process.
-    1. Call `record.update_attributes`, passing in the incoming params
-    1. Redirect to `/posts/:id` with the ID filled in
+1. Match PUT "/posts/:id"
+1. Extract the ID
+1. Call `Posts::Record.find_by_id` with the ID, returning `record`
+1. Enforce the :admin requirement. If the user isn't an admin, it return HTTP 403 Forbidden and end this process.
+1. Call `record.update_attributes`, passing in the incoming params
+1. Redirect to `/posts/:id` with the ID filled in
 
 ### Requirements / constraints
 
