@@ -76,19 +76,30 @@ module Raptor
       incoming_path = request.path_info
       if @delegate_name
         args = infer_args(request)
-        record = find_delegate_method.call(*args)
+        record = delegate_method.call(*args)
       end
       presenter = presenter_class.new(record)
       render(presenter)
     end
 
     def infer_args(request)
-      InfersArgs.for(request, find_delegate_method, @path)
+      InfersArgs.for(request, delegate_method_for_inference, @path) end
+
+    def delegate_method
+      @resource.record_class.method(delegate_method_name)
     end
 
-    def find_delegate_method
-      delegate_method = @delegate_name.split('#').last.to_sym
-      @resource.record_class.method(delegate_method)
+    def delegate_method_name
+      @delegate_name.split('#').last.to_sym
+    end
+
+    def delegate_method_for_inference
+      method_name = delegate_method_name
+      if method_name == :new
+        @resource.record_class.instance_method(:initialize)
+      else
+        @resource.record_class.method(method_name)
+      end
     end
 
     def presenter_class
@@ -131,10 +142,11 @@ module Raptor
     end
 
     def self.for_required_params(request, parameters, path)
-        path_args = path.extract_args(request.path_info)
-        parameters.map do |type, name|
-          path_args.fetch(name)
-        end
+      other_arg_sources = {:params => request.params}
+      path_args = path.extract_args(request.path_info).merge(other_arg_sources)
+      parameters.map do |type, name|
+        path_args.fetch(name)
+      end
     end
   end
 

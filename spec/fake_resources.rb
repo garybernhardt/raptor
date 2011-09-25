@@ -24,12 +24,15 @@ module FakeResources::Post
   end
 
   class Record
+    def initialize(params)
+    end
+
     def title
       "first post"
     end
 
     def self.find_by_id(id)
-      records = {5 => Record.new}
+      records = {5 => Record.new({})}
       records.fetch(id)
     end
   end
