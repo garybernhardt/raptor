@@ -7,10 +7,15 @@ https://github.com/garybernhardt/raptor
 R-A-P-T-O-R, taken in order of importance:
 
 A: Application
+
 R: Routes
+
 O: [plain old] Objects
+
 R: Records
+
 P: Presenter
+
 T: Template
 
 ## Application structure
