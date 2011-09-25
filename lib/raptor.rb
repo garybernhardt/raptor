@@ -90,7 +90,8 @@ module Raptor
     end
 
     def infer_args(request)
-      InfersArgs.for(request, delegate_method_for_inference, @path) end
+      InfersArgs.for(request, delegate_method_for_inference, @path)
+    end
 
     def delegate_method
       @resource.record_class.method(delegate_method_name)
