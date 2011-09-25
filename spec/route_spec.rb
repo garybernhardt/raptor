@@ -11,14 +11,14 @@ describe Raptor::App do
   end
 
   it "routes to multiple resources" do
-    request = Rack::Request.new({'PATH_INFO' => '/post/5'})
+    request = request('/post/5')
     app.call(request).strip.must_equal "It's FIRST POST!"
-    request = Rack::Request.new({'PATH_INFO' => '/with_no_behavior/5'})
+    request = request('/with_no_behavior/5')
     app.call(request).strip.must_equal "The index!"
   end
 
   it "raises an error if no route matches" do
-    request = Rack::Request.new({'PATH_INFO' => '/resource_that_doesnt_exist/5'})
+    request = request('/resource_that_doesnt_exist/5')
     Proc.new do
       app.call(request)
     end.must_raise(Raptor::NoRouteMatches)
@@ -27,20 +27,20 @@ end
 
 describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
-    request = Rack::Request.new({'PATH_INFO' => '/post/5'})
+    request = request('/post/5')
     rendered = FakeResources::Post::Routes.call(request)
     rendered.strip.must_equal "It's FIRST POST!"
   end
 
   it "routes requests to new" do
-    request = Rack::Request.new({'PATH_INFO' => '/post/new'})
+    request = request('/post/new')
     rendered = FakeResources::Post::Routes.call(request)
     rendered.strip.must_equal "<form>\n</form>"
   end
 
   describe "when a route isn't defined" do
     it "raises an error" do
-      request = Rack::Request.new({'PATH_INFO' => '/doesnt_exist'})
+      request = request('/doesnt_exist')
       Proc.new do
         FakeResources::Post::Routes.call(request)
       end.must_raise(Raptor::NoRouteMatches)
@@ -48,12 +48,12 @@ describe Raptor::Router do
   end
 
   it "has an index" do
-    request = Rack::Request.new({'PATH_INFO' => '/with_no_behavior/index'})
+    request = request('/with_no_behavior/index')
     FakeResources::WithNoBehavior::Routes.call(request).strip.must_equal "The index!"
   end
 
   it "raises an error when templates access undefined methods" do
-    request = Rack::Request.new({'PATH_INFO' => '/with_undefined_method_call_in_index/index'})
+    request = request('/with_undefined_method_call_in_index/index')
     Proc.new do
       FakeResources::WithUndefinedMethodCallInIndex::Routes.call(request)
     end.must_raise(NameError,
@@ -114,5 +114,9 @@ describe Raptor::Resource do
   it "knows how to get the presenter" do
     resource.one_presenter.must_equal FakeResources::Post::PresentsOne
   end
+end
+
+def request(path)
+  Rack::Request.new('PATH_INFO' => path)
 end
 
