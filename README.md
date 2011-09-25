@@ -1,4 +1,8 @@
-### Application structure
+# Raptor
+
+https://github.com/garybernhardt/raptor
+
+## Application structure
 
 An application is just a Ruby script:
 
@@ -11,13 +15,13 @@ An application is just a Ruby script:
 
 Running this script will start a server [TODO], just like Sinatra would. There's no autoloader and no discovery of your code: you explicitly require your resources and give them to Raptor.
 
-### Resources
+## Resources
 
 An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those. Not all resources can be accessed directly through HTTP, and not all resources map directly onto database records.
 
 Resources are composed of plain old Ruby objects. Sometimes, Raptor uses conventions to instantiate or interact with them [TODO], but the objects themselves are simple. There are no base classes to inherit from. (The one exception to this is routing, because it's pure configuration.)
 
-### Routes
+## Routes
 
 Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects [TODO], enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example:
 
@@ -60,13 +64,13 @@ Each of these is customizable, and each of the seven standard actions has a slig
 1. Call `record.update_attributes`, passing in the incoming params
 1. Redirect to `/posts/:id` with the ID filled in
 
-### Requirements / constraints
+## Requirements / constraints
 
 [TODO choose name of these things]
 
 Requirements are always enforced immediately after record retrieval.
 
-### Complex behavior and the injector
+## Complex behavior and the injector
 
 If your `show` route needs to do more than simply retrieve a record, that's not a problem. You can route to any method:
 
@@ -80,9 +84,9 @@ The `show` route here delegates to the `Profile.from_user` method, which presuma
 
 This is much of the magic of Raptor. It will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will magically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
-### Specifying the authentication mechanism
+## Specifying the authentication mechanism
 
-### Raptor request process
+## Raptor request process
 
 - Step through all routes, choosing the first that matches.
 - Delegate to the domain object, inferring arguments as needed.
@@ -90,7 +94,7 @@ This is much of the magic of Raptor. It will infer arguments to all kinds of thi
 - Instantiate the presenter with the domain object
 - Pass the presenter to the template
 
-### Design Notes / Constraints
+## Design Notes / Constraints
 
 - All scripts will comform to Unix argument conventions
 - All scripts will die immediately on ^C
@@ -98,18 +102,18 @@ This is much of the magic of Raptor. It will infer arguments to all kinds of thi
 - Autoreload will happen by killing and restarting, not in-place
 - Releases will follow semantic versioning
 
-### Sanity Notes
+## Sanity Notes
 
 - Mutating a record in a presenter is an error
 - A resource may not be named "params"
 - No two injectables may register the same name
 
-### Testing
+## Testing
 
 - Running request tests generates transcripts of the requests as text files. Reviewing these on commit can reveal unintended changes.
 - Add request metatests that duplicate requests that should be idempotent (everything except POSTs) and verify that they actually are. (Good idea?)
 
-### Possible database layer primitives
+## Possible database layer primitives
 
 https://github.com/nateware/redis-objects
 
