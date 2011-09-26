@@ -40,7 +40,6 @@ module Raptor
     end
 
     def call(request)
-      incoming_path = request.path_info
       route = route_for_request(request)
       Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}} # XXX: path abstraction
       route.call(request)
@@ -76,7 +75,6 @@ module Raptor
     end
 
     def call(request)
-      incoming_path = request.path_info
       record = Delegator.new(request, @path, @resource, @delegate_name).delegate
       presenter = presenter_class.new(record)
       render(presenter)
