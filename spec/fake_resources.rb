@@ -40,9 +40,9 @@ end
 
 module FakeResources::WithNoBehavior
   Routes = Raptor.routes(self) do
+    new
     show
     index
-    new
   end
 
   class PresentsOne

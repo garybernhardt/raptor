@@ -7,12 +7,6 @@ describe Raptor::Router do
     rendered.strip.should == "It's FIRST POST!"
   end
 
-  it "routes requests to new" do
-    request = request('/post/new')
-    rendered = FakeResources::Post::Routes.call(request)
-    rendered.strip.should == "<form>\n</form>"
-  end
-
   describe "when a route isn't defined" do
     it "raises an error" do
       request = request('/doesnt_exist')
@@ -41,6 +35,11 @@ describe Raptor::Router do
     it "has a show" do
       request = request('/with_no_behavior/2')
       router.call(request).strip.should == "record 2"
+    end
+
+    it "has a new" do
+      request = request('/with_no_behavior/new')
+      router.call(request).strip.should == "<form></form>"
     end
   end
 end

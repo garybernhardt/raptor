@@ -29,7 +29,7 @@ module Raptor
                    :index => "/%s"}
 
     DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
-                              :new => "Record.initialize",
+                              :new => "Record.new",
                               :index => "Record.all"}
 
     def initialize(resource, &block)
