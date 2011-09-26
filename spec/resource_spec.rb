@@ -5,8 +5,12 @@ describe Raptor::Resource do
   def camel_case_resource; Raptor::Resource.new(stub(:name => 'CamelCase')); end
   def resource; Raptor::Resource.new(FakeResources::Post); end
 
-  it "knows the name of resources with camel cased names" do
-    camel_case_resource.resource_name.should == 'camel_case'
+  it "knows resources' names" do
+    camel_case_resource.resource_name.should == 'CamelCase'
+  end
+
+  it "knows resources' path components" do
+    camel_case_resource.path_component.should == 'camel_case'
   end
 
   it "knows how to get the record class" do

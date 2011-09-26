@@ -53,7 +53,7 @@ module Raptor
 
     ROUTE_PATHS.each_pair do |method_name, path_template|
       define_method(method_name) do |delegate_name=nil|
-        route_path = path_template % @resource.resource_name
+        route_path = path_template % @resource.path_component
         delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(method_name)
         @routes << Route.new(route_path,
                              delegate_name,
@@ -97,7 +97,7 @@ module Raptor
     end
 
     def render(presenter)
-      Template.new(presenter, @resource.resource_name, @template_name).render
+      Template.new(presenter, @resource.path_component, @template_name).render
     end
   end
 
@@ -130,9 +130,9 @@ module Raptor
   end
 
   class Template
-    def initialize(presenter, resource_name, template_name)
+    def initialize(presenter, resource_path_component, template_name)
       @presenter = presenter
-      @resource_name = resource_name
+      @resource_path_component = resource_path_component
       @template_name = template_name
     end
 
@@ -145,7 +145,7 @@ module Raptor
     end
 
     def template_path
-      "views/#{@resource_name}/#{@template_name}.html.erb"
+      "views/#{@resource_path_component}/#{@template_name}.html.erb"
     end
   end
 
@@ -211,8 +211,12 @@ module Raptor
       @resource = resource
     end
 
+    def path_component
+      underscore(resource_name)
+    end
+
     def resource_name
-      underscore(@resource.name.split('::').last)
+      @resource.name.split('::').last
     end
 
     def underscore(string)
