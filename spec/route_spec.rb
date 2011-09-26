@@ -16,14 +16,6 @@ describe Raptor::Router do
     end
   end
 
-  it "knows when a route matches" do
-    FakeResources::Post::Routes.matches?("/post/new").should == true
-  end
-
-  it "knows when routes don't match" do
-    FakeResources::Post::Routes.matches?("/not_a_post/new").should == false
-  end
-
   describe "default routes" do
     include FakeResources::WithNoBehavior
 

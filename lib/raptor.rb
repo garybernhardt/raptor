@@ -46,10 +46,6 @@ module Raptor
       route.call(request)
     end
 
-    def matches?(path)
-      @routes.any? { |r| r.matches?(path) }
-    end
-
     def route_for_path(incoming_path)
       @routes.find {|r| r.matches?(incoming_path) } or raise NoRouteMatches
     end
