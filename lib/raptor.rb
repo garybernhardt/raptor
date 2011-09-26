@@ -146,6 +146,27 @@ module Raptor
     end
   end
 
+  class InferenceSources
+    def self.sources(request, route_path, path)
+      {:params => request.params}.merge(extract_args(route_path, path))
+    end
+
+    def self.extract_args(route_path, path)
+      args = {}
+      pairs = path_component_pairs(route_path, path)
+      pairs.select do |route_component, path_component|
+        route_component[0] == ':'
+      end.each do |x, y|
+        args[x[1..-1].to_sym] = y.to_i
+      end
+      args
+    end
+
+    def self.path_component_pairs(route_path, path)
+      route_path.split('/').zip(path.split('/'))
+    end
+  end
+
   class InfersArgs
     def self.for(request, method, path)
       method = method_for_inference(method)
