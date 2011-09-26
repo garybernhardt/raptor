@@ -177,13 +177,25 @@ module Raptor
     end
 
     def args
-      method = method_for_inference
-      parameters = method.parameters
-      if parameters == [[:rest]] || parameters == []
-        return []
+      if has_required_params?
+        for_required_params
       else
-        for_required_params(parameters)
+        []
       end
+    end
+
+    def has_required_params?
+      parameters != [[:rest]] && parameters != []
+    end
+
+    def for_required_params
+      parameters.map do |type, name|
+        @sources.fetch(name)
+      end
+    end
+
+    def parameters
+      method_for_inference.parameters
     end
 
     def method_for_inference
@@ -191,12 +203,6 @@ module Raptor
         @method.receiver.instance_method(:initialize)
       else
         @method
-      end
-    end
-
-    def for_required_params(parameters)
-      parameters.map do |type, name|
-        @sources.fetch(name)
       end
     end
   end
