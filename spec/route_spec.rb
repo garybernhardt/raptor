@@ -22,14 +22,6 @@ describe Raptor::Router do
     end
   end
 
-  it "raises an error when templates access undefined methods" do
-    request = request('/with_undefined_method_call_in_index/index')
-    Proc.new do
-      FakeResources::WithUndefinedMethodCallInIndex::Routes.call(request)
-    end.must_raise(NameError,
-                   /undefined local variable or method `undefined_method'/)
-  end
-
   it "knows when a route matches" do
     FakeResources::Post::Routes.matches?("/post/new").must_equal true
   end
