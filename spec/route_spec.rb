@@ -25,21 +25,21 @@ describe Raptor::Router do
   end
 
   describe "default routes" do
-    def router; FakeResources::WithNoBehavior::Routes; end
+    include FakeResources::WithNoBehavior
 
     it "has an index" do
       request = request('/with_no_behavior')
-      router.call(request).strip.should match /record 1\s+record 2/
+      Routes.call(request).strip.should match /record 1\s+record 2/
     end
 
     it "has a show" do
       request = request('/with_no_behavior/2')
-      router.call(request).strip.should == "record 2"
+      Routes.call(request).strip.should == "record 2"
     end
 
     it "has a new" do
       request = request('/with_no_behavior/new')
-      router.call(request).strip.should == "<form></form>"
+      Routes.call(request).strip.should == "<form></form>"
     end
   end
 end
