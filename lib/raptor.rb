@@ -110,7 +110,7 @@ module Raptor
     end
 
     def delegate
-      record = delegate_method.call(*delegate_args)
+      delegate_method.call(*delegate_args)
     end
 
     def delegate_args
