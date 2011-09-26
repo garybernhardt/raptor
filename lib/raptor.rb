@@ -13,6 +13,7 @@ module Raptor
     end
 
     def call(request)
+      Raptor.log "App: routing request to #{request.path_info}"
       @resources.each do |resource|
         begin
           return resource::Routes.call(request)
@@ -40,7 +41,9 @@ module Raptor
 
     def call(request)
       incoming_path = request.path_info
-      route_for_path(incoming_path).call(request)
+      route = route_for_path(incoming_path)
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.path.inspect}} # XXX: path abstraction
+      route.call(request)
     end
 
     def matches?(path)
@@ -66,6 +69,8 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class Route
+    attr_reader :path
+
     def initialize(path, delegate_name, template_name, resource)
       @path = RoutePath.new(path)
       @delegate_name = delegate_name
@@ -257,6 +262,10 @@ module Raptor
     def components
       @path.split('/')
     end
+  end
+
+  def self.log(text)
+    puts "Raptor: #{text}"
   end
 end
 
