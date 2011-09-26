@@ -41,13 +41,13 @@ module Raptor
 
     def call(request)
       incoming_path = request.path_info
-      route = route_for_path(incoming_path)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.path.inspect}} # XXX: path abstraction
+      route = route_for_request(request)
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}} # XXX: path abstraction
       route.call(request)
     end
 
-    def route_for_path(incoming_path)
-      @routes.find {|r| r.matches?(incoming_path) } or raise NoRouteMatches
+    def route_for_request(request)
+      @routes.find {|r| r.match?(request) } or raise NoRouteMatches
     end
 
     ROUTE_PATHS.each_pair do |method_name, path_template|
@@ -68,7 +68,8 @@ module Raptor
     attr_reader :path
 
     def initialize(path, delegate_name, template_name, resource)
-      @path = RouteCriteria.new(path)
+      @path = path
+      @criteria = RouteCriteria.new(path)
       @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource
@@ -93,8 +94,8 @@ module Raptor
       @template_name == :index
     end
 
-    def matches?(path)
-      @path.matches?(path)
+    def match?(request)
+      @criteria.match?(request.path_info)
     end
 
     def render(presenter)
@@ -116,7 +117,7 @@ module Raptor
 
     def delegate_args
       inference_sources = InferenceSources.new(@request,
-                                               @route_path.path,
+                                               @route_path,
                                                @request.path_info).sources
       InfersArgs.new(delegate_method, inference_sources).args
     end
@@ -244,7 +245,7 @@ module Raptor
       @path = path
     end
 
-    def matches?(path)
+    def match?(path)
       path_component_pairs(path).map do |route_component, path_component|
         route_component[0] == ':' && path_component || route_component == path_component
       end.all?
