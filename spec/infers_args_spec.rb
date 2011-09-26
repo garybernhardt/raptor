@@ -18,19 +18,19 @@ describe Raptor::InfersArgs do
   end
 
   it "infers required arguments for delegate methods" do
-    infer(:method_taking_id).must_equal [5]
+    infer(:method_taking_id).should == [5]
   end
 
   it "infers :params" do
-    infer(:method_taking_params).must_equal [@params]
+    infer(:method_taking_params).should == [@params]
   end
 
   it "infers [] when the method only takes optional parameters" do
-    infer(:method_taking_splat).must_equal []
+    infer(:method_taking_splat).should == []
   end
 
   it "infers [] when the method takes nothing" do
-    infer(:method_taking_nothing).must_equal []
+    infer(:method_taking_nothing).should == []
   end
 end
 

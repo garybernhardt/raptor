@@ -1,5 +1,3 @@
-require 'minitest/autorun'
-
 $LOAD_PATH << "lib" << "spec"
 require 'raptor'
 require 'fake_resources'

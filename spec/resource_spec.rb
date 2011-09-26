@@ -6,19 +6,19 @@ describe Raptor::Resource do
   def resource; Raptor::Resource.new(FakeResources::Post); end
 
   it "knows the name of resources with camel cased names" do
-    camel_case_resource.resource_name.must_equal 'camel_case'
+    camel_case_resource.resource_name.should == 'camel_case'
   end
 
   it "knows how to get the record class" do
-    resource.record_class.must_equal FakeResources::Post::Record
+    resource.record_class.should == FakeResources::Post::Record
   end
 
   it "knows how to get the one presenter" do
-    resource.one_presenter.must_equal FakeResources::Post::PresentsOne
+    resource.one_presenter.should == FakeResources::Post::PresentsOne
   end
 
   it "knows how to get the many presenter" do
-    resource.many_presenter.must_equal FakeResources::Post::PresentsMany
+    resource.many_presenter.should == FakeResources::Post::PresentsMany
   end
 end
 

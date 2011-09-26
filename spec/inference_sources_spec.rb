@@ -13,11 +13,11 @@ describe Raptor::InferenceSources do
   end
 
   it "infers request params" do
-    @sources.fetch(:params).must_equal @params
+    @sources.fetch(:params).should == @params
   end
 
   it "infers IDs from paths" do
-    @sources.fetch(:id).must_equal 5
+    @sources.fetch(:id).should == 5
   end
 end
 

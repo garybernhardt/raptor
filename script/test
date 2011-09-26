@@ -1,12 +1,8 @@
 #!/bin/bash
 
 if [ $# -ne 0 ]; then
-  ruby $1 -v
+  rspec -f doc $1
 else
-  ruby -e "`
-    find spec -iname '*_spec.rb' | sed 's/\.rb$//' | while read spec_name; do
-      echo "require('./${spec_name}');"
-    done
-  `"
+  rspec spec
 fi
 
