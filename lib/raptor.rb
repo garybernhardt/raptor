@@ -239,16 +239,6 @@ module Raptor
       end.all?
     end
 
-    def extract_args(path)
-      args = {}
-      path_component_pairs(path).select do |route_component, path_component|
-        route_component[0] == ':'
-      end.each do |x,y|
-        args[x[1..-1].to_sym] = y.to_i
-      end
-      args
-    end
-
     def path_component_pairs(path)
       path_components = path.split('/')
       self.components.zip(path_components)
