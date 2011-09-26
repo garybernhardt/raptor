@@ -38,7 +38,6 @@ describe Raptor::Router do
       router.call(request).strip.should match /record 1\s+record 2/
     end
 
-
     it "has a show" do
       request = request('/with_no_behavior/2')
       router.call(request).strip.should == "record 2"
