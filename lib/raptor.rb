@@ -265,7 +265,7 @@ module Raptor
   end
 
   def self.log(text)
-    puts "Raptor: #{text}"
+    puts "Raptor: #{text}" if ENV['RAPTOR_LOGGING']
   end
 end
 

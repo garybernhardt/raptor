@@ -1,7 +1,14 @@
 #!/bin/bash
 
 if [ $# -ne 0 ]; then
-  rspec -f doc $1
+  filename=`echo $1 | cut -d ':' -f 1`
+  command="rspec -f doc $1"
+  # Run with logging if we're focused on a single test (line number)
+  if echo $1 | grep ':' > /dev/null; then
+    RAPTOR_LOGGING=1 $command
+  else
+    $command
+  fi
 else
   rspec spec
 fi
