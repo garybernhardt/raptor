@@ -183,7 +183,7 @@ module Raptor
 
     def args
       parameters.select do |type, name|
-        name && type != :rest
+        name && type != :rest && type != :block
       end.map do |type, name|
         @sources.fetch(name)
       end

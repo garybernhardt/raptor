@@ -6,6 +6,7 @@ describe Raptor::InfersArgs do
   def method_taking_params(params); end
   def method_taking_splat(*); end
   def method_taking_nothing; end
+  def method_taking_only_a_block(&block); end
 
   before do
     @params = stub
@@ -31,6 +32,10 @@ describe Raptor::InfersArgs do
 
   it "infers [] when the method takes nothing" do
     infer(:method_taking_nothing).should == []
+  end
+
+  it "infers [] when the method takes only a block" do
+    infer(:method_taking_only_a_block).should == []
   end
 end
 
