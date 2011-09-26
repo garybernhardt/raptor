@@ -68,7 +68,7 @@ module Raptor
     attr_reader :path
 
     def initialize(path, delegate_name, template_name, resource)
-      @path = RoutePath.new(path)
+      @path = RouteCriteria.new(path)
       @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource
@@ -237,7 +237,7 @@ module Raptor
     end
   end
 
-  class RoutePath
+  class RouteCriteria
     attr_reader :path
 
     def initialize(path)

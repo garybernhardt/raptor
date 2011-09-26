@@ -1,6 +1,6 @@
 require './spec/spec_helper'
 
-describe Raptor::RoutePath do
+describe Raptor::RouteCriteria do
   describe "route matching" do
     it "matches if the paths are the same" do
       matches?('/post/new', '/post/new').should == true
@@ -19,7 +19,7 @@ describe Raptor::RoutePath do
     end
 
     def matches?(route, url)
-      Raptor::RoutePath.new(route).matches?(url)
+      Raptor::RouteCriteria.new(route).matches?(url)
     end
   end
 end
