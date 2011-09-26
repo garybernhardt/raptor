@@ -69,7 +69,7 @@ module Raptor
 
     def initialize(path, delegate_name, template_name, resource)
       @path = path
-      @criteria = RouteCriteria.new(path)
+      @criteria = RouteCriteria.new('GET', path)
       @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource
@@ -95,7 +95,7 @@ module Raptor
     end
 
     def match?(request)
-      @criteria.match?(request.path_info)
+      @criteria.match?(request.request_method, request.path_info)
     end
 
     def render(presenter)
@@ -241,11 +241,20 @@ module Raptor
   class RouteCriteria
     attr_reader :path
 
-    def initialize(path)
+    def initialize(http_method, path)
+      @http_method = http_method
       @path = path
     end
 
-    def match?(path)
+    def match?(http_method, path)
+      match_http_method?(http_method) && match_path?(path)
+    end
+
+    def match_http_method?(http_method)
+      http_method == @http_method
+    end
+
+    def match_path?(path)
       path_component_pairs(path).map do |route_component, path_component|
         route_component[0] == ':' && path_component || route_component == path_component
       end.all?
