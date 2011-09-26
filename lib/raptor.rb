@@ -25,13 +25,16 @@ module Raptor
   end
 
   class Router
-    ROUTE_PATHS = {:show => "/%s/:id",
-                   :new => "/%s/new",
-                   :index => "/%s"}
+    ROUTE_CRITERIA = {:show => ["GET", "/%s/:id"],
+                      :new => ["GET", "/%s/new"],
+                      :index => ["GET", "/%s"],
+                      :create => ["POST", "/%s"],
+    }
 
     DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
                               :new => "Record.new",
-                              :index => "Record.all"}
+                              :index => "Record.all",
+                              :create => "Record.create"}
 
     def initialize(resource, &block)
       @resource = resource
@@ -49,11 +52,14 @@ module Raptor
       @routes.find {|r| r.match?(request) } or raise NoRouteMatches
     end
 
-    ROUTE_PATHS.each_pair do |method_name, path_template|
+    ROUTE_CRITERIA.each_pair do |method_name, criteria|
+      http_method, path_template = criteria
       define_method(method_name) do |delegate_name=nil|
         route_path = path_template % @resource.path_component
+        criteria = RouteCriteria.new(http_method, route_path)
         delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(method_name)
         @routes << Route.new(route_path,
+                             criteria,
                              delegate_name,
                              method_name,
                              @resource)
@@ -66,9 +72,9 @@ module Raptor
   class Route
     attr_reader :path
 
-    def initialize(path, delegate_name, template_name, resource)
+    def initialize(path, criteria, delegate_name, template_name, resource)
       @path = path
-      @criteria = RouteCriteria.new('GET', path)
+      @criteria = criteria
       @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource

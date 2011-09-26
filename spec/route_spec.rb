@@ -33,6 +33,13 @@ describe Raptor::Router do
       request = request('GET', '/with_no_behavior/new')
       Routes.call(request).strip.should == "<form></form>"
     end
+
+    it "has a create" do
+      bob = stub(:name => "bob")
+      Record.should_receive(:create)
+      request = request('POST', '/with_no_behavior', StringIO.new('name=bob'))
+      Routes.call(request)
+    end
   end
 end
 
