@@ -7,7 +7,9 @@ describe Raptor::InferenceSources do
     @request = stub(:params => @params)
     @route_path = '/foo/:id'
     @path = '/foo/5'
-    @sources = Raptor::InferenceSources.sources(@request, @route_path, @path)
+    @sources = Raptor::InferenceSources.new(@request,
+                                            @route_path,
+                                            @path).sources
   end
 
   it "infers request params" do

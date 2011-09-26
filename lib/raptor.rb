@@ -114,9 +114,9 @@ module Raptor
     end
 
     def delegate_args
-      inference_sources = InferenceSources.sources(@request,
-                                                   @route_path.path,
-                                                   @request.path_info)
+      inference_sources = InferenceSources.new(@request,
+                                               @route_path.path,
+                                               @request.path_info).sources
       InfersArgs.new(delegate_method, inference_sources).args
     end
 
@@ -150,14 +150,19 @@ module Raptor
   end
 
   class InferenceSources
-    def self.sources(request, route_path, path)
-      {:params => request.params}.merge(extract_args(route_path, path))
+    def initialize(request, route_path, path)
+      @request = request
+      @route_path = route_path
+      @path = path
     end
 
-    def self.extract_args(route_path, path)
+    def sources
+      {:params => @request.params}.merge(extract_args)
+    end
+
+    def extract_args
       args = {}
-      pairs = path_component_pairs(route_path, path)
-      pairs.select do |route_component, path_component|
+      path_component_pairs.select do |route_component, path_component|
         route_component[0] == ':'
       end.each do |x, y|
         args[x[1..-1].to_sym] = y.to_i
@@ -165,8 +170,8 @@ module Raptor
       args
     end
 
-    def self.path_component_pairs(route_path, path)
-      route_path.split('/').zip(path.split('/'))
+    def path_component_pairs
+      @route_path.split('/').zip(@path.split('/'))
     end
   end
 
