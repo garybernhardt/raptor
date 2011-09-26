@@ -117,7 +117,7 @@ module Raptor
       inference_sources = InferenceSources.sources(@request,
                                                    @route_path.path,
                                                    @request.path_info)
-      InfersArgs.for(delegate_method, inference_sources)
+      InfersArgs.new(delegate_method, inference_sources).args
     end
 
     def delegate_method
@@ -171,27 +171,32 @@ module Raptor
   end
 
   class InfersArgs
-    def self.for(method, sources)
-      method = method_for_inference(method)
+    def initialize(method, sources)
+      @method = method
+      @sources = sources
+    end
+
+    def args
+      method = method_for_inference
       parameters = method.parameters
       if parameters == [[:rest]] || parameters == []
         return []
       else
-        self.for_required_params(parameters, sources)
+        for_required_params(parameters)
       end
     end
 
-    def self.method_for_inference(method)
-      if method.name == :new
-        method.receiver.instance_method(:initialize)
+    def method_for_inference
+      if @method.name == :new
+        @method.receiver.instance_method(:initialize)
       else
-        method
+        @method
       end
     end
 
-    def self.for_required_params(parameters, sources)
+    def for_required_params(parameters)
       parameters.map do |type, name|
-        sources.fetch(name)
+        @sources.fetch(name)
       end
     end
   end

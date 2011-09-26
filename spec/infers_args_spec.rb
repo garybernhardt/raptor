@@ -14,7 +14,7 @@ describe Raptor::InfersArgs do
   end
 
   def infer(method_name)
-    Raptor::InfersArgs.for(method(method_name), @sources)
+    Raptor::InfersArgs.new(method(method_name), @sources).args
   end
 
   it "infers required arguments for delegate methods" do
