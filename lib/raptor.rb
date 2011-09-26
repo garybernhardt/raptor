@@ -177,19 +177,9 @@ module Raptor
     end
 
     def args
-      if has_required_params?
-        for_required_params
-      else
-        []
-      end
-    end
-
-    def has_required_params?
-      parameters != [[:rest]] && parameters != []
-    end
-
-    def for_required_params
-      parameters.map do |type, name|
+      parameters.select do |type, name|
+        name && type != :rest
+      end.map do |type, name|
         @sources.fetch(name)
       end
     end
