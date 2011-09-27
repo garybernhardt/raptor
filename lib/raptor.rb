@@ -33,8 +33,7 @@ module Raptor
     def call(request)
       route = route_for_request(request)
       log_routing_of(route, request)
-      response = route.call(request)
-      RouteResult.new(route, response).mutate_response
+      route.call(request)
     end
 
     def log_routing_of(route, request)
@@ -87,16 +86,16 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class RouteResult
-    def initialize(route, response)
+    def initialize(route, response, record)
       @route = route
       @response = response
+      @record = record
     end
 
     def mutate_response
       if @route.template_name == :create
         @response.status = 403
-        # XXX: generalize this. Not all records in the world have ID 7, Gary.
-        @response["Location"] = "/#{@route.resource.path_component}/7"
+        @response["Location"] = "/#{@route.resource.path_component}/#{@record.id}"
       end
       @response
     end
@@ -121,7 +120,8 @@ module Raptor
       record = delegator.delegate
       presenter = presenter_class.new(record)
       body = render(presenter)
-      Rack::Response.new(body)
+      response = Rack::Response.new(body)
+      RouteResult.new(self, response, record).mutate_response
     end
 
     def presenter_class
