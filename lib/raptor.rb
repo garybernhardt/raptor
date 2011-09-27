@@ -81,7 +81,9 @@ module Raptor
     end
 
     def call(request)
-      record = Delegator.new(request, @path, @resource, @delegate_name).delegate
+      inference_sources = InferenceSources.new(request, @path).to_hash
+      delegator = Delegator.new(inference_sources, @resource, @delegate_name)
+      record = delegator.delegate
       presenter = presenter_class.new(record)
       body = render(presenter)
       Rack::Response.new(body)
@@ -109,9 +111,8 @@ module Raptor
   end
 
   class Delegator
-    def initialize(request, route_path, resource, delegate_name)
-      @request = request
-      @route_path = route_path
+    def initialize(inference_sources, resource, delegate_name)
+      @inference_sources = inference_sources
       @resource = resource
       @delegate_name = delegate_name
     end
@@ -121,10 +122,7 @@ module Raptor
     end
 
     def delegate_args
-      inference_sources = InferenceSources.new(@request,
-                                               @route_path,
-                                               @request.path_info).sources
-      InfersArgs.new(delegate_method, inference_sources).args
+      InfersArgs.new(delegate_method, @inference_sources).args
     end
 
     def delegate_method
@@ -157,13 +155,12 @@ module Raptor
   end
 
   class InferenceSources
-    def initialize(request, route_path, path)
+    def initialize(request, route_path)
       @request = request
       @route_path = route_path
-      @path = path
     end
 
-    def sources
+    def to_hash
       {:params => @request.params}.merge(extract_args)
     end
 
@@ -178,7 +175,7 @@ module Raptor
     end
 
     def path_component_pairs
-      @route_path.split('/').zip(@path.split('/'))
+      @route_path.split('/').zip(@request.path_info.split('/'))
     end
   end
 

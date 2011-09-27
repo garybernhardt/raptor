@@ -4,12 +4,9 @@ require 'mocha'
 describe Raptor::InferenceSources do
   before do
     @params = stub
-    @request = stub(:params => @params)
+    @request = stub(:params => @params, :path_info => '/foo/5')
     @route_path = '/foo/:id'
-    @path = '/foo/5'
-    @sources = Raptor::InferenceSources.new(@request,
-                                            @route_path,
-                                            @path).sources
+    @sources = Raptor::InferenceSources.new(@request, @route_path).to_hash
   end
 
   it "infers request params" do
