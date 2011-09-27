@@ -63,7 +63,10 @@ describe Raptor::Router do
     end
 
     context "edit" do
-      it "renders a template"
+      it "renders a template" do
+        request = request('GET', '/with_no_behavior/7/edit')
+        Routes.call(request).body.join('').strip.should == "<form>Edit</form>"
+      end
     end
 
     context "update" do

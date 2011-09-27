@@ -37,6 +37,7 @@ end
 
 module FakeResources::WithNoBehavior
   Routes = Raptor.routes(self) do
+    edit
     new
     show
     index

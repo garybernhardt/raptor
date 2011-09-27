@@ -51,12 +51,16 @@ module Raptor
                       :new => ["GET", "/%s/new"],
                       :index => ["GET", "/%s"],
                       :create => ["POST", "/%s"],
+                      :edit => ["GET", "/%s/:id/edit"]
     }
 
     DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
                               :new => "Record.new",
                               :index => "Record.all",
-                              :create => "Record.create"}
+                              :create => "Record.create",
+                              :edit => "Record.find_by_id"
+    }
+
     def initialize(resource)
       @resource = resource
       @routes = []
