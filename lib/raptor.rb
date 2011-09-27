@@ -44,7 +44,7 @@ module Raptor
 
     def call(request)
       route = route_for_request(request)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}} # XXX: path abstraction
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
       route.call(request)
     end
 
