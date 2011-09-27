@@ -24,9 +24,6 @@ module FakeResources::Post
   end
 
   class Record
-    def initialize(params)
-    end
-
     def title
       "first post"
     end
