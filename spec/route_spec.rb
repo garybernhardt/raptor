@@ -19,19 +19,25 @@ describe Raptor::Router do
   describe "default routes" do
     include FakeResources::WithNoBehavior
 
-    it "has an index" do
-      request = request('GET', '/with_no_behavior')
-      Routes.call(request).strip.should match /record 1\s+record 2/
+    context "index" do
+      it "finds all records" do
+        request = request('GET', '/with_no_behavior')
+        Routes.call(request).strip.should match /record 1\s+record 2/
+      end
     end
 
-    it "has a show" do
-      request = request('GET', '/with_no_behavior/2')
-      Routes.call(request).strip.should == "record 2"
+    context "show" do
+      it "retrieves a single record" do
+        request = request('GET', '/with_no_behavior/2')
+        Routes.call(request).strip.should == "record 2"
+      end
     end
 
-    it "has a new" do
-      request = request('GET', '/with_no_behavior/new')
-      Routes.call(request).strip.should == "<form></form>"
+    context "new" do
+      it "renders a template" do
+        request = request('GET', '/with_no_behavior/new')
+        Routes.call(request).strip.should == "<form></form>"
+      end
     end
 
     context "create" do
@@ -42,6 +48,19 @@ describe Raptor::Router do
       end
 
       it "redirects to show"
+    end
+
+    context "edit" do
+      it "renders a template"
+    end
+
+    context "update" do
+      it "updates records"
+      it "redirects to show"
+    end
+
+    context "destroy" do
+      it "destroys records"
     end
   end
 end
