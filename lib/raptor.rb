@@ -13,7 +13,7 @@ module Raptor
     end
 
     def call(request)
-      Raptor.log "App: routing request to #{request.path_info}"
+      Raptor.log "App: routing #{request.path_info}"
       @resources.each do |resource|
         begin
           return resource::Routes.call(request)
