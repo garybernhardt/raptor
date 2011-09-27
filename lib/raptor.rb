@@ -25,6 +25,29 @@ module Raptor
   end
 
   class Router
+    def initialize(resource, &block)
+      @resource = resource
+      @routes = RouteBuilder.new(resource).build(&block)
+    end
+
+    def call(request)
+      route = route_for_request(request)
+      log_routing_of(route, request)
+      response = route.call(request)
+      RouteResult.new(route, response).mutate_response
+    end
+
+    def log_routing_of(route, request)
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
+    end
+
+    def route_for_request(request)
+      @routes.find {|r| r.match?(request) } or raise NoRouteMatches
+    end
+
+  end
+
+  class RouteBuilder
     ROUTE_CRITERIA = {:show => ["GET", "/%s/:id"],
                       :new => ["GET", "/%s/new"],
                       :index => ["GET", "/%s"],
@@ -35,22 +58,14 @@ module Raptor
                               :new => "Record.new",
                               :index => "Record.all",
                               :create => "Record.create"}
-
-    def initialize(resource, &block)
+    def initialize(resource)
       @resource = resource
       @routes = []
+    end
+
+    def build(&block)
       instance_eval(&block)
-    end
-
-    def call(request)
-      route = route_for_request(request)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
-      response = route.call(request)
-      RouteResult.new(route, response).mutate_response
-    end
-
-    def route_for_request(request)
-      @routes.find {|r| r.match?(request) } or raise NoRouteMatches
+      @routes
     end
 
     ROUTE_CRITERIA.each_pair do |method_name, criteria|
@@ -66,6 +81,7 @@ module Raptor
                              @resource)
       end
     end
+
   end
 
   class NoRouteMatches < RuntimeError; end
