@@ -4,7 +4,7 @@ describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
     request = request('GET', '/post/5')
     rendered = FakeResources::Post::Routes.call(request)
-    rendered.strip.should == "It's FIRST POST!"
+    rendered.body.join('').strip.should == "It's FIRST POST!"
   end
 
   describe "when a route isn't defined" do
@@ -22,21 +22,21 @@ describe Raptor::Router do
     context "index" do
       it "finds all records" do
         request = request('GET', '/with_no_behavior')
-        Routes.call(request).strip.should match /record 1\s+record 2/
+        Routes.call(request).body.join('').strip.should match /record 1\s+record 2/
       end
     end
 
     context "show" do
       it "retrieves a single record" do
         request = request('GET', '/with_no_behavior/2')
-        Routes.call(request).strip.should == "record 2"
+        Routes.call(request).body.join('').strip.should == "record 2"
       end
     end
 
     context "new" do
       it "renders a template" do
         request = request('GET', '/with_no_behavior/new')
-        Routes.call(request).strip.should == "<form></form>"
+        Routes.call(request).body.join('').strip.should == "<form></form>"
       end
     end
 

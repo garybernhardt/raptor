@@ -83,7 +83,8 @@ module Raptor
     def call(request)
       record = Delegator.new(request, @path, @resource, @delegate_name).delegate
       presenter = presenter_class.new(record)
-      render(presenter)
+      body = render(presenter)
+      Rack::Response.new(body)
     end
 
     def presenter_class

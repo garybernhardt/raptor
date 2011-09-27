@@ -7,9 +7,9 @@ describe Raptor::App do
 
   it "routes to multiple resources" do
     request = request('GET', '/post/5')
-    app.call(request).strip.should == "It's FIRST POST!"
+    app.call(request).body.join('').strip.should == "It's FIRST POST!"
     request = request('GET', '/with_no_behavior/5')
-    app.call(request).strip.should == "record 5"
+    app.call(request).body.join('').strip.should == "record 5"
   end
 
   it "raises an error if no route matches" do
