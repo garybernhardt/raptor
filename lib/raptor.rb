@@ -27,7 +27,7 @@ module Raptor
   class Router
     def initialize(resource, &block)
       @resource = resource
-      @routes = RouteBuilder.new(resource).build(&block)
+      @routes = BuildsRoutes.new(resource).build(&block)
     end
 
     def call(request)
@@ -47,7 +47,7 @@ module Raptor
 
   end
 
-  class RouteBuilder
+  class BuildsRoutes
     ROUTE_CRITERIA = {:show => ["GET", "/%s/:id"],
                       :new => ["GET", "/%s/new"],
                       :index => ["GET", "/%s"],
