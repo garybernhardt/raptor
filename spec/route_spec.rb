@@ -41,14 +41,25 @@ describe Raptor::Router do
     end
 
     context "create" do
-      it "creates records" do
-        bob = stub(:name => "joe", :id => 7)
-        request = request('POST', '/with_no_behavior', StringIO.new('name=joe'))
-        Record.should_receive(:create)
-        Routes.call(request)
+      let(:bob) { stub(:name => "joe", :id => 7) }
+      let(:req) do
+        request('POST', '/with_no_behavior', StringIO.new('name=joe'))
       end
 
-      it "redirects to show"
+      before do
+        Record.stub(:create) { bob }
+      end
+
+      it "creates records" do
+        Record.should_receive(:create)
+        Routes.call(req)
+      end
+
+      it "redirects to show" do
+        response = Routes.call(req)
+        response.status.should == 403
+        response['Location'].should == "/with_no_behavior/7"
+      end
     end
 
     context "edit" do

@@ -45,7 +45,8 @@ module Raptor
     def call(request)
       route = route_for_request(request)
       Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
-      route.call(request)
+      response = route.call(request)
+      RouteResult.new(route, response).mutate_response
     end
 
     def route_for_request(request)
@@ -69,8 +70,26 @@ module Raptor
 
   class NoRouteMatches < RuntimeError; end
 
+  class RouteResult
+    def initialize(route, response)
+      @route = route
+      @response = response
+    end
+
+    def mutate_response
+      if @route.template_name == :create
+        @response.status = 403
+        # XXX: generalize this. Not all records in the world have ID 7, Gary.
+        @response["Location"] = "/#{@route.resource.path_component}/7"
+      end
+      @response
+    end
+  end
+
   class Route
     attr_reader :path
+    attr_reader :template_name
+    attr_reader :resource
 
     def initialize(path, criteria, delegate_name, template_name, resource)
       @path = path
