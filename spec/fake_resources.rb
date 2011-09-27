@@ -10,14 +10,9 @@ module FakeResources::Post
     show 'Posts::Record.find_by_id'
   end
 
-  class PresentsOne
-    def initialize(post)
-      @post = post
-    end
-
-    def title
-      @post.title.upcase
-    end
+  class PresentsOne < Shorty
+    takes(:post)
+    let(:title) { @post.title.upcase }
   end
 
   class PresentsMany
@@ -43,14 +38,9 @@ module FakeResources::WithNoBehavior
     create
   end
 
-  class PresentsOne
-    def initialize(record)
-      @record = record
-    end
-
-    def name
-      "record #{@record.id}"
-    end
+  class PresentsOne < Shorty
+    takes :record
+    let(:name) { "record #{@record.id}" }
   end
 
   class PresentsMany

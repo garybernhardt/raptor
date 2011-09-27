@@ -1,6 +1,27 @@
 require 'erb'
 require 'rack'
 
+class Shorty
+  def self.takes(*args)
+    @__shorty_args = args
+  end
+
+  def self.__shorty_args
+    @__shorty_args
+  end
+
+  def initialize(*args)
+    arg_names = self.class.__shorty_args || []
+    arg_names.zip(args).each do |arg_name, arg|
+      instance_variable_set(:"@#{arg_name}", arg)
+    end
+  end
+
+  def self.let(name, &block)
+    define_method(name, &block)
+  end
+end
+
 module Raptor
   def self.routes(resource, &block)
     resource = Resource.wrap(resource)
@@ -107,13 +128,11 @@ module Raptor
     end
   end
 
-  class Delegator
-    def initialize(request, route_path, resource, delegate_name)
-      @request = request
-      @route_path = route_path
-      @resource = resource
-      @delegate_name = delegate_name
-    end
+  class Delegator < Shorty
+    takes :request, :route_path, :resource, :delegate_name
+
+    let(:delegate_method) { @resource.record_class.method(method_name) }
+    let(:method_name) { @delegate_name.split('.').last.to_sym }
 
     def delegate
       delegate_method.call(*delegate_args)
@@ -125,46 +144,24 @@ module Raptor
                                                @request.path_info).sources
       InfersArgs.new(delegate_method, inference_sources).args
     end
-
-    def delegate_method
-      @resource.record_class.method(method_name)
-    end
-
-    def method_name
-      @delegate_name.split('.').last.to_sym
-    end
   end
 
-  class Template
-    def initialize(presenter, resource_path_component, template_name)
-      @presenter = presenter
-      @resource_path_component = resource_path_component
-      @template_name = template_name
-    end
+  class Template < Shorty
+    takes :presenter, :resource_name, :name
+
+    let(:template) { ERB.new(File.new(template_path).read) }
+    let(:template_path) { "views/#{@resource_name}/#{@name}.html.erb" }
 
     def render
       template.result(@presenter.instance_eval { binding })
     end
-
-    def template
-      ERB.new(File.new(template_path).read)
-    end
-
-    def template_path
-      "views/#{@resource_path_component}/#{@template_name}.html.erb"
-    end
   end
 
-  class InferenceSources
-    def initialize(request, route_path, path)
-      @request = request
-      @route_path = route_path
-      @path = path
-    end
+  class InferenceSources < Shorty
+    takes(:request, :route_path, :path)
 
-    def sources
-      {:params => @request.params}.merge(extract_args)
-    end
+    let(:sources)  { {:params => @request.params}.merge(extract_args) }
+    let(:path_component_pairs) { @route_path.split('/').zip(@path.split('/')) }
 
     def extract_args
       args = {}
@@ -174,10 +171,6 @@ module Raptor
         args[x[1..-1].to_sym] = y.to_i
       end
       args
-    end
-
-    def path_component_pairs
-      @route_path.split('/').zip(@path.split('/'))
     end
   end
 
@@ -208,47 +201,29 @@ module Raptor
     end
   end
 
-  class Resource
+  class Resource < Shorty
     def self.wrap(resource)
       new(resource)
     end
 
-    def initialize(resource)
-      @resource = resource
-    end
+    takes :resource
 
-    def path_component
-      underscore(resource_name)
-    end
-
-    def resource_name
-      @resource.name.split('::').last
-    end
+    let(:path_component) { underscore(resource_name) }
+    let(:resource_name) { @resource.name.split('::').last }
+    let(:record_class) { @resource.const_get(:Record) }
+    let(:one_presenter) { @resource.const_get(:PresentsOne) }
+    let(:many_presenter) { @resource.const_get(:PresentsMany) }
 
     def underscore(string)
       string.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
-
-    def record_class
-      @resource.const_get(:Record)
-    end
-
-    def one_presenter
-      @resource.const_get(:PresentsOne)
-    end
-
-    def many_presenter
-      @resource.const_get(:PresentsMany)
-    end
   end
 
-  class RouteCriteria
+  class RouteCriteria < Shorty
     attr_reader :path
+    takes :http_method, :path
 
-    def initialize(http_method, path)
-      @http_method = http_method
-      @path = path
-    end
+    let(:components) { @path.split('/') }
 
     def match?(http_method, path)
       match_http_method?(http_method) && match_path?(path)
@@ -267,10 +242,6 @@ module Raptor
     def path_component_pairs(path)
       path_components = path.split('/')
       self.components.zip(path_components)
-    end
-
-    def components
-      @path.split('/')
     end
   end
 
