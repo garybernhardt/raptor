@@ -34,11 +34,14 @@ describe Raptor::Router do
       Routes.call(request).strip.should == "<form></form>"
     end
 
-    it "has a create" do
-      bob = stub(:name => "bob")
-      Record.should_receive(:create)
-      request = request('POST', '/with_no_behavior', StringIO.new('name=bob'))
-      Routes.call(request)
+    context "create" do
+      it "creates records" do
+        bob = stub(:name => "bob", :id => 7)
+        request = request('POST', '/with_no_behavior', StringIO.new('name=bob'))
+        Record.last.name.should == "bob"
+      end
+
+      it "redirects to show"
     end
   end
 end

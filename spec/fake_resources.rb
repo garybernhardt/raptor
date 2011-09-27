@@ -59,9 +59,19 @@ module FakeResources::WithNoBehavior
     end
   end
 
-  class Record < Struct.new(:id)
+  class Record < Struct.new(:id, :name)
+    def self.create(params)
+      record = new(1, params.fetch('name'))
+      @all << record
+      record
+    end
+
+    def self.last
+      @all.last
+    end
+
     def self.all
-      [Record.new(1), Record.new(2)]
+      @all ||= [Record.new(1, "alice"), Record.new(2, "bob")]
     end
 
     def self.find_by_id(id)
