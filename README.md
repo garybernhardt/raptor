@@ -6,17 +6,25 @@ https://github.com/garybernhardt/raptor
 
 R-A-P-T-O-R, taken in order of importance:
 
-A: Application
+**A: Application**: The entire Raptor application is an object that conforms to the Rack interface. You can pass it around if you like. Even mount it as part of a larger Rack app if you like.
 
-R: Routes
+**R: Routes**: More powerful than you're used to. They route both in (via URL, verb, etc.) and out (by mapping raised exceptions to redirects and renders).
 
-O: [plain old] Objects
+**O: [plain old] Objects**: No controllers. Put your logic in a plain old Ruby object. Raptor will pass it whatever it needs&mdash;database records, form parameters, the request URL, or nothing, if it needs nothing.
 
-R: Records
+**R: [database] Records**: You decide what this means. Your records just need to comform to Raptor's expected interface.
 
-P: Presenter
+**P: Presenter**: All template rendering goes through a presenter. At the end of a request, the presenter is automatically instantiated and used to render the template.
 
-T: Template
+**T: Template**: Same as it ever was.
+
+There are some other components that act as plumbing in your app:
+
+**Inferables**: Raptor will infer which arguments your objects need based on their names. Inferables are providers for those arguments. For example, you might write an inferable that provides current\_user for any method that needs it.
+
+**Requirements**: These are higher-level routing constraints based on more than just the URL or HTTP method. For example, you could create a route that's only triggered for paying users.
+
+Controllers are conspicuously absent from all of this. All of the controller's responsibilities are provided by these other mechanisms: selective code execution based on the objects in play (requirements), translation of exceptional conditions into redirects and renders (routes), and construction of a template rendering environment (presenters).
 
 ## Application structure
 
