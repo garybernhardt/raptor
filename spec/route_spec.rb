@@ -70,8 +70,22 @@ describe Raptor::Router do
     end
 
     context "update" do
+      let(:bob) { stub(:name => "joe", :id => 7) }
+
+      let(:req) do
+        request('PUT', '/with_no_behavior/7', StringIO.new('name=joe'))
+      end
+
+      before do
+        Record.stub(:find_by_id) { bob }
+      end
+
       it "updates records"
-      it "redirects to show"
+      it "redirects to show" do
+        response = Routes.call(req)
+        response.status.should == 403
+        response['Location'].should == "/with_no_behavior/7"
+      end
     end
 
     context "destroy" do

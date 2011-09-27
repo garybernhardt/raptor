@@ -51,14 +51,16 @@ module Raptor
                       :new => ["GET", "/%s/new"],
                       :index => ["GET", "/%s"],
                       :create => ["POST", "/%s"],
-                      :edit => ["GET", "/%s/:id/edit"]
+                      :edit => ["GET", "/%s/:id/edit"],
+                      :update => ["PUT", "/%s/:id"]
     }
 
     DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
                               :new => "Record.new",
                               :index => "Record.all",
                               :create => "Record.create",
-                              :edit => "Record.find_by_id"
+                              :edit => "Record.find_by_id",
+                              :update => "Record.find_by_id"
     }
 
     def initialize(resource)
@@ -90,6 +92,7 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class RouteResult
+    REDIRECTED_TO_SHOW = [:create, :update]
     def initialize(route, response, record)
       @route = route
       @response = response
@@ -97,7 +100,7 @@ module Raptor
     end
 
     def mutate_response
-      if @route.template_name == :create
+      if REDIRECTED_TO_SHOW.include? @route.template_name
         @response.status = 403
         @response["Location"] = "/#{@route.resource.path_component}/#{@record.id}"
       end
