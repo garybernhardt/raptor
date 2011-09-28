@@ -14,7 +14,7 @@ module Raptor
 
     def call(env)
       request = Rack::Request.new(env)
-      Raptor.log "App: routing #{request.path_info}"
+      Raptor.log "App: routing #{request.request_method} #{request.path_info}"
       @resources.each do |resource|
         begin
           return resource::Routes.call(request)
@@ -146,8 +146,10 @@ module Raptor
 
     def mutate_response(response, record)
       if REDIRECTED_TO_SHOW.include? @template_name
+        location = "/#{@resource.path_component}/#{record.id}"
+        Raptor.log("Redirecting to #{location}")
         response.status = 302
-        response["Location"] = "/#{@resource.path_component}/#{record.id}"
+        response["Location"] = location
       end
       response
     end
@@ -172,8 +174,11 @@ module Raptor
     end
 
     def delegate(request, route_path)
+      Raptor.log("Delegating to #{@delegate_name}")
       sources = inference_sources(request, route_path)
-      delegate_method.call(*delegate_args(sources))
+      record = delegate_method.call(*delegate_args(sources))
+      Raptor.log("Delegate returned #{record}")
+      record
     end
 
     def delegate_args(sources)
