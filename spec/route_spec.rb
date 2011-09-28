@@ -107,5 +107,6 @@ describe Raptor::Router do
   end
 
   it "rejects route sets with multiple routes for the same verb/path"
+  it "sets no-cache by default"
 end
 
