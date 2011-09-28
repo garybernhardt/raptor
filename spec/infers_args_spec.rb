@@ -1,5 +1,4 @@
 require './spec/spec_helper'
-require 'mocha'
 
 describe Raptor::InfersArgs do
   def method_taking_id(id); end

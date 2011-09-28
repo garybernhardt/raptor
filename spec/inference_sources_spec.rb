@@ -1,5 +1,4 @@
 require './spec/spec_helper'
-require 'mocha'
 
 describe Raptor::InferenceSources do
   before do

@@ -1,4 +1,3 @@
-require 'mocha'
 require './spec/spec_helper'
 
 describe Raptor::Resource do
