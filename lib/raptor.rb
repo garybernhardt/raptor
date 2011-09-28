@@ -58,63 +58,33 @@ module Raptor
     end
 
     def show(delegate_name="Record.find_by_id")
-      route_path = "/%s/:id" % @resource.path_component
-      criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :show,
-                           @resource,
-                           true)
+      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id")
+      @routes << Route.new(criteria, delegate_name, :show, @resource, true)
     end
 
     def new(delegate_name="Record.new")
-      route_path = "/%s/new" % @resource.path_component
-      criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :new,
-                           @resource,
-                           true)
+      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/new")
+      @routes << Route.new(criteria, delegate_name, :new, @resource, true)
     end
 
     def index(delegate_name="Record.all")
-      route_path = "/%s" % @resource.path_component
-      criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :index,
-                           @resource,
-                           true)
+      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}")
+      @routes << Route.new(criteria, delegate_name, :index, @resource, true)
     end
 
     def create(delegate_name="Record.create")
-      route_path = "/%s" % @resource.path_component
-      criteria = RouteCriteria.new("POST", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :create,
-                           @resource,
-                           false)
+      criteria = RouteCriteria.new("POST", "/#{@resource.path_component}")
+      @routes << Route.new(criteria, delegate_name, :create, @resource, false)
     end
 
     def edit(delegate_name="Record.find_by_id")
-      route_path = "/%s/:id/edit" % @resource.path_component
-      criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :edit,
-                           @resource,
-                           true)
+      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id/edit")
+      @routes << Route.new(criteria, delegate_name, :edit, @resource, true)
     end
 
     def update(delegate_name="Record.find_and_update")
-      route_path = "/%s/:id" % @resource.path_component
-      criteria = RouteCriteria.new("PUT", route_path)
-      @routes << Route.new(criteria,
-                           delegate_name,
-                           :update,
-                           @resource,
-                           false)
+      criteria = RouteCriteria.new("PUT", "/#{@resource.path_component}/:id")
+      @routes << Route.new(criteria, delegate_name, :update, @resource, false)
     end
   end
 
