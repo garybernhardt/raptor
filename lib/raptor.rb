@@ -60,42 +60,42 @@ module Raptor
     def show(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :show, true)
+      responder = Responder.new(@resource, :show)
       @routes << Route.new(criteria, delegator, responder)
     end
 
     def new(delegate_name="Record.new")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/new")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :new, true)
+      responder = Responder.new(@resource, :new)
       @routes << Route.new(criteria, delegator, responder)
     end
 
     def index(delegate_name="Record.all")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :index, true)
+      responder = Responder.new(@resource, :index)
       @routes << Route.new(criteria, delegator, responder)
     end
 
     def create(delegate_name="Record.create")
       criteria = RouteCriteria.new("POST", "/#{@resource.path_component}")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :create, false)
+      responder = Responder.new(@resource, :create)
       @routes << Route.new(criteria, delegator, responder)
     end
 
     def edit(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id/edit")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :edit, true)
+      responder = Responder.new(@resource, :edit)
       @routes << Route.new(criteria, delegator, responder)
     end
 
     def update(delegate_name="Record.find_and_update")
       criteria = RouteCriteria.new("PUT", "/#{@resource.path_component}/:id")
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :update, false)
+      responder = Responder.new(@resource, :update)
       @routes << Route.new(criteria, delegator, responder)
     end
   end
@@ -126,22 +126,24 @@ module Raptor
   class Responder
     REDIRECTED_TO_SHOW = [:create, :update]
 
-    def initialize(resource, template_name, should_render)
+    def initialize(resource, template_name)
       @resource = resource
       @template_name = template_name
-      @should_render = should_render
     end
 
     def respond(record)
-      if @should_render
-        presenter = presenter_class.new(record)
-        body = Template.new(presenter, @resource.path_component, @template_name).render
-      else
-        body = ""
-      end
-
-      response = Rack::Response.new(body)
+      response = Rack::Response.new(body(record))
       mutate_response(response, record)
+    end
+
+    def body(record)
+      presenter = presenter_class.new(record)
+      template = Template.new(presenter, @resource.path_component, @template_name)
+      if template.exists?
+        template.render
+      else
+        ""
+      end
     end
 
     def mutate_response(response, record)
@@ -198,6 +200,10 @@ module Raptor
       @presenter = presenter
       @resource_path_component = resource_path_component
       @template_name = template_name
+    end
+
+    def exists?
+      File.exists?(template_path)
     end
 
     def render
