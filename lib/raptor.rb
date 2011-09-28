@@ -58,44 +58,33 @@ module Raptor
     end
 
     def show(delegate_name="Record.find_by_id")
-      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id")
-      delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :show)
-      @routes << Route.new(criteria, delegator, responder)
+      route(:show, "GET", "/#{@resource.path_component}/:id", delegate_name)
     end
 
     def new(delegate_name="Record.new")
-      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/new")
-      delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :new)
-      @routes << Route.new(criteria, delegator, responder)
+      route(:new, "GET", "/#{@resource.path_component}/new", delegate_name)
     end
 
     def index(delegate_name="Record.all")
-      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}")
-      delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :index)
-      @routes << Route.new(criteria, delegator, responder)
+      route(:index, "GET", "/#{@resource.path_component}", delegate_name)
     end
 
     def create(delegate_name="Record.create")
-      criteria = RouteCriteria.new("POST", "/#{@resource.path_component}")
-      delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :create)
-      @routes << Route.new(criteria, delegator, responder)
+      route(:create, "POST", "/#{@resource.path_component}", delegate_name)
     end
 
     def edit(delegate_name="Record.find_by_id")
-      criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id/edit")
-      delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :edit)
-      @routes << Route.new(criteria, delegator, responder)
+      route(:edit, "GET", "/#{@resource.path_component}/:id/edit", delegate_name)
     end
 
     def update(delegate_name="Record.find_and_update")
-      criteria = RouteCriteria.new("PUT", "/#{@resource.path_component}/:id")
+      route(:update, "PUT", "/#{@resource.path_component}/:id", delegate_name)
+    end
+
+    def route(action, http_method, path, delegate_name)
+      criteria = RouteCriteria.new(http_method, path)
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, :update)
+      responder = Responder.new(@resource, action)
       @routes << Route.new(criteria, delegator, responder)
     end
   end
