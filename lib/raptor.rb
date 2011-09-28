@@ -37,7 +37,7 @@ module Raptor
     end
 
     def log_routing_of(route, request)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.criteria.path.inspect}}
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
     end
 
     def route_for_request(request)
@@ -59,48 +59,97 @@ module Raptor
 
     def show(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id")
-      handler = Handler.new(delegate_name, @resource, :show, true)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :show, true)
+      @routes << Route.new(criteria, delegator, responder)
     end
 
     def new(delegate_name="Record.new")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/new")
-      handler = Handler.new(delegate_name, @resource, :new, true)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :new, true)
+      @routes << Route.new(criteria, delegator, responder)
     end
 
     def index(delegate_name="Record.all")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}")
-      handler = Handler.new(delegate_name, @resource, :index, true)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :index, true)
+      @routes << Route.new(criteria, delegator, responder)
     end
 
     def create(delegate_name="Record.create")
       criteria = RouteCriteria.new("POST", "/#{@resource.path_component}")
-      handler = Handler.new(delegate_name, @resource, :create, false)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :create, false)
+      @routes << Route.new(criteria, delegator, responder)
     end
 
     def edit(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id/edit")
-      handler = Handler.new(delegate_name, @resource, :edit, true)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :edit, true)
+      @routes << Route.new(criteria, delegator, responder)
     end
 
     def update(delegate_name="Record.find_and_update")
       criteria = RouteCriteria.new("PUT", "/#{@resource.path_component}/:id")
-      handler = Handler.new(delegate_name, @resource, :update, false)
-      @routes << Route.new(criteria, delegate_name, @resource, handler)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder = Responder.new(@resource, :update, false)
+      @routes << Route.new(criteria, delegator, responder)
     end
   end
 
-  class Handler
-    attr_reader :template_name
+  class NoRouteMatches < RuntimeError; end
 
-    def initialize(delegate_name, resource, template_name, should_render)
+  class Route
+    def initialize(criteria, delegator, responder)
+      @criteria = criteria
+      @delegator = delegator
+      @responder = responder
+    end
+
+    def path
+      @criteria.path
+    end
+
+    def call(request)
+      record = @delegator.delegate(request, @criteria.path)
+      @responder.respond(record)
+    end
+
+    def match?(request)
+      @criteria.match?(request.request_method, request.path_info)
+    end
+  end
+
+  class Responder
+    REDIRECTED_TO_SHOW = [:create, :update]
+
+    def initialize(resource, template_name, should_render)
       @resource = resource
       @template_name = template_name
       @should_render = should_render
+    end
+
+    def respond(record)
+      if @should_render
+        presenter = presenter_class.new(record)
+        body = Template.new(presenter, @resource.path_component, @template_name).render
+      else
+        body = ""
+      end
+
+      response = Rack::Response.new(body)
+      mutate_response(response, record)
+    end
+
+    def mutate_response(response, record)
+      if REDIRECTED_TO_SHOW.include? @template_name
+        response.status = 403
+        response["Location"] = "/#{@resource.path_component}/#{record.id}"
+      end
+      response
     end
 
     def presenter_class
@@ -114,78 +163,21 @@ module Raptor
     def plural?
       @template_name == :index
     end
-
-    def render(record)
-      if @should_render
-        presenter = presenter_class.new(record)
-        Template.new(presenter, @resource.path_component, @template_name).render
-      else
-        ""
-      end
-    end
-  end
-
-  class NoRouteMatches < RuntimeError; end
-
-  class RouteResult
-    REDIRECTED_TO_SHOW = [:create, :update]
-    def initialize(route, response, record)
-      @route = route
-      @response = response
-      @record = record
-    end
-
-    def mutate_response
-      if REDIRECTED_TO_SHOW.include? @route.handler.template_name
-        @response.status = 403
-        @response["Location"] = "/#{@route.resource.path_component}/#{@record.id}"
-      end
-      @response
-    end
-  end
-
-  class Route
-    attr_reader :criteria
-    attr_reader :resource
-    attr_reader :handler
-
-    def initialize(criteria,
-                   delegate_name,
-                   resource,
-                   handler)
-      @criteria = criteria
-      @delegate_name = delegate_name
-      @resource = resource
-      @handler = handler
-    end
-
-    def call(request)
-      inference_sources = InferenceSources.new(request, @criteria.path).to_hash
-      delegator = Delegator.new(inference_sources, @resource, @delegate_name)
-      record = delegator.delegate
-      body = @handler.render(record)
-      response = Rack::Response.new(body)
-      RouteResult.new(self, response, record).mutate_response
-    end
-
-    def match?(request)
-      @criteria.match?(request.request_method, request.path_info)
-    end
   end
 
   class Delegator
-    def initialize(inference_sources, resource, delegate_name)
-      @inference_sources = inference_sources
+    def initialize(resource, delegate_name)
       @resource = resource
       @delegate_name = delegate_name
     end
 
-    def delegate
-      delegate_method.call(*delegate_args)
+    def delegate(request, route_path)
+      sources = inference_sources(request, route_path)
+      delegate_method.call(*delegate_args(sources))
     end
 
-    def delegate_args
-      InfersArgs.new(delegate_method, @inference_sources).args
+    def delegate_args(sources)
+      InfersArgs.new(delegate_method, sources).args
     end
 
     def delegate_method
@@ -194,6 +186,10 @@ module Raptor
 
     def method_name
       @delegate_name.split('.').last.to_sym
+    end
+
+    def inference_sources(request, route_path)
+      InferenceSources.new(request, route_path).to_hash
     end
   end
 
