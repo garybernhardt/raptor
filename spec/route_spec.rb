@@ -60,6 +60,8 @@ describe Raptor::Router do
         response.status.should == 403
         response['Location'].should == "/with_no_behavior/7"
       end
+
+      it "re-renders on errors"
     end
 
     context "edit" do
