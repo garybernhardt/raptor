@@ -253,10 +253,14 @@ module Raptor
     end
 
     def to_hash
-      {:params => @request.params}.merge(extract_args)
+      request_sources.merge(path_arg_sources)
     end
 
-    def extract_args
+    def request_sources
+      {:path => @request.path_info, :params => @request.params}
+    end
+
+    def path_arg_sources
       args = {}
       path_component_pairs.select do |route_component, path_component|
         route_component[0] == ':'

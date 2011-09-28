@@ -8,6 +8,10 @@ describe Raptor::InferenceSources do
     @sources = Raptor::InferenceSources.new(@request, @route_path).to_hash
   end
 
+  it "infers path" do
+    @sources.fetch(:path).should == "/foo/5"
+  end
+
   it "infers request params" do
     @sources.fetch(:params).should == @params
   end
