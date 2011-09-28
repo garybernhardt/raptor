@@ -103,6 +103,13 @@ describe Raptor::Router do
         Record.should_receive(:destroy)
         Routes.call(req)
       end
+
+      it "redirects to index" do
+        Record.stub(:destroy)
+        response = Routes.call(req)
+        response.status.should == 302
+        response['Location'].should == "/with_no_behavior"
+      end
     end
   end
 

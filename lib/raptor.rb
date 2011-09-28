@@ -147,6 +147,7 @@ module Raptor
 
   class Responder
     REDIRECTED_TO_SHOW = [:create, :update]
+    REDIRECTED_TO_INDEX = [:destroy]
 
     def initialize(resource, template_name)
       @resource = resource
@@ -182,12 +183,17 @@ module Raptor
 
     def mutate_response(response, record)
       if REDIRECTED_TO_SHOW.include? @template_name
-        location = "/#{@resource.path_component}/#{record.id}"
-        Raptor.log("Redirecting to #{location}")
-        response.status = 302
-        response["Location"] = location
+        redirect_to(response, "/#{@resource.path_component}/#{record.id}")
+      elsif REDIRECTED_TO_INDEX.include? @template_name
+        redirect_to(response, "/#{@resource.path_component}")
       end
       response
+    end
+
+    def redirect_to(response, location)
+      Raptor.log("Redirecting to #{location}")
+      response.status = 302
+      response["Location"] = location
     end
   end
 
