@@ -1,6 +1,30 @@
 require 'erb'
 require 'rack'
 
+class Class
+  def takes(*args)
+    @__shorty_args = args
+    define_initialize
+  end
+
+  def __shorty_args
+    @__shorty_args
+  end
+
+  def define_initialize
+    define_method(:initialize) do |*args|
+      arg_names = self.class.__shorty_args || []
+      arg_names.zip(args).each do |arg_name, arg|
+        instance_variable_set(:"@#{arg_name}", arg)
+      end
+    end
+  end
+
+  def let(name, &block)
+    define_method(name, &block)
+  end
+end
+
 module Raptor
   def self.routes(resource, &block)
     resource = Resource.wrap(resource)
