@@ -47,29 +47,6 @@ module Raptor
   end
 
   class BuildsRoutes
-    ROUTE_CRITERIA = {:show => ["GET", "/%s/:id"],
-                      :new => ["GET", "/%s/new"],
-                      :index => ["GET", "/%s"],
-                      :create => ["POST", "/%s"],
-                      :edit => ["GET", "/%s/:id/edit"],
-                      :update => ["PUT", "/%s/:id"]
-    }
-
-    DEFAULT_DELEGATE_NAMES = {:show => "Record.find_by_id",
-                              :new => "Record.new",
-                              :index => "Record.all",
-                              :create => "Record.create",
-                              :edit => "Record.find_by_id",
-                              :update => "Record.find_and_update"
-    }
-
-    ROUTE_RENDER_FLAGS = {:show => true,
-                          :new => true,
-                          :index => true,
-                          :create => false,
-                          :edit => true,
-                          :update => false}
-
     def initialize(resource)
       @resource = resource
       @routes = []
@@ -80,22 +57,71 @@ module Raptor
       @routes
     end
 
-    ROUTE_CRITERIA.each_pair do |method_name, criteria|
-      http_method, path_template = criteria
-      define_method(method_name) do |delegate_name=nil|
-        route_path = path_template % @resource.path_component
-        criteria = RouteCriteria.new(http_method, route_path)
-        delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(method_name)
-        should_render = ROUTE_RENDER_FLAGS.fetch(method_name)
-        @routes << Route.new(route_path,
-                             criteria,
-                             delegate_name,
-                             method_name,
-                             @resource,
-                             should_render)
-      end
+    def show(delegate_name="Record.find_by_id")
+      route_path = "/%s/:id" % @resource.path_component
+      criteria = RouteCriteria.new("GET", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :show,
+                           @resource,
+                           true)
     end
 
+    def new(delegate_name="Record.new")
+      route_path = "/%s/new" % @resource.path_component
+      criteria = RouteCriteria.new("GET", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :new,
+                           @resource,
+                           true)
+    end
+
+    def index(delegate_name="Record.all")
+      route_path = "/%s" % @resource.path_component
+      criteria = RouteCriteria.new("GET", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :index,
+                           @resource,
+                           true)
+    end
+
+    def create(delegate_name="Record.create")
+      route_path = "/%s" % @resource.path_component
+      criteria = RouteCriteria.new("POST", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :create,
+                           @resource,
+                           false)
+    end
+
+    def edit(delegate_name="Record.find_by_id")
+      route_path = "/%s/:id/edit" % @resource.path_component
+      criteria = RouteCriteria.new("GET", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :edit,
+                           @resource,
+                           true)
+    end
+
+    def update(delegate_name="Record.find_and_update")
+      route_path = "/%s/:id" % @resource.path_component
+      criteria = RouteCriteria.new("PUT", route_path)
+      @routes << Route.new(route_path,
+                           criteria,
+                           delegate_name,
+                           :update,
+                           @resource,
+                           false)
+    end
   end
 
   class NoRouteMatches < RuntimeError; end
