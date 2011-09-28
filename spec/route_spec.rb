@@ -95,8 +95,12 @@ describe Raptor::Router do
     end
 
     context "destroy" do
-      it "destroys records"
-      it "doesn't render a template"
+      let(:req) { request('DELETE', '/with_no_behavior/7', StringIO.new('')) }
+
+      it "destroys records" do
+        Record.should_receive(:destroy)
+        Routes.call(req)
+      end
     end
   end
 end

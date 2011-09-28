@@ -43,6 +43,7 @@ module FakeResources::WithNoBehavior
     show
     index
     create
+    destroy
   end
 
   class PresentsOne

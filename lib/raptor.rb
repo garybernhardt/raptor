@@ -81,6 +81,10 @@ module Raptor
       route(:update, "PUT", "/#{base}/:id", delegate_name)
     end
 
+    def destroy(delegate_name="Record.destroy")
+      route(:destroy, "DELETE", "/#{base}/:id", delegate_name)
+    end
+
     def base
       @resource.path_component
     end
