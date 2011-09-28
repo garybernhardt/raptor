@@ -3,21 +3,15 @@ require 'rack'
 
 class Class
   def takes(*args)
-    @__shorty_args = args
-    define_initialize
+    define_initialize(args)
   end
 
-  def __shorty_args
-    @__shorty_args
-  end
-
-  def define_initialize
-    define_method(:initialize) do |*args|
-      arg_names = self.class.__shorty_args || []
-      arg_names.zip(args).each do |arg_name, arg|
-        instance_variable_set(:"@#{arg_name}", arg)
+  def define_initialize(args)
+    self.class_eval %{
+      def initialize(#{args.join(", ")})
+        #{args.map { |a| "@#{a} = #{a}" }.join("\n")}
       end
-    end
+    }
   end
 
   def let(name, &block)
