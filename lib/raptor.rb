@@ -12,7 +12,8 @@ module Raptor
       @resources = resources
     end
 
-    def call(request)
+    def call(env)
+      request = Rack::Request.new(env)
       Raptor.log "App: routing #{request.path_info}"
       @resources.each do |resource|
         begin
