@@ -12,23 +12,13 @@ module Posts
   end
 
   class PresentsOne
-    def initialize(post)
-      @post = post
-    end
-
-    def id
-      @post.id
-    end
-
-    def title
-      @post.title
-    end
+    takes :post
+    let(:id) { @post.id }
+    let(:title) { @post.title }
   end
 
   class PresentsMany
-    def all
-      Record.all
-    end
+    let(:all) { Record.all }
   end
 
   class Record < FakeRecord.new(:title)
