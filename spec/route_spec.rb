@@ -105,5 +105,7 @@ describe Raptor::Router do
       end
     end
   end
+
+  it "rejects route sets with multiple routes for the same verb/path"
 end
 
