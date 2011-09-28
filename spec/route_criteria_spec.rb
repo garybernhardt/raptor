@@ -20,7 +20,7 @@ describe Raptor::RouteCriteria do
       match?('/post/new', '/post/new').should == true
     end
 
-    it "does not match when the paths are different" do
+    it "doesn't match when the paths are different" do
       match?('/post/new', '/foo/bar').should == false
     end
 
@@ -28,8 +28,13 @@ describe Raptor::RouteCriteria do
       match?('/post/:id', '/post/5').should == true
     end
 
-    it "does not a path with params when the path does not match" do
+    it "doesn't match a path with params when the path doesn't match" do
       match?('/post/:id', '/users/2').should == false
+    end
+
+    it "doesn't match a path with extra components" do
+      match?('/posts', '/posts/new').should == false
+      match?('/posts/new', '/posts').should == false
     end
 
     def match?(route, url)

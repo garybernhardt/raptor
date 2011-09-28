@@ -320,18 +320,18 @@ module Raptor
     end
 
     def match_path?(path)
+      return false if components(@path).length != components(path).length
       path_component_pairs(path).all? do |route_component, path_component|
         route_component[0] == ':' && path_component || route_component == path_component
       end
     end
 
     def path_component_pairs(path)
-      path_components = path.split('/')
-      self.components.zip(path_components)
+      components(@path).zip(components(path))
     end
 
-    def components
-      @path.split('/')
+    def components(path)
+      path.split('/')
     end
   end
 
