@@ -66,7 +66,7 @@ module Raptor
     ROUTE_RENDER_FLAGS = {:show => true,
                           :new => true,
                           :index => true,
-                          :create => true,
+                          :create => false,
                           :edit => true,
                           :update => false}
 
