@@ -57,7 +57,7 @@ describe Raptor::Router do
 
       it "redirects to show" do
         response = Routes.call(req)
-        response.status.should == 403
+        response.status.should == 302
         response['Location'].should == "/with_no_behavior/7"
       end
 
@@ -89,7 +89,7 @@ describe Raptor::Router do
 
       it "redirects to show" do
         response = Routes.call(req)
-        response.status.should == 403
+        response.status.should == 302
         response['Location'].should == "/with_no_behavior/7"
       end
 

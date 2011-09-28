@@ -146,7 +146,7 @@ module Raptor
 
     def mutate_response(response, record)
       if REDIRECTED_TO_SHOW.include? @template_name
-        response.status = 403
+        response.status = 302
         response["Location"] = "/#{@resource.path_component}/#{record.id}"
       end
       response
