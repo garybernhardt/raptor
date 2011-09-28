@@ -320,9 +320,9 @@ module Raptor
     end
 
     def match_path?(path)
-      path_component_pairs(path).map do |route_component, path_component|
+      path_component_pairs(path).all? do |route_component, path_component|
         route_component[0] == ':' && path_component || route_component == path_component
-      end.all?
+      end
     end
 
     def path_component_pairs(path)
