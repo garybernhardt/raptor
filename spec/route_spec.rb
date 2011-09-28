@@ -93,7 +93,6 @@ describe Raptor::Router do
         response['Location'].should == "/with_no_behavior/7"
       end
 
-      it "doesn't render a template"
       it "re-renders edit on failure"
     end
 

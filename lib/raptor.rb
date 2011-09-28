@@ -63,6 +63,13 @@ module Raptor
                               :update => "Record.find_and_update"
     }
 
+    ROUTE_RENDER_FLAGS = {:show => true,
+                          :new => true,
+                          :index => true,
+                          :create => true,
+                          :edit => true,
+                          :update => false}
+
     def initialize(resource)
       @resource = resource
       @routes = []
@@ -79,11 +86,13 @@ module Raptor
         route_path = path_template % @resource.path_component
         criteria = RouteCriteria.new(http_method, route_path)
         delegate_name ||= DEFAULT_DELEGATE_NAMES.fetch(method_name)
+        should_render = ROUTE_RENDER_FLAGS.fetch(method_name)
         @routes << Route.new(route_path,
                              criteria,
                              delegate_name,
                              method_name,
-                             @resource)
+                             @resource,
+                             should_render)
       end
     end
 
@@ -113,12 +122,18 @@ module Raptor
     attr_reader :template_name
     attr_reader :resource
 
-    def initialize(path, criteria, delegate_name, template_name, resource)
+    def initialize(path,
+                   criteria,
+                   delegate_name,
+                   template_name,
+                   resource,
+                   should_render)
       @path = path
       @criteria = criteria
       @delegate_name = delegate_name
       @template_name = template_name
       @resource = resource
+      @should_render = should_render
     end
 
     def call(request)
@@ -126,7 +141,7 @@ module Raptor
       delegator = Delegator.new(inference_sources, @resource, @delegate_name)
       record = delegator.delegate
       presenter = presenter_class.new(record)
-      body = render(presenter)
+      body = @should_render ? render(presenter) : ""
       response = Rack::Response.new(body)
       RouteResult.new(self, response, record).mutate_response
     end
