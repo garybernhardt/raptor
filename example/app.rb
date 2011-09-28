@@ -3,5 +3,5 @@
 require_relative '../lib/raptor'
 require './posts'
 
-App = Raptor::App.new([Posts]).attack!
+App = Raptor::App.new([Posts])
 
