@@ -168,16 +168,6 @@ module Raptor
       end
     end
 
-    def mutate_response(response, record)
-      if REDIRECTED_TO_SHOW.include? @template_name
-        location = "/#{@resource.path_component}/#{record.id}"
-        Raptor.log("Redirecting to #{location}")
-        response.status = 302
-        response["Location"] = location
-      end
-      response
-    end
-
     def presenter_class
       if plural?
         @resource.many_presenter
@@ -188,6 +178,16 @@ module Raptor
 
     def plural?
       @template_name == :index
+    end
+
+    def mutate_response(response, record)
+      if REDIRECTED_TO_SHOW.include? @template_name
+        location = "/#{@resource.path_component}/#{record.id}"
+        Raptor.log("Redirecting to #{location}")
+        response.status = 302
+        response["Location"] = location
+      end
+      response
     end
   end
 
