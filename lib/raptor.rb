@@ -37,7 +37,7 @@ module Raptor
     end
 
     def log_routing_of(route, request)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
+      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.criteria.path.inspect}}
     end
 
     def route_for_request(request)
@@ -60,8 +60,7 @@ module Raptor
     def show(delegate_name="Record.find_by_id")
       route_path = "/%s/:id" % @resource.path_component
       criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :show,
                            @resource,
@@ -71,8 +70,7 @@ module Raptor
     def new(delegate_name="Record.new")
       route_path = "/%s/new" % @resource.path_component
       criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :new,
                            @resource,
@@ -82,8 +80,7 @@ module Raptor
     def index(delegate_name="Record.all")
       route_path = "/%s" % @resource.path_component
       criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :index,
                            @resource,
@@ -93,8 +90,7 @@ module Raptor
     def create(delegate_name="Record.create")
       route_path = "/%s" % @resource.path_component
       criteria = RouteCriteria.new("POST", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :create,
                            @resource,
@@ -104,8 +100,7 @@ module Raptor
     def edit(delegate_name="Record.find_by_id")
       route_path = "/%s/:id/edit" % @resource.path_component
       criteria = RouteCriteria.new("GET", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :edit,
                            @resource,
@@ -115,8 +110,7 @@ module Raptor
     def update(delegate_name="Record.find_and_update")
       route_path = "/%s/:id" % @resource.path_component
       criteria = RouteCriteria.new("PUT", route_path)
-      @routes << Route.new(route_path,
-                           criteria,
+      @routes << Route.new(criteria,
                            delegate_name,
                            :update,
                            @resource,
@@ -144,17 +138,15 @@ module Raptor
   end
 
   class Route
-    attr_reader :path
+    attr_reader :criteria
     attr_reader :template_name
     attr_reader :resource
 
-    def initialize(path,
-                   criteria,
+    def initialize(criteria,
                    delegate_name,
                    template_name,
                    resource,
                    should_render)
-      @path = path
       @criteria = criteria
       @delegate_name = delegate_name
       @template_name = template_name
@@ -163,7 +155,7 @@ module Raptor
     end
 
     def call(request)
-      inference_sources = InferenceSources.new(request, @path).to_hash
+      inference_sources = InferenceSources.new(request, @criteria.path).to_hash
       delegator = Delegator.new(inference_sources, @resource, @delegate_name)
       record = delegator.delegate
       presenter = presenter_class.new(record)
