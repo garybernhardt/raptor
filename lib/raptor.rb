@@ -59,79 +59,48 @@ module Raptor
 
     def show(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id")
-      @routes << Route.new(criteria, delegate_name, :show, @resource, true)
+      handler = Handler.new(delegate_name, @resource, :show, true)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
 
     def new(delegate_name="Record.new")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/new")
-      @routes << Route.new(criteria, delegate_name, :new, @resource, true)
+      handler = Handler.new(delegate_name, @resource, :new, true)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
 
     def index(delegate_name="Record.all")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}")
-      @routes << Route.new(criteria, delegate_name, :index, @resource, true)
+      handler = Handler.new(delegate_name, @resource, :index, true)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
 
     def create(delegate_name="Record.create")
       criteria = RouteCriteria.new("POST", "/#{@resource.path_component}")
-      @routes << Route.new(criteria, delegate_name, :create, @resource, false)
+      handler = Handler.new(delegate_name, @resource, :create, false)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
 
     def edit(delegate_name="Record.find_by_id")
       criteria = RouteCriteria.new("GET", "/#{@resource.path_component}/:id/edit")
-      @routes << Route.new(criteria, delegate_name, :edit, @resource, true)
+      handler = Handler.new(delegate_name, @resource, :edit, true)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
 
     def update(delegate_name="Record.find_and_update")
       criteria = RouteCriteria.new("PUT", "/#{@resource.path_component}/:id")
-      @routes << Route.new(criteria, delegate_name, :update, @resource, false)
+      handler = Handler.new(delegate_name, @resource, :update, false)
+      @routes << Route.new(criteria, delegate_name, @resource, handler)
     end
   end
 
-  class NoRouteMatches < RuntimeError; end
-
-  class RouteResult
-    REDIRECTED_TO_SHOW = [:create, :update]
-    def initialize(route, response, record)
-      @route = route
-      @response = response
-      @record = record
-    end
-
-    def mutate_response
-      if REDIRECTED_TO_SHOW.include? @route.template_name
-        @response.status = 403
-        @response["Location"] = "/#{@route.resource.path_component}/#{@record.id}"
-      end
-      @response
-    end
-  end
-
-  class Route
-    attr_reader :criteria
+  class Handler
     attr_reader :template_name
-    attr_reader :resource
 
-    def initialize(criteria,
-                   delegate_name,
-                   template_name,
-                   resource,
-                   should_render)
-      @criteria = criteria
-      @delegate_name = delegate_name
-      @template_name = template_name
+    def initialize(delegate_name, resource, template_name, should_render)
       @resource = resource
+      @template_name = template_name
       @should_render = should_render
-    end
-
-    def call(request)
-      inference_sources = InferenceSources.new(request, @criteria.path).to_hash
-      delegator = Delegator.new(inference_sources, @resource, @delegate_name)
-      record = delegator.delegate
-      presenter = presenter_class.new(record)
-      body = @should_render ? render(presenter) : ""
-      response = Rack::Response.new(body)
-      RouteResult.new(self, response, record).mutate_response
     end
 
     def presenter_class
@@ -146,12 +115,61 @@ module Raptor
       @template_name == :index
     end
 
-    def match?(request)
-      @criteria.match?(request.request_method, request.path_info)
+    def render(record)
+      if @should_render
+        presenter = presenter_class.new(record)
+        Template.new(presenter, @resource.path_component, @template_name).render
+      else
+        ""
+      end
+    end
+  end
+
+  class NoRouteMatches < RuntimeError; end
+
+  class RouteResult
+    REDIRECTED_TO_SHOW = [:create, :update]
+    def initialize(route, response, record)
+      @route = route
+      @response = response
+      @record = record
     end
 
-    def render(presenter)
-      Template.new(presenter, @resource.path_component, @template_name).render
+    def mutate_response
+      if REDIRECTED_TO_SHOW.include? @route.handler.template_name
+        @response.status = 403
+        @response["Location"] = "/#{@route.resource.path_component}/#{@record.id}"
+      end
+      @response
+    end
+  end
+
+  class Route
+    attr_reader :criteria
+    attr_reader :resource
+    attr_reader :handler
+
+    def initialize(criteria,
+                   delegate_name,
+                   resource,
+                   handler)
+      @criteria = criteria
+      @delegate_name = delegate_name
+      @resource = resource
+      @handler = handler
+    end
+
+    def call(request)
+      inference_sources = InferenceSources.new(request, @criteria.path).to_hash
+      delegator = Delegator.new(inference_sources, @resource, @delegate_name)
+      record = delegator.delegate
+      body = @handler.render(record)
+      response = Rack::Response.new(body)
+      RouteResult.new(self, response, record).mutate_response
+    end
+
+    def match?(request)
+      @criteria.match?(request.request_method, request.path_info)
     end
   end
 
