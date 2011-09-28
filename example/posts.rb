@@ -12,9 +12,9 @@ module Posts
   end
 
   class PresentsOne
-    takes :post
-    let(:id) { @post.id }
-    let(:title) { @post.title }
+    takes :record
+    let(:id) { @record.id }
+    let(:title) { @record.title }
   end
 
   class PresentsMany

@@ -11,12 +11,12 @@ module FakeResources::Post
   end
 
   class PresentsOne
-    def initialize(post)
-      @post = post
+    def initialize(record)
+      @record = record
     end
 
     def title
-      @post.title.upcase
+      @record.title.upcase
     end
   end
 

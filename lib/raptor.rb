@@ -131,13 +131,14 @@ module Raptor
       @responder = responder
     end
 
-    def path
-      @criteria.path
-    end
-
     def call(request)
       record = @delegator.delegate(request, @criteria.path)
-      @responder.respond(record)
+      inference_sources = InferenceSources.new(request, path)
+      @responder.respond(record, inference_sources)
+    end
+
+    def path
+      @criteria.path
     end
 
     def match?(request)
@@ -154,19 +155,36 @@ module Raptor
       @template_name = template_name
     end
 
-    def respond(record)
-      response = Rack::Response.new(body(record))
+    def respond(record, inference_sources)
+      response = Rack::Response.new
+      if render?
+        presenter = create_presenter(record, inference_sources)
+        response.write(body(record, presenter))
+      end
       mutate_response(response, record)
     end
 
-    def body(record)
-      presenter = presenter_class.new(record)
-      template = Template.new(presenter, @resource.path_component, @template_name)
-      if template.exists?
+    def render?
+      template(nil).exists? # XXX: abstractions are all wrong here
+    end
+
+    def template(presenter)
+      Template.new(presenter, @resource.path_component, @template_name)
+    end
+
+    def body(record, presenter)
+      template = self.template(presenter)
+      if template.exists? # XXX: tell don't ask
         template.render
       else
         ""
       end
+    end
+
+    def create_presenter(record, inference_sources)
+      sources = inference_sources.with_record(record).to_hash
+      args = InfersArgs.new(presenter_class.method(:new), sources).args
+      presenter_class.new(*args)
     end
 
     def presenter_class
@@ -253,13 +271,14 @@ module Raptor
   end
 
   class InferenceSources
-    def initialize(request, route_path)
+    def initialize(request, route_path, record=nil)
       @request = request
       @route_path = route_path
+      @record = record
     end
 
     def to_hash
-      request_sources.merge(path_arg_sources)
+      request_sources.merge(path_arg_sources).merge(record_sources)
     end
 
     def request_sources
@@ -278,6 +297,14 @@ module Raptor
 
     def path_component_pairs
       @route_path.split('/').zip(@request.path_info.split('/'))
+    end
+
+    def record_sources
+      @record ? {:record => @record} : {}
+    end
+
+    def with_record(record)
+      InferenceSources.new(@request, @route_path, record)
     end
   end
 
