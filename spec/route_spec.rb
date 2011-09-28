@@ -77,10 +77,14 @@ describe Raptor::Router do
       end
 
       before do
-        Record.stub(:find_by_id) { bob }
+        Record.stub(:find_and_update) { bob }
       end
 
-      it "updates records"
+      it "updates records" do
+        Record.should_receive(:find_and_update)
+        Routes.call(req)
+      end
+
       it "redirects to show" do
         response = Routes.call(req)
         response.status.should == 403

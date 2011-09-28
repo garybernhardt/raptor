@@ -60,7 +60,7 @@ module Raptor
                               :index => "Record.all",
                               :create => "Record.create",
                               :edit => "Record.find_by_id",
-                              :update => "Record.find_by_id"
+                              :update => "Record.find_and_update"
     }
 
     def initialize(resource)
