@@ -16,5 +16,7 @@ describe Raptor::InferenceSources do
   it "infers IDs from paths" do
     @sources.fetch(:id).should == 5
   end
+
+  it "infers model objects"
 end
 
