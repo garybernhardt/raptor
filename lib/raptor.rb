@@ -58,27 +58,31 @@ module Raptor
     end
 
     def show(delegate_name="Record.find_by_id")
-      route(:show, "GET", "/#{@resource.path_component}/:id", delegate_name)
+      route(:show, "GET", "/#{base}/:id", delegate_name)
     end
 
     def new(delegate_name="Record.new")
-      route(:new, "GET", "/#{@resource.path_component}/new", delegate_name)
+      route(:new, "GET", "/#{base}/new", delegate_name)
     end
 
     def index(delegate_name="Record.all")
-      route(:index, "GET", "/#{@resource.path_component}", delegate_name)
+      route(:index, "GET", "/#{base}", delegate_name)
     end
 
     def create(delegate_name="Record.create")
-      route(:create, "POST", "/#{@resource.path_component}", delegate_name)
+      route(:create, "POST", "/#{base}", delegate_name)
     end
 
     def edit(delegate_name="Record.find_by_id")
-      route(:edit, "GET", "/#{@resource.path_component}/:id/edit", delegate_name)
+      route(:edit, "GET", "/#{base}/:id/edit", delegate_name)
     end
 
     def update(delegate_name="Record.find_and_update")
-      route(:update, "PUT", "/#{@resource.path_component}/:id", delegate_name)
+      route(:update, "PUT", "/#{base}/:id", delegate_name)
+    end
+
+    def base
+      @resource.path_component
     end
 
     def route(action, http_method, path, delegate_name)
