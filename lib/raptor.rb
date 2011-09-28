@@ -14,9 +14,7 @@ class Class
     }
   end
 
-  def let(name, &block)
-    define_method(name, &block)
-  end
+  alias_method :let, :define_method
 end
 
 module Raptor
