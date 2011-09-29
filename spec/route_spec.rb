@@ -12,7 +12,7 @@ describe Raptor::Router do
     router = Raptor::Router.new(resource) do
       route(:my_action, "GET", "/things/:id", "Object.new")
     end
-    router.action_target(:my_action).should == "/things/:id"
+    router.route_named(:my_action).path.should == "/things/:id"
   end
 
   describe "when a route isn't defined" do
@@ -69,7 +69,15 @@ describe Raptor::Router do
         response['Location'].should == "/with_no_behavior/7"
       end
 
-      it "re-renders on errors"
+      it "re-renders on errors" do
+        Record.stub(:create).and_raise(Raptor::ValidationError)
+        Raptor::Template.stub(:new).with(anything, anything, :new).
+          and_return(stub(:render => "<form>New</form>"))
+        response = Routes.call(req)
+        response.body.join('').strip.should == "<form>New</form>"
+      end
+
+      it "ignores exceptions that aren't handled"
     end
 
     context "edit" do

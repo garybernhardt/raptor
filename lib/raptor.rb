@@ -51,7 +51,20 @@ module Raptor
     def call(request)
       route = route_for_request(request)
       log_routing_of(route, request)
-      route.call(request)
+      begin
+        route.call(request)
+      rescue Exception => e
+        Raptor.log("Looking for a redirect for #{e.inspect}")
+        handle_exception(request, route.redirects, e)
+      end
+    end
+
+    def handle_exception(request, redirects, e)
+      redirects.each_pair do |maybe_exception, maybe_action|
+        if maybe_exception.is_a?(Class) && e.is_a?(maybe_exception)
+          return route_named(maybe_action).call(request)
+        end
+      end
     end
 
     def log_routing_of(route, request)
@@ -62,8 +75,8 @@ module Raptor
       @routes.find {|r| r.match?(request) } or raise NoRouteMatches
     end
 
-    def action_target(action_name)
-      @routes.find { |r| r.name == action_name }.path
+    def route_named(action_name)
+      @routes.find { |r| r.name == action_name }
     end
   end
 
@@ -92,7 +105,7 @@ module Raptor
 
     def create(delegate_name="Record.create")
       route(:create, "POST", "/#{base}", delegate_name,
-            :redirect => :show)
+            :redirect => :show, ValidationError => :new)
     end
 
     def edit(delegate_name="Record.find_by_id")
@@ -123,20 +136,21 @@ module Raptor
                                           action,
                                           redirects.fetch(:redirect))
       end
-      @routes << Route.new(action, criteria, delegator, responder)
+      @routes << Route.new(action, criteria, delegator, responder, redirects)
     end
   end
 
   class NoRouteMatches < RuntimeError; end
 
   class Route
-    attr_reader :name
+    attr_reader :name, :redirects
 
-    def initialize(name, criteria, delegator, responder)
+    def initialize(name, criteria, delegator, responder, redirects)
       @name = name
       @criteria = criteria
       @delegator = delegator
       @responder = responder
+      @redirects = redirects
     end
 
     def call(request)
@@ -163,7 +177,7 @@ module Raptor
 
     def respond(record, inference_sources)
       response = Rack::Response.new
-      path = @resource.routes.action_target(@target_route_name)
+      path = @resource.routes.route_named(@target_route_name).path
       if record
         # XXX: Generalize replace
         path = path.gsub(/:id/, record.id.to_s)
@@ -402,6 +416,8 @@ module Raptor
       path.split('/')
     end
   end
+
+  class ValidationError < RuntimeError; end
 
   def self.log(text)
     puts "Raptor: #{text}" if ENV['RAPTOR_LOGGING']
