@@ -35,19 +35,28 @@ An application is just a Ruby script:
     require 'posts'
     require 'users'
 
-    Raptor.new([Posts, Users]).attack!
+    App = Raptor.new([Posts, Users])
 
-Running this script will start a server [TODO], just like Sinatra would. There's no autoloader and no discovery of your code: you explicitly require your resources and give them to Raptor.
+`App` is now a Rack app, so you can create a standard config.ru:
+
+    require './app'
+    run App
+
+and run the app with `rackup`:
+
+    $ rackup
+
+There's no autoloader and no discovery of your code: you explicitly require your resources, give them to Raptor, and get back a Rack app.
 
 ## Resources
 
 An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those. Not all resources can be accessed directly through HTTP, and not all resources map directly onto database records.
 
-Resources are composed of plain old Ruby objects. Sometimes, Raptor uses conventions to instantiate or interact with them [TODO], but the objects themselves are simple. There are no base classes to inherit from. (The one exception to this is routing, because it's pure configuration.)
+Resources are composed of plain old Ruby objects. Sometimes, Raptor uses conventions to instantiate or interact with them, but the objects themselves are simple. There are no base classes to inherit from. (The one exception to this is routing, because it's pure configuration.)
 
 ## Routes
 
-Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects [TODO], enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
+Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects, enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
 
     module Posts
       Routes = Raptor.routes(self) do
