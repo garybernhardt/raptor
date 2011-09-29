@@ -24,6 +24,21 @@ describe Raptor::Router do
     end
   end
 
+  describe "routes" do
+    it "propagates exceptions raised in delegates" do
+      resource = stub(:resource_name => "Things",
+                      :record_class => Object)
+      Object.stub(:fail).and_raise(RuntimeError)
+      router = Raptor::Router.new(resource) do
+        route(:my_action, "GET", "/things", "Object.fail")
+      end
+      req = request("GET", "/things")
+      expect do
+        router.call(req)
+      end.to raise_error(RuntimeError)
+    end
+  end
+
   describe "default routes" do
     include FakeResources::WithNoBehavior
 
@@ -76,8 +91,6 @@ describe Raptor::Router do
         response = Routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
-
-      it "ignores exceptions that aren't handled"
     end
 
     context "edit" do

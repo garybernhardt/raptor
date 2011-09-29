@@ -55,7 +55,7 @@ module Raptor
         route.call(request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
-        handle_exception(request, route.redirects, e)
+        handle_exception(request, route.redirects, e) or raise
       end
     end
 
@@ -65,6 +65,7 @@ module Raptor
           return route_named(maybe_action).call(request)
         end
       end
+      false
     end
 
     def log_routing_of(route, request)
