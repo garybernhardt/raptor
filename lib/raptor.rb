@@ -114,7 +114,7 @@ module Raptor
       criteria = RouteCriteria.new(http_method, path)
       delegator = Delegator.new(@resource, delegate_name)
       if redirects.empty?
-        responder = Responder.new(@resource, action)
+        responder = TemplateResponder.new(@resource, action)
       else
         responder = RedirectResponder.new(@resource,
                                           action,
@@ -173,36 +173,19 @@ module Raptor
     end
   end
 
-  class Responder
+  class TemplateResponder
     def initialize(resource, template_name)
       @resource = resource
       @template_name = template_name
     end
 
     def respond(record, inference_sources)
-      response = Rack::Response.new
-      if render?
-        presenter = create_presenter(record, inference_sources)
-        response.write(body(record, presenter))
-      end
-      response
-    end
-
-    def render?
-      template(nil).exists? # XXX: abstractions are all wrong here
+      presenter = create_presenter(record, inference_sources)
+      Rack::Response.new(template(presenter).render)
     end
 
     def template(presenter)
       Template.new(presenter, @resource.path_component, @template_name)
-    end
-
-    def body(record, presenter)
-      template = self.template(presenter)
-      if template.exists? # XXX: tell don't ask
-        template.render
-      else
-        ""
-      end
     end
 
     def create_presenter(record, inference_sources)
