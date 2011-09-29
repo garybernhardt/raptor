@@ -7,14 +7,6 @@ describe Raptor::Router do
     rendered.body.join('').strip.should == "It's FIRST POST!"
   end
 
-  it "knows routes' paths" do
-    resource = stub
-    router = Raptor::Router.new(resource) do
-      route(:my_action, "GET", "/things/:id", "Object.new")
-    end
-    router.route_named(:my_action).path.should == "/things/:id"
-  end
-
   describe "when a route isn't defined" do
     it "raises an error" do
       request = request('GET', '/doesnt_exist')
@@ -25,18 +17,29 @@ describe Raptor::Router do
   end
 
   describe "routes" do
-    it "propagates exceptions raised in delegates" do
+    let(:resource) do
       resource = stub(:resource_name => "Things",
                       :record_class => Object)
-      Object.stub(:fail).and_raise(RuntimeError)
-      router = Raptor::Router.new(resource) do
-        route(:my_action, "GET", "/things", "Object.fail")
-      end
-      req = request("GET", "/things")
-      expect do
-        router.call(req)
-      end.to raise_error(RuntimeError)
     end
+
+    let(:router) do
+      router = Raptor::Router.new(resource) do
+        route(:my_action, "GET", "/things", "Object.delegate")
+      end
+    end
+
+    it "propagates exceptions raised in delegates" do
+      Object.stub(:delegate).and_raise(RuntimeError)
+      req = request("GET", "/things")
+      expect { router.call(req) }.to raise_error(RuntimeError)
+    end
+
+    it "knows routes' paths" do
+      router.route_named(:my_action).path.should == "/things"
+    end
+
+    it "rejects route sets with multiple routes for the same verb/path"
+    it "sets no-cache by default"
   end
 
   describe "default routes" do
@@ -147,8 +150,5 @@ describe Raptor::Router do
       end
     end
   end
-
-  it "rejects route sets with multiple routes for the same verb/path"
-  it "sets no-cache by default"
 end
 
