@@ -9,7 +9,7 @@ require_relative 'raptor/delegation'
 
 module Raptor
   def self.routes(resource, &block)
-    resource = Resource.wrap(resource)
+    resource = Resource.new(resource)
     Router.new(resource, &block)
   end
 
@@ -33,10 +33,6 @@ module Raptor
   end
 
   class Resource
-    def self.wrap(resource)
-      new(resource)
-    end
-
     def initialize(resource)
       @resource = resource
     end
