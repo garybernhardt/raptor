@@ -1,4 +1,4 @@
-require './spec/spec_helper'
+require './lib/raptor/inference'
 
 describe Raptor::InferenceSources do
   let(:record) { stub }
