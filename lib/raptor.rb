@@ -114,7 +114,7 @@ module Raptor
 
     def update(delegate_name="Record.find_and_update")
       route(:update, "PUT", "/#{base}/:id", delegate_name,
-            :redirect => :show)
+            :redirect => :show, ValidationError => :edit)
     end
 
     def destroy(delegate_name="Record.destroy")

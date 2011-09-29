@@ -69,7 +69,7 @@ describe Raptor::Router do
         response['Location'].should == "/with_no_behavior/7"
       end
 
-      it "re-renders on errors" do
+      it "re-renders new on errors" do
         Record.stub(:create).and_raise(Raptor::ValidationError)
         Raptor::Template.stub(:new).with(anything, anything, :new).
           and_return(stub(:render => "<form>New</form>"))
@@ -109,7 +109,13 @@ describe Raptor::Router do
         response['Location'].should == "/with_no_behavior/7"
       end
 
-      it "re-renders edit on failure"
+      it "re-renders edit on failure" do
+        Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
+        Raptor::Template.stub(:new).with(anything, anything, :edit).
+          and_return(stub(:render => "<form>Edit</form>"))
+        response = Routes.call(req)
+        response.body.join('').strip.should == "<form>Edit</form>"
+      end
     end
 
     context "destroy" do
