@@ -155,21 +155,20 @@ module Raptor
   end
 
   class RedirectResponder
-    def initialize(resource, template_name, target)
+    def initialize(resource, template_name, target_route_name)
       @resource = resource
       @template_name = template_name
-      @target = target
+      @target_route_name = target_route_name
     end
 
     def respond(record, inference_sources)
       response = Rack::Response.new
-      target = @resource.routes.action_target(@target)
+      path = @resource.routes.action_target(@target_route_name)
       if record
-        target = target.gsub(/:id/, record.id.to_s) # XXX: Generalize replace
-      else
-        target = target
+        # XXX: Generalize replace
+        path = path.gsub(/:id/, record.id.to_s)
       end
-      redirect_to(response, target)
+      redirect_to(response, path)
       response
     end
 
