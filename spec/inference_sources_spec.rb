@@ -23,6 +23,6 @@ describe Raptor::InferenceSources do
     sources.with_record(record).to_hash.fetch(:record).should == record
   end
 
-  it "infers model objects"
+  it "infers other model objects"
 end
 
