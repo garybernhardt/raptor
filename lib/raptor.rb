@@ -88,7 +88,8 @@ module Raptor
     end
 
     def create(delegate_name="Record.create")
-      route(:create, "POST", "/#{base}", delegate_name)
+      route(:create, "POST", "/#{base}", delegate_name,
+            :redirect => "/#{base}/:id")
     end
 
     def edit(delegate_name="Record.find_by_id")
@@ -96,21 +97,29 @@ module Raptor
     end
 
     def update(delegate_name="Record.find_and_update")
-      route(:update, "PUT", "/#{base}/:id", delegate_name)
+      route(:update, "PUT", "/#{base}/:id", delegate_name,
+            :redirect => "/#{base}/:id")
     end
 
     def destroy(delegate_name="Record.destroy")
-      route(:destroy, "DELETE", "/#{base}/:id", delegate_name)
+      route(:destroy, "DELETE", "/#{base}/:id", delegate_name,
+            :redirect => "/#{base}")
     end
 
     def base
       @resource.path_component
     end
 
-    def route(action, http_method, path, delegate_name)
+    def route(action, http_method, path, delegate_name, redirects={})
       criteria = RouteCriteria.new(http_method, path)
       delegator = Delegator.new(@resource, delegate_name)
-      responder = Responder.new(@resource, action)
+      if redirects.empty?
+        responder = Responder.new(@resource, action)
+      else
+        responder = RedirectResponder.new(@resource,
+                                          action,
+                                          redirects.fetch(:redirect))
+      end
       @routes << Route.new(criteria, delegator, responder)
     end
   end
@@ -139,10 +148,32 @@ module Raptor
     end
   end
 
-  class Responder
-    REDIRECTED_TO_SHOW = [:create, :update]
-    REDIRECTED_TO_INDEX = [:destroy]
+  class RedirectResponder
+    def initialize(resource, template_name, target)
+      @resource = resource
+      @template_name = template_name
+      @target = target
+    end
 
+    def respond(record, inference_sources)
+      response = Rack::Response.new
+      if record
+        target = @target.gsub(/:id/, record.id.to_s) # XXX: Generalize replace
+      else
+        target = @target
+      end
+      redirect_to(response, target)
+      response
+    end
+
+    def redirect_to(response, location)
+      Raptor.log("Redirecting to #{location}")
+      response.status = 302
+      response["Location"] = location
+    end
+  end
+
+  class Responder
     def initialize(resource, template_name)
       @resource = resource
       @template_name = template_name
@@ -154,7 +185,7 @@ module Raptor
         presenter = create_presenter(record, inference_sources)
         response.write(body(record, presenter))
       end
-      mutate_response(response, record)
+      response
     end
 
     def render?
@@ -190,21 +221,6 @@ module Raptor
 
     def plural?
       @template_name == :index
-    end
-
-    def mutate_response(response, record)
-      if REDIRECTED_TO_SHOW.include? @template_name
-        redirect_to(response, "/#{@resource.path_component}/#{record.id}")
-      elsif REDIRECTED_TO_INDEX.include? @template_name
-        redirect_to(response, "/#{@resource.path_component}")
-      end
-      response
-    end
-
-    def redirect_to(response, location)
-      Raptor.log("Redirecting to #{location}")
-      response.status = 302
-      response["Location"] = location
     end
   end
 
