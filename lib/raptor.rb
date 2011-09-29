@@ -62,6 +62,9 @@ module Raptor
       @routes.find {|r| r.match?(request) } or raise NoRouteMatches
     end
 
+    def action_target(action_name)
+      @routes.find { |r| r.name == action_name }.path
+    end
   end
 
   class BuildsRoutes
@@ -89,7 +92,7 @@ module Raptor
 
     def create(delegate_name="Record.create")
       route(:create, "POST", "/#{base}", delegate_name,
-            :redirect => "/#{base}/:id")
+            :redirect => :show)
     end
 
     def edit(delegate_name="Record.find_by_id")
@@ -98,12 +101,12 @@ module Raptor
 
     def update(delegate_name="Record.find_and_update")
       route(:update, "PUT", "/#{base}/:id", delegate_name,
-            :redirect => "/#{base}/:id")
+            :redirect => :show)
     end
 
     def destroy(delegate_name="Record.destroy")
       route(:destroy, "DELETE", "/#{base}/:id", delegate_name,
-            :redirect => "/#{base}")
+            :redirect => :index)
     end
 
     def base
@@ -120,14 +123,17 @@ module Raptor
                                           action,
                                           redirects.fetch(:redirect))
       end
-      @routes << Route.new(criteria, delegator, responder)
+      @routes << Route.new(action, criteria, delegator, responder)
     end
   end
 
   class NoRouteMatches < RuntimeError; end
 
   class Route
-    def initialize(criteria, delegator, responder)
+    attr_reader :name
+
+    def initialize(name, criteria, delegator, responder)
+      @name = name
       @criteria = criteria
       @delegator = delegator
       @responder = responder
@@ -157,10 +163,11 @@ module Raptor
 
     def respond(record, inference_sources)
       response = Rack::Response.new
+      target = @resource.routes.action_target(@target)
       if record
-        target = @target.gsub(/:id/, record.id.to_s) # XXX: Generalize replace
+        target = target.gsub(/:id/, record.id.to_s) # XXX: Generalize replace
       else
-        target = @target
+        target = target
       end
       redirect_to(response, target)
       response
@@ -358,6 +365,10 @@ module Raptor
 
     def many_presenter
       @resource.const_get(:PresentsMany)
+    end
+
+    def routes
+      @resource::Routes
     end
   end
 

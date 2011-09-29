@@ -7,6 +7,14 @@ describe Raptor::Router do
     rendered.body.join('').strip.should == "It's FIRST POST!"
   end
 
+  it "knows routes' paths" do
+    resource = stub
+    router = Raptor::Router.new(resource) do
+      route(:my_action, "GET", "/things/:id", "Object.new")
+    end
+    router.action_target(:my_action).should == "/things/:id"
+  end
+
   describe "when a route isn't defined" do
     it "raises an error" do
       request = request('GET', '/doesnt_exist')
