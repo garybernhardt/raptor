@@ -36,9 +36,10 @@ module Raptor
         begin
           return resource::Routes.call(request)
         rescue NoRouteMatches
-          raise if resource == @resources.last
         end
       end
+
+      raise NoRouteMatches
     end
   end
 
