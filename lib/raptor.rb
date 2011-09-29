@@ -52,7 +52,7 @@ module Raptor
       route = route_for_request(request)
       log_routing_of(route, request)
       begin
-        route.call(request)
+        route.respond_to_request(request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
         handle_exception(request, route.redirects, e) or raise
@@ -62,7 +62,7 @@ module Raptor
     def handle_exception(request, redirects, e)
       redirects.each_pair do |maybe_exception, maybe_action|
         if maybe_exception.is_a?(Class) && e.is_a?(maybe_exception)
-          return route_named(maybe_action).call(request)
+          return route_named(maybe_action).respond_to_request(request)
         end
       end
       false
@@ -154,7 +154,7 @@ module Raptor
       @redirects = redirects
     end
 
-    def call(request)
+    def respond_to_request(request)
       record = @delegator.delegate(request, @criteria.path)
       inference_sources = InferenceSources.new(request, path)
       @responder.respond(record, inference_sources)
