@@ -67,9 +67,9 @@ describe Raptor::Router do
     end
 
     context "create" do
-      let(:bob) { stub(:name => "joe", :id => 7) }
+      let(:bob) { stub(:name => "bob", :id => 7) }
       let(:req) do
-        request('POST', '/with_no_behavior', StringIO.new('name=joe'))
+        request('POST', '/with_no_behavior', StringIO.new('name=bob'))
       end
 
       before do
@@ -104,10 +104,10 @@ describe Raptor::Router do
     end
 
     context "update" do
-      let(:bob) { stub(:name => "joe", :id => 7) }
+      let(:bob) { stub(:name => "bob", :id => 7) }
 
       let(:req) do
-        request('PUT', '/with_no_behavior/7', StringIO.new('name=joe'))
+        request('PUT', '/with_no_behavior/7', StringIO.new('name=bob'))
       end
 
       before do
