@@ -18,7 +18,10 @@ describe Raptor::Router do
 
   describe "routes" do
     let(:resource) do
-      resource = stub(:resource_name => "Things", :record_class => Object)
+      resource = stub(:resource_name => "Things",
+                      :record_class => Object,
+                      :one_presenter => Class.new,
+                      :path_component => "things")
     end
 
     let(:router) do
@@ -52,6 +55,16 @@ describe Raptor::Router do
         expect do
           router.call(req)
         end.to raise_error(Raptor::NoRouteMatches)
+      end
+
+      it "runs normally if the requirement matches" do
+        Raptor::Template.stub(:new) { stub(:render => "rendered") }
+        resource.stub(:requirements => [FailingRequirement])
+        router = Raptor::Router.new(resource) do
+          route(:my_action, "GET", "/things", "Object.new",
+                :require => :matching)
+        end
+        router.call(req).body.join('').strip.should == "rendered"
       end
     end
 
@@ -172,6 +185,12 @@ end
 class FailingRequirement
   def self.match?
     false
+  end
+end
+
+class MatchingRequirement
+  def self.match?
+    true
   end
 end
 
