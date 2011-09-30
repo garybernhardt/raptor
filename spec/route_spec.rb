@@ -18,10 +18,7 @@ describe Raptor::Router do
 
   describe "routes" do
     let(:resource) do
-      resource = stub(:resource_name => "Things",
-                      :record_class => Object,
-                      :one_presenter => Class.new,
-                      :path_component => "things")
+      resource = stub(:resource_name => "Things", :record_class => Object)
     end
 
     let(:router) do
@@ -47,7 +44,7 @@ describe Raptor::Router do
 
     describe "requirements" do
       it "raises an error if the requirement doesn't match" do
-        resource.stub(:requirements) { [FailingRequirement] }
+        resource = stub(:requirements => [FailingRequirement])
         router = Raptor::Router.new(resource) do
           route(:my_action, "GET", "/things", "Object.new",
                 :require => :failing)
