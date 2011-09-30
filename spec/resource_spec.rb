@@ -1,8 +1,8 @@
 require './spec/spec_helper'
 
 describe Raptor::Resource do
-  def camel_case_resource; Raptor::Resource.new(stub(:name => 'CamelCase')); end
-  def resource; Raptor::Resource.new(FakeResources::Post); end
+  let(:camel_case_resource) { Raptor::Resource.new(stub(:name => 'CamelCase')) }
+  let(:resource) { Raptor::Resource.new(FakeResources::Post) }
 
   it "knows resources' names" do
     camel_case_resource.resource_name.should == 'CamelCase'
