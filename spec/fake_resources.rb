@@ -23,6 +23,9 @@ module FakeResources::Post
   class PresentsMany
   end
 
+  class LoggedInRequirement
+  end
+
   class Record
     def title
       "first post"

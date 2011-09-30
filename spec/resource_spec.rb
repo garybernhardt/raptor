@@ -23,5 +23,9 @@ describe Raptor::Resource do
   it "knows how to get the many presenter" do
     resource.many_presenter.should == FakeResources::Post::PresentsMany
   end
+
+  it "knows the requirements" do
+    resource.requirements.should == [FakeResources::Post::LoggedInRequirement]
+  end
 end
 

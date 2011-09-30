@@ -60,6 +60,11 @@ module Raptor
     def routes
       @resource::Routes
     end
+
+    def requirements
+      class_names = @resource.constants.select { |c| c =~ /Requirement$/ }
+      class_names.map { |c| @resource.const_get(c) }
+    end
   end
 
   class ValidationError < RuntimeError; end
