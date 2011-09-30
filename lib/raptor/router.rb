@@ -84,27 +84,30 @@ module Raptor
       @resource.path_component
     end
 
-    def route(action, http_method, path, delegate_name, redirects={})
-      if redirects.has_key?(:redirect)
-        responder = RedirectResponder.new(@resource,
-                                          action,
-                                          redirects.fetch(:redirect))
-      end
-
-      if redirects.has_key?(:require)
-        requirement_name = Raptor::Util.camel_case(redirects[:require].to_s) + "Requirement"
-        requirement = @resource.requirements.find do |requirement|
-          requirement.name == requirement_name
-        end
-        requirements = [requirement]
-      end
-
-      requirements ||= []
+    def route(action, http_method, path, delegate_name, params={})
+      responder = responder_from_params(params, action)
+      requirements = requirements_from_params(params)
 
       criteria = RouteCriteria.new(http_method, path, requirements)
       delegator = Delegator.new(@resource, delegate_name)
-      responder ||= TemplateResponder.new(@resource, action)
-      @routes << Route.new(action, criteria, delegator, responder, redirects)
+      @routes << Route.new(action, criteria, delegator, responder, params)
+    end
+
+    def responder_from_params(params, action)
+      redirect = params.delete(:redirect)
+      if redirect
+        responder = RedirectResponder.new(@resource, action, redirect)
+      else
+        responder ||= TemplateResponder.new(@resource, action)
+      end
+    end
+
+    def requirements_from_params(params)
+      return [] unless params.has_key?(:require)
+      requirement_name = Util.camel_case(params[:require].to_s) + "Requirement"
+      @resource.requirements.select do |requirement|
+        requirement.name == requirement_name
+      end
     end
   end
 
