@@ -85,15 +85,25 @@ module Raptor
     end
 
     def route(action, http_method, path, delegate_name, redirects={})
-      criteria = RouteCriteria.new(http_method, path)
-      delegator = Delegator.new(@resource, delegate_name)
-      if redirects.empty?
-        responder = TemplateResponder.new(@resource, action)
-      else
+      if redirects.has_key?(:redirect)
         responder = RedirectResponder.new(@resource,
                                           action,
                                           redirects.fetch(:redirect))
       end
+
+      if redirects.has_key?(:require)
+        requirement_name = Raptor::Util.camel_case(redirects[:require].to_s) + "Requirement"
+        requirement = @resource.requirements.find do |requirement|
+          requirement.name == requirement_name
+        end
+        requirements = [requirement]
+      end
+
+      requirements ||= []
+
+      criteria = RouteCriteria.new(http_method, path, requirements)
+      delegator = Delegator.new(@resource, delegate_name)
+      responder ||= TemplateResponder.new(@resource, action)
       @routes << Route.new(action, criteria, delegator, responder, redirects)
     end
   end
@@ -129,13 +139,16 @@ module Raptor
   class RouteCriteria
     attr_reader :path
 
-    def initialize(http_method, path)
+    def initialize(http_method, path, requirements)
       @http_method = http_method
       @path = path
+      @requirements = requirements
     end
 
     def match?(http_method, path)
-      match_http_method?(http_method) && match_path?(path)
+      match_http_method?(http_method) &&
+        match_path?(path) &&
+        match_requirements?
     end
 
     def match_http_method?(http_method)
@@ -155,6 +168,10 @@ module Raptor
 
     def components(path)
       path.split('/')
+    end
+
+    def match_requirements?
+      @requirements.all?(&:match?)
     end
   end
 end

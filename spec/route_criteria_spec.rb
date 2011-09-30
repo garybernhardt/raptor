@@ -11,7 +11,7 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(method1, method2)
-      Raptor::RouteCriteria.new(method1, '/path').match?(method2, '/path')
+      Raptor::RouteCriteria.new(method1, '/path', []).match?(method2, '/path')
     end
   end
 
@@ -38,7 +38,22 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(route, url)
-      Raptor::RouteCriteria.new('GET', route).match?('GET', url)
+      Raptor::RouteCriteria.new('GET', route, []).match?('GET', url)
+    end
+  end
+
+  describe "requirement matching" do
+    it "matches if the requirement matches" do
+      match?(stub(:match? => true)).should be_true
+    end
+
+    it "doesn't match if the requirement doesn't" do
+      match?(stub(:match? => false)).should be_false
+    end
+
+    def match?(requirement)
+      criteria = Raptor::RouteCriteria.new("GET", "/url", [requirement])
+      criteria.match?("GET", "/url")
     end
   end
 end

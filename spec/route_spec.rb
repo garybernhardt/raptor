@@ -19,7 +19,9 @@ describe Raptor::Router do
   describe "routes" do
     let(:resource) do
       resource = stub(:resource_name => "Things",
-                      :record_class => Object)
+                      :record_class => Object,
+                      :one_presenter => Class.new,
+                      :path_component => "things")
     end
 
     let(:router) do
@@ -28,14 +30,32 @@ describe Raptor::Router do
       end
     end
 
+    let(:req) { request("GET", "/things") }
+
+    before do
+      Raptor::Template.stub(:new) { stub(:render => "") }
+    end
+
     it "propagates exceptions raised in delegates" do
       Object.stub(:delegate).and_raise(RuntimeError)
-      req = request("GET", "/things")
       expect { router.call(req) }.to raise_error(RuntimeError)
     end
 
     it "knows routes' paths" do
       router.route_named(:my_action).path.should == "/things"
+    end
+
+    describe "requirements" do
+      it "raises an error if the requirement doesn't match" do
+        resource.stub(:requirements) { [FailingRequirement] }
+        router = Raptor::Router.new(resource) do
+          route(:my_action, "GET", "/things", "Object.new",
+                :require => :failing)
+        end
+        expect do
+          router.call(req)
+        end.to raise_error(Raptor::NoRouteMatches)
+      end
     end
 
     it "rejects route sets with multiple routes for the same verb/path"
@@ -149,6 +169,12 @@ describe Raptor::Router do
         response['Location'].should == "/with_no_behavior"
       end
     end
+  end
+end
+
+class FailingRequirement
+  def self.match?
+    false
   end
 end
 

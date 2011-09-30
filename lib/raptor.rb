@@ -38,15 +38,11 @@ module Raptor
     end
 
     def path_component
-      underscore(resource_name)
+      Raptor::Util.underscore(resource_name)
     end
 
     def resource_name
       @resource.name.split('::').last
-    end
-
-    def underscore(string)
-      string.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
 
     def record_class
@@ -67,6 +63,16 @@ module Raptor
   end
 
   class ValidationError < RuntimeError; end
+
+  module Util
+    def self.underscore(string)
+      string.gsub(/(.)([A-Z])/, '\1_\2').downcase
+    end
+
+    def self.camel_case(string)
+      string.gsub(/(^|_)(.)/) { $2.upcase } 
+    end
+  end
 
   def self.log(text)
     puts "Raptor: #{text}" if ENV['RAPTOR_LOGGING']
