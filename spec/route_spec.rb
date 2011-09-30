@@ -16,6 +16,8 @@ describe Raptor::Router do
     end
   end
 
+  it "delegates to the named object, not just Record"
+
   describe "routes" do
     let(:resource) do
       resource = stub(:resource_name => "Things",
