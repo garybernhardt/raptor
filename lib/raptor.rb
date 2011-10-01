@@ -6,6 +6,7 @@ require_relative 'raptor/router'
 require_relative 'raptor/inference'
 require_relative 'raptor/responders'
 require_relative 'raptor/delegation'
+require_relative 'raptor/validation'
 
 module Raptor
   def self.routes(resource, &block)

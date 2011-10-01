@@ -46,6 +46,7 @@ module Raptor
 
     def build(&block)
       instance_eval(&block)
+      ValidatesRoutes.validate!(@routes)
       @routes
     end
 
