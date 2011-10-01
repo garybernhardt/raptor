@@ -23,6 +23,18 @@ describe Raptor::Router do
     end.to raise_error(FakeResources::Post::NotSupportedError)
   end
 
+  it "allows overriding of redirect in standard routes" do
+    class Resource
+      Routes = Raptor::routes(self) do
+        index :redirect => :index, :to => "Object.new"
+      end
+    end
+    request = request("GET", "/resource")
+    response = Resource::Routes.call(request)
+    response.status.should == 302
+    response["Location"].should == "/resource"
+  end
+
   describe "routes" do
     let(:resource) do
       resource = stub(:resource_name => "Things",
