@@ -10,7 +10,7 @@ module Raptor
       path = @resource.routes.route_named(@target_route_name).path
       if record
         # XXX: Generalize replace
-        path = path.gsub(/:id/, record.id.to_s)
+        path = path.gsub(/:id/) { record.id.to_s }
       end
       redirect_to(response, path)
       response
