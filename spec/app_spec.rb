@@ -1,15 +1,28 @@
 require './spec/spec_helper'
 
 describe Raptor::App do
-  def app
-    Raptor::App.new([FakeResources::Post, FakeResources::WithNoBehavior])
+  module Resource1
+    Routes = Raptor.routes(self) { index :to => "Object.new" }
+    class PresentsMany; end
   end
 
+  module Resource2
+    Routes = Raptor.routes(self) { index :to => "Object.new" }
+    class PresentsMany; end
+  end
+
+  let(:app) { Raptor::App.new([Resource1, Resource2]) }
+
+
   it "routes to multiple resources" do
-    env = env('GET', '/post/5')
-    app.call(env).body.join('').strip.should == "It's FIRST POST!"
-    env = env('GET', '/with_no_behavior/5')
-    app.call(env).body.join('').strip.should == "record 5"
+    File.stub(:new).with("views/resource1/index.html.erb").
+      and_return(stub(:read => "Resource 1 response"))
+    File.stub(:new).with("views/resource2/index.html.erb").
+      and_return(stub(:read => "Resource 2 response"))
+    env = env('GET', '/resource1')
+    app.call(env).body.join('').strip.should == "Resource 1 response"
+    env = env('GET', '/resource2')
+    app.call(env).body.join('').strip.should == "Resource 2 response"
   end
 
   it "raises an error if no route matches" do

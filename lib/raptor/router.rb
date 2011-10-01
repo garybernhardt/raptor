@@ -121,8 +121,11 @@ module Raptor
 
     def responder_for(action)
       redirect = @params[:redirect]
+      text = @params[:text]
       if redirect
         RedirectResponder.new(@resource, redirect)
+      elsif text
+        PlaintextResponder.new(text)
       else
         TemplateResponder.new(@resource, action)
       end

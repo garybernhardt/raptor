@@ -1,4 +1,14 @@
 module Raptor
+  class PlaintextResponder
+    def initialize(text)
+      @text = text
+    end
+
+    def respond(record, inference_sources)
+      Rack::Response.new(@text)
+    end
+  end
+
   class RedirectResponder
     def initialize(resource, target_route_name)
       @resource = resource
