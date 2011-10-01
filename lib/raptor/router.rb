@@ -12,17 +12,17 @@ module Raptor
         route.respond_to_request(request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
-        handle_exception(request, route.redirects, e) or raise
+        handle_exception(request, route.redirects, e) or raise e
       end
     end
 
     def handle_exception(request, redirects, e)
-      redirects.each_pair do |maybe_exception, maybe_action|
-        if maybe_exception.is_a?(Class) && e.is_a?(maybe_exception)
-          return route_named(maybe_action).respond_to_request(request)
-        end
+      action = redirects.action_for_exception(e)
+      if action
+        route_named(action).respond_to_request(request)
+      else
+        false
       end
-      false
     end
 
     def log_routing_of(route, request)
@@ -91,7 +91,7 @@ module Raptor
 
       criteria = RouteCriteria.new(http_method, path, requirements)
       delegator = Delegator.new(@resource, delegate_name)
-      @routes << Route.new(action, criteria, delegator, responder, raw_options)
+      @routes << Route.new(action, criteria, delegator, responder, route_options)
     end
   end
 
@@ -99,6 +99,15 @@ module Raptor
     def initialize(resource, params)
       @resource = resource
       @params = params
+    end
+
+    def action_for_exception(e)
+      @params.each_pair do |maybe_exception, maybe_action|
+        if maybe_exception.is_a?(Class) && e.is_a?(maybe_exception)
+          return maybe_action
+        end
+      end
+      false
     end
 
     def responder_for(action)
