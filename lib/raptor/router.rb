@@ -92,11 +92,8 @@ module Raptor
       @resource.path_component
     end
 
-    def route(action, http_method, path, raw_options={})
-      route_options = RouteOptions.new(@resource, raw_options)
-      criteria = RouteCriteria.new(http_method, path, route_options.requirements)
-      delegator = Delegator.new(@resource, route_options.delegate_name)
-      @routes << Route.new(action, criteria, delegator, route_options.responder_for(action), route_options)
+    def route(action, http_method, path, params={})
+      @routes << Route.for_resource(@resource, action, http_method, path, params)
     end
   end
 
@@ -162,6 +159,13 @@ module Raptor
       @delegator = delegator
       @responder = responder
       @redirects = redirects
+    end
+
+    def self.for_resource(resource, action, http_method, path, params)
+      route_options = RouteOptions.new(resource, params)
+      criteria = RouteCriteria.new(http_method, path, route_options.requirements)
+      delegator = Delegator.new(resource, route_options.delegate_name)
+      new(action, criteria, delegator, route_options.responder_for(action), route_options)
     end
 
     def respond_to_request(request)
