@@ -25,7 +25,7 @@ describe Raptor::Router do
 
   it "allows overriding of redirect in standard routes" do
     # XXX: Remove circular reference between resource and route
-    resource = stub(:class_named => Object)
+    resource = stub(:resource_module => Object)
     builder = Raptor::BuildsRoutes.new(resource)
     route = builder.route(:index, "GET", "/resource",
                           :to => "Object.new", :redirect => :index)
@@ -55,7 +55,8 @@ describe Raptor::Router do
       resource = stub(:resource_name => "Things",
                       :class_named => Object,
                       :one_presenter => Class.new,
-                      :path_component => "things")
+                      :path_component => "things",
+                      :resource_module => Object)
     end
 
     let(:router) do
@@ -93,7 +94,8 @@ describe Raptor::Router do
 
       it "runs normally if the requirement matches" do
         Raptor::Template.stub(:new) { stub(:render => "rendered") }
-        resource.stub(:requirements => [FailingRequirement])
+        resource.stub(:requirements => [FailingRequirement],
+                      :resource_module => Object)
         router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :matching)

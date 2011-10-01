@@ -34,8 +34,10 @@ module Raptor
   end
 
   class Resource
-    def initialize(resource)
-      @resource = resource
+    attr_reader :resource_module
+
+    def initialize(resource_module)
+      @resource_module = resource_module
     end
 
     def path_component
@@ -43,28 +45,30 @@ module Raptor
     end
 
     def resource_name
-      @resource.name.split('::').last
+      @resource_module.name.split('::').last
     end
 
     def class_named(name)
-      @resource.const_get(name)
+      @resource_module.const_get(name)
     end
 
     def one_presenter
-      @resource.const_get(:PresentsOne)
+      @resource_module.const_get(:PresentsOne)
     end
 
     def many_presenter
-      @resource.const_get(:PresentsMany)
+      @resource_module.const_get(:PresentsMany)
     end
 
     def routes
-      @resource::Routes
+      @resource_module::Routes
     end
 
     def requirements
-      class_names = @resource.constants.select { |c| c =~ /Requirement$/ }
-      class_names.map { |c| @resource.const_get(c) }
+      class_names = @resource_module.constants.select do
+        |c| c =~ /Requirement$/
+      end
+      class_names.map { |c| @resource_module.const_get(c) }
     end
   end
 
