@@ -1,8 +1,7 @@
 module Raptor
   class RedirectResponder
-    def initialize(resource, template_name, target_route_name)
+    def initialize(resource, target_route_name)
       @resource = resource
-      @template_name = template_name
       @target_route_name = target_route_name
     end
 

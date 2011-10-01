@@ -122,7 +122,7 @@ module Raptor
     def responder_for(action)
       redirect = @params[:redirect]
       if redirect
-        RedirectResponder.new(@resource, action, redirect)
+        RedirectResponder.new(@resource, redirect)
       else
         TemplateResponder.new(@resource, action)
       end
