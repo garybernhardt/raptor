@@ -24,13 +24,15 @@ describe Raptor::Router do
   end
 
   it "allows overriding of redirect in standard routes" do
-    class Resource
-      Routes = Raptor::routes(self) do
-        index :redirect => :index, :to => "Object.new"
-      end
-    end
+    # XXX: Remove circular reference between resource and route
+    resource = stub(:class_named => Object)
+    builder = Raptor::BuildsRoutes.new(resource)
+    route = builder.route(:index, "GET", "/resource",
+                          :to => "Object.new", :redirect => :index)
+    resource.stub(:routes) { Raptor::Router.new(resource, [route]) }
     request = request("GET", "/resource")
-    response = Resource::Routes.call(request)
+
+    response = route.respond_to_request(request)
     response.status.should == 302
     response["Location"].should == "/resource"
   end
@@ -57,7 +59,7 @@ describe Raptor::Router do
     end
 
     let(:router) do
-      router = Raptor::Router.new(resource) do
+      router = Raptor::Router.build(resource) do
         route(:my_action, "GET", "/things", :to => "Object.delegate")
       end
     end
@@ -80,7 +82,7 @@ describe Raptor::Router do
     describe "requirements" do
       it "raises an error if the requirement doesn't match" do
         resource = stub(:requirements => [FailingRequirement])
-        router = Raptor::Router.new(resource) do
+        router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :failing)
         end
@@ -92,7 +94,7 @@ describe Raptor::Router do
       it "runs normally if the requirement matches" do
         Raptor::Template.stub(:new) { stub(:render => "rendered") }
         resource.stub(:requirements => [FailingRequirement])
-        router = Raptor::Router.new(resource) do
+        router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :matching)
         end

@@ -11,7 +11,7 @@ require_relative 'raptor/validation'
 module Raptor
   def self.routes(resource, &block)
     resource = Resource.new(resource)
-    Router.new(resource, &block)
+    Router.build(resource, &block)
   end
 
   class App
