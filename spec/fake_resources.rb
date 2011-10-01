@@ -4,10 +4,12 @@ module FakeResources::Post
   #   - One record, ID 5, whose title is "first post"
   #   - A presenter that upcases records' titles
   #   - A template that says "It's #{post.title}!"
+  #   - A route that redirects to a domain object
 
   Routes = Raptor.routes(self) do
     new 'Posts::Record.new'
     show 'Posts::Record.find_by_id'
+    update 'Posts::UpdatesPosts.update!'
   end
 
   class PresentsOne
@@ -24,6 +26,15 @@ module FakeResources::Post
   end
 
   class LoggedInRequirement
+  end
+
+  class NotSupportedError < Exception
+  end
+
+  class UpdatesPosts
+    def self.update!
+      raise NotSupportedError
+    end
   end
 
   class Record

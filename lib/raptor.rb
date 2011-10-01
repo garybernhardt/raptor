@@ -45,8 +45,8 @@ module Raptor
       @resource.name.split('::').last
     end
 
-    def record_class
-      @resource.const_get(:Record)
+    def class_named(name)
+      @resource.const_get(name)
     end
 
     def one_presenter

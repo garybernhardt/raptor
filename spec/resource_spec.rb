@@ -13,7 +13,7 @@ describe Raptor::Resource do
   end
 
   it "knows how to get the record class" do
-    resource.record_class.should == FakeResources::Post::Record
+    resource.class_named(:Record).should == FakeResources::Post::Record
   end
 
   it "knows how to get the one presenter" do

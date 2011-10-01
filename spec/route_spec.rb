@@ -16,12 +16,17 @@ describe Raptor::Router do
     end
   end
 
-  it "delegates to the named object, not just Record"
+  it "delegates to the named object, not just Record" do
+    request = request('PUT', '/post/5')
+    expect do
+      FakeResources::Post::Routes.call(request)
+    end.to raise_error(FakeResources::Post::NotSupportedError)
+  end
 
   describe "routes" do
     let(:resource) do
       resource = stub(:resource_name => "Things",
-                      :record_class => Object,
+                      :class_named => Object,
                       :one_presenter => Class.new,
                       :path_component => "things")
     end

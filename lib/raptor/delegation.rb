@@ -18,7 +18,15 @@ module Raptor
     end
 
     def delegate_method
-      @resource.record_class.method(method_name)
+      domain_class.method(method_name)
+    end
+
+    def domain_class
+      @resource.class_named(delegate_class_name)
+    end
+
+    def delegate_class_name
+      @delegate_name.split('.').first.split('::').last
     end
 
     def method_name
