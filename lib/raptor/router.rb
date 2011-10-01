@@ -108,7 +108,7 @@ module Raptor
     end
 
     def responder_for(action)
-      redirect = @params.delete(:redirect)
+      redirect = @params[:redirect]
       if redirect
         RedirectResponder.new(@resource, action, redirect)
       else
