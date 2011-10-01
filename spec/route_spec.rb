@@ -33,7 +33,7 @@ describe Raptor::Router do
 
     let(:router) do
       router = Raptor::Router.new(resource) do
-        route(:my_action, "GET", "/things", "Object.delegate")
+        route(:my_action, "GET", "/things", :to => "Object.delegate")
       end
     end
 
@@ -56,8 +56,8 @@ describe Raptor::Router do
       it "raises an error if the requirement doesn't match" do
         resource = stub(:requirements => [FailingRequirement])
         router = Raptor::Router.new(resource) do
-          route(:my_action, "GET", "/things", "Object.new",
-                :require => :failing)
+          route(:my_action, "GET", "/things",
+                :to => "Object.new", :require => :failing)
         end
         expect do
           router.call(req)
@@ -68,8 +68,8 @@ describe Raptor::Router do
         Raptor::Template.stub(:new) { stub(:render => "rendered") }
         resource.stub(:requirements => [FailingRequirement])
         router = Raptor::Router.new(resource) do
-          route(:my_action, "GET", "/things", "Object.new",
-                :require => :matching)
+          route(:my_action, "GET", "/things",
+                :to => "Object.new", :require => :matching)
         end
         router.call(req).body.join('').strip.should == "rendered"
       end

@@ -50,45 +50,52 @@ module Raptor
       @routes
     end
 
-    def show(delegate_name="Record.find_by_id")
-      route(:show, "GET", "/#{base}/:id", delegate_name)
+    def show(params={})
+      params[:to] ||= "Record.find_by_id"
+      route(:show, "GET", "/#{base}/:id", params)
     end
 
-    def new(delegate_name="Record.new")
-      route(:new, "GET", "/#{base}/new", delegate_name)
+    def new(params={})
+      params[:to] ||= "Record.new"
+      route(:new, "GET", "/#{base}/new", params)
     end
 
-    def index(delegate_name="Record.all")
-      route(:index, "GET", "/#{base}", delegate_name)
+    def index(params={})
+      params[:to] ||= "Record.all"
+      route(:index, "GET", "/#{base}", params)
     end
 
-    def create(delegate_name="Record.create")
-      route(:create, "POST", "/#{base}", delegate_name,
-            :redirect => :show, ValidationError => :new)
+    def create(params={})
+      params[:to] ||= "Record.create"
+      route(:create, "POST", "/#{base}",
+            {:redirect => :show, ValidationError => :new}.merge(params))
     end
 
-    def edit(delegate_name="Record.find_by_id")
-      route(:edit, "GET", "/#{base}/:id/edit", delegate_name)
+    def edit(params={})
+      params[:to] ||= "Record.find_by_id"
+      route(:edit, "GET", "/#{base}/:id/edit", params)
     end
 
-    def update(delegate_name="Record.find_and_update")
-      route(:update, "PUT", "/#{base}/:id", delegate_name,
-            :redirect => :show, ValidationError => :edit)
+    def update(params={})
+      params[:to] ||= "Record.find_and_update"
+      route(:update, "PUT", "/#{base}/:id",
+            {:redirect => :show, ValidationError => :edit}.merge(params))
     end
 
-    def destroy(delegate_name="Record.destroy")
-      route(:destroy, "DELETE", "/#{base}/:id", delegate_name,
-            :redirect => :index)
+    def destroy(params={})
+      params[:to] ||= "Record.destroy"
+      route(:destroy, "DELETE", "/#{base}/:id",
+            {:redirect => :index}.merge(params))
     end
 
     def base
       @resource.path_component
     end
 
-    def route(action, http_method, path, delegate_name, raw_options={})
+    def route(action, http_method, path, raw_options={})
       route_options = RouteOptions.new(@resource, raw_options)
       criteria = RouteCriteria.new(http_method, path, route_options.requirements)
-      delegator = Delegator.new(@resource, delegate_name)
+      delegator = Delegator.new(@resource, route_options.delegate_name)
       @routes << Route.new(action, criteria, delegator, route_options.responder_for(action), route_options)
     end
   end
@@ -97,6 +104,10 @@ module Raptor
     def initialize(resource, params)
       @resource = resource
       @params = params
+    end
+
+    def delegate_name
+      @params.fetch(:to)
     end
 
     def action_for_exception(e)
