@@ -86,12 +86,9 @@ module Raptor
 
     def route(action, http_method, path, delegate_name, raw_options={})
       route_options = RouteOptions.new(@resource, raw_options)
-      responder = route_options.responder_for(action)
-      requirements = route_options.requirements
-
-      criteria = RouteCriteria.new(http_method, path, requirements)
+      criteria = RouteCriteria.new(http_method, path, route_options.requirements)
       delegator = Delegator.new(@resource, delegate_name)
-      @routes << Route.new(action, criteria, delegator, responder, route_options)
+      @routes << Route.new(action, criteria, delegator, route_options.responder_for(action), route_options)
     end
   end
 
