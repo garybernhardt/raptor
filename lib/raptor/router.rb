@@ -84,34 +84,48 @@ module Raptor
       @resource.path_component
     end
 
-    def route(action, http_method, path, delegate_name, route_options={})
-      responder = Responder.from_route_options(@resource, route_options, action)
-      requirements = Requirements.from_route_options(@resource, route_options)
+    def route(action, http_method, path, delegate_name, route_params={})
+      route_options = RouteOptions.new(@resource, route_params)
+      responder = route_options.responder_for(action)
+      requirements = route_options.requirements
 
       criteria = RouteCriteria.new(http_method, path, requirements)
       delegator = Delegator.new(@resource, delegate_name)
-      @routes << Route.new(action, criteria, delegator, responder, route_options)
+      @routes << Route.new(action, criteria, delegator, responder, route_params)
     end
   end
 
-  module Requirements
-    def self.from_route_options(resource, route_options)
-      return [] unless route_options.has_key?(:require)
-      requirement_name = Util.camel_case(route_options[:require].to_s) + "Requirement"
-      resource.requirements.select do |requirement|
-        requirement.name == requirement_name
-      end
-
+  class RouteOptions
+    def initialize(resource, params)
+      @resource = resource
+      @params = params
     end
-  end
 
-  module Responder
-    def self.from_route_options(resource, route_options, action)
-      redirect = route_options.delete(:redirect)
+    def responder_for(action)
+      redirect = @params.delete(:redirect)
       if redirect
-        responder = RedirectResponder.new(resource, action, redirect)
+        RedirectResponder.new(@resource, action, redirect)
       else
-        responder ||= TemplateResponder.new(resource, action)
+        TemplateResponder.new(@resource, action)
+      end
+    end
+
+    def requirements
+      return [] unless @params.has_key?(:require)
+      name = @params.fetch(:require).to_s
+      Requirements.new(@resource).matching(name)
+    end
+  end
+
+  class Requirements
+    def initialize(resource)
+      @resource = resource
+    end
+
+    def matching(name)
+      requirement_name = Util.camel_case(name) + "Requirement"
+      @resource.requirements.select do |requirement|
+        requirement.name == requirement_name
       end
     end
   end
