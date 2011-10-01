@@ -84,29 +84,34 @@ module Raptor
       @resource.path_component
     end
 
-    def route(action, http_method, path, delegate_name, params={})
-      responder = responder_from_params(params, action)
-      requirements = requirements_from_params(params)
+    def route(action, http_method, path, delegate_name, route_options={})
+      responder = Responder.from_route_options(@resource, route_options, action)
+      requirements = Requirements.from_route_options(@resource, route_options)
 
       criteria = RouteCriteria.new(http_method, path, requirements)
       delegator = Delegator.new(@resource, delegate_name)
-      @routes << Route.new(action, criteria, delegator, responder, params)
+      @routes << Route.new(action, criteria, delegator, responder, route_options)
     end
+  end
 
-    def responder_from_params(params, action)
-      redirect = params.delete(:redirect)
-      if redirect
-        responder = RedirectResponder.new(@resource, action, redirect)
-      else
-        responder ||= TemplateResponder.new(@resource, action)
-      end
-    end
-
-    def requirements_from_params(params)
-      return [] unless params.has_key?(:require)
-      requirement_name = Util.camel_case(params[:require].to_s) + "Requirement"
-      @resource.requirements.select do |requirement|
+  module Requirements
+    def self.from_route_options(resource, route_options)
+      return [] unless route_options.has_key?(:require)
+      requirement_name = Util.camel_case(route_options[:require].to_s) + "Requirement"
+      resource.requirements.select do |requirement|
         requirement.name == requirement_name
+      end
+
+    end
+  end
+
+  module Responder
+    def self.from_route_options(resource, route_options, action)
+      redirect = route_options.delete(:redirect)
+      if redirect
+        responder = RedirectResponder.new(resource, action, redirect)
+      else
+        responder ||= TemplateResponder.new(resource, action)
       end
     end
   end
