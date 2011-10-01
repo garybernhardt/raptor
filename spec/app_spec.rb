@@ -13,7 +13,6 @@ describe Raptor::App do
 
   let(:app) { Raptor::App.new([Resource1, Resource2]) }
 
-
   it "routes to multiple resources" do
     File.stub(:new).with("views/resource1/index.html.erb").
       and_return(stub(:read => "Resource 1 response"))
