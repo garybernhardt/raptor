@@ -30,13 +30,9 @@ module Raptor
       return nil if @delegate_name.nil?
       Raptor.log("Delegating to #{@delegate_name}")
       sources = inference_sources(request, route_path)
-      record = delegate_method.call(*delegate_args(sources))
+      record = InfersArgs.new(delegate_method, sources).call
       Raptor.log("Delegate returned #{record}")
       record
-    end
-
-    def delegate_args(sources)
-      InfersArgs.new(delegate_method, sources).args
     end
 
     def delegate_method

@@ -7,6 +7,10 @@ module Raptor
       @sources = sources
     end
 
+    def call
+      @method.call(*args)
+    end
+
     def args
       parameters.select do |type, name|
         name && type != :rest && type != :block

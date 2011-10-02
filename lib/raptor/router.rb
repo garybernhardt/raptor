@@ -206,9 +206,7 @@ module Raptor
       inference_sources = InferenceSources.new(request,
                                                request.path_info).to_hash
       @requirements.all? do |requirement|
-        args = InfersArgs.new(requirement.method(:match?),
-                              inference_sources).args
-        requirement.match?(*args)
+        InfersArgs.new(requirement.method(:match?), inference_sources).call
       end
     end
   end
