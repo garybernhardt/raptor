@@ -1,6 +1,9 @@
-require_relative 'spec_helper'
+require_relative "../lib/raptor/responders"
+require "rack"
 
 describe Raptor::RedirectResponder do
+  before { Raptor.stub(:log) }
+
   let(:resource) do
     # XXX: #loldemeter
     routes = stub
