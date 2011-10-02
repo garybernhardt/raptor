@@ -17,16 +17,8 @@ module Raptor
         route.respond_to_request(request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
-        handle_exception(request, route.redirects, e) or raise e
-      end
-    end
-
-    def handle_exception(request, redirects, e)
-      action = redirects.action_for_exception(e)
-      if action
+        action = route.action_for_exception(e) or raise
         route_named(action).respond_to_request(request)
-      else
-        false
       end
     end
 
@@ -118,13 +110,10 @@ module Raptor
       @params.fetch(:to)
     end
 
-    def action_for_exception(e)
-      @params.each_pair do |maybe_exception, maybe_action|
-        if maybe_exception.is_a?(Class) && e.is_a?(maybe_exception)
-          return maybe_action
-        end
+    def exception_actions
+      @params.select do |maybe_exception, maybe_action|
+        maybe_exception.is_a?(Class)
       end
-      false
     end
 
     def responder_for(action)
@@ -162,15 +151,15 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class Route
-    attr_reader :name, :path, :redirects
+    attr_reader :name, :path
 
-    def initialize(name, path, requirements, delegator, responder, redirects)
+    def initialize(name, path, requirements, delegator, responder, exception_actions)
       @name = name
       @path = path
       @requirements = requirements
       @delegator = delegator
       @responder = responder
-      @redirects = redirects
+      @exception_actions = exception_actions
     end
 
     def self.for_resource(resource, action, http_method, path, params)
@@ -181,13 +170,20 @@ module Raptor
       ]
       delegator = Delegator.new(route_options.delegate_name)
       responder = route_options.responder_for(action)
-      new(action, path, requirements, delegator, responder, route_options)
+      new(action, path, requirements, delegator, responder,
+          route_options.exception_actions)
     end
 
     def respond_to_request(request)
       record = @delegator.delegate(request, @path)
       inference_sources = InferenceSources.new(request, @path)
       @responder.respond(record, inference_sources)
+    end
+
+    def action_for_exception(e)
+      @exception_actions.select do |exception_class, action|
+        e.is_a? exception_class
+      end.values.first
     end
 
     def match?(request)
