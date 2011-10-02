@@ -65,7 +65,7 @@ Routes are the core of Raptor, and are much more powerful than in most web frame
         update :require => :admin
       end
 
-      class OnePresenter
+      class PresentsOne
         ...
       end
 
@@ -74,14 +74,14 @@ Routes are the core of Raptor, and are much more powerful than in most web frame
       end
     end
 
-`Posts` is the resource. It has routes, a presenter, and records in a database (nevermind their implementation for now). Let's take the routes in order.
+`Posts` is the resource. It has routes, a presenter, and records in a database (never mind their implementation for now). Let's take the routes in order.
 
 `show` has no arguments, so it inherits the default show behavior:
 
 1. Match GET "/posts/:id"
 1. Extract the ID
 1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-1. Instantiate a `Posts::OnePresenter.new(record)`
+1. Instantiate a `Posts::PresentsOne.new(record)`
 1. Render `views/posts/show.html.erb` with the presenter as its context
 
 Each of these is customizable, and each of the seven standard actions has a slightly different set of defaults, mostly in steps 2 and 3.
