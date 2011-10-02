@@ -60,15 +60,12 @@ describe Raptor::Router do
 
     let(:router) do
       router = Raptor::Router.build(resource) do
-        route(:my_action, "GET", "/things", :to => "Object.delegate")
+        route(:my_action, "GET", "/things", :to => "Object.delegate",
+              :text => "")
       end
     end
 
     let(:req) { request("GET", "/things") }
-
-    before do
-      Raptor::Template.stub(:new) { stub(:render => "") }
-    end
 
     it "propagates exceptions raised in delegates" do
       Object.stub(:delegate).and_raise(RuntimeError)
@@ -125,7 +122,7 @@ describe Raptor::Router do
     context "new" do
       it "renders a template" do
         request = request('GET', '/with_no_behavior/new')
-        Routes.call(request).body.join('').strip.should == "<form></form>"
+        Routes.call(request).body.join('').strip.should == "<form>New</form>"
       end
     end
 
@@ -152,8 +149,6 @@ describe Raptor::Router do
 
       it "re-renders new on errors" do
         Record.stub(:create).and_raise(Raptor::ValidationError)
-        Raptor::Template.stub(:new).with(anything, anything, :new).
-          and_return(stub(:render => "<form>New</form>"))
         response = Routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
@@ -190,8 +185,6 @@ describe Raptor::Router do
 
       it "re-renders edit on failure" do
         Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
-        Raptor::Template.stub(:new).with(anything, anything, :edit).
-          and_return(stub(:render => "<form>Edit</form>"))
         response = Routes.call(req)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
