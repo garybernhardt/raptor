@@ -65,7 +65,7 @@ Routes are the core of Raptor, and are much more powerful than in most web frame
         update :require => :admin
       end
 
-      class OnePresenter
+      class PresentsOne
         ...
       end
 
@@ -74,14 +74,14 @@ Routes are the core of Raptor, and are much more powerful than in most web frame
       end
     end
 
-`Posts` is the resource. It has routes, a presenter, and records in a database (nevermind their implementation for now). Let's take the routes in order.
+`Posts` is the resource. It has routes, a presenter, and records in a database (never mind their implementation for now). Let's take the routes in order.
 
 `show` has no arguments, so it inherits the default show behavior:
 
 1. Match GET "/posts/:id"
 1. Extract the ID
 1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-1. Instantiate a `Posts::OnePresenter.new(record)`
+1. Instantiate a `Posts::PresentsOne.new(record)`
 1. Render `views/posts/show.html.erb` with the presenter as its context
 
 Each of these is customizable, and each of the seven standard actions has a slightly different set of defaults, mostly in steps 2 and 3.
@@ -119,7 +119,7 @@ If your `show` route needs to do more than simply retrieve a record, that's not 
       end
     end
 
-The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::OnePresenter from the profile and renders `views/profiles/show.html.erb` with it.
+The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::PresentsOne from the profile and renders `views/profiles/show.html.erb` with it.
 
 Raptor will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
