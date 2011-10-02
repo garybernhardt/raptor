@@ -7,9 +7,9 @@ module FakeResources::Post
   #   - A route that redirects to a domain object
 
   Routes = Raptor.routes(self) do
-    new :to => 'Record.new'
-    show :to => 'Record.find_by_id'
-    update :to => 'UpdatesPosts.update!'
+    new :to => 'FakeResources::Post::Record.new'
+    show :to => 'FakeResources::Post::Record.find_by_id'
+    update :to => 'FakeResources::Post::UpdatesPosts.update!'
   end
 
   class PresentsOne

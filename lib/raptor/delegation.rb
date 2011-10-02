@@ -1,9 +1,7 @@
 module Raptor
   class DelegateFinder
-    def initialize(a_module, delegate_name)
-      @a_module = a_module
-      @delegate_name = delegate_name
-      @module_path, @method_name = @delegate_name.split('.')
+    def initialize(delegate_name)
+      @module_path, @method_name = delegate_name.split('.')
     end
 
     def find
@@ -11,7 +9,7 @@ module Raptor
     end
 
     def domain_module
-      the_module = @a_module
+      the_module = Object
       module_path_components.each do |module_name|
         the_module = the_module.const_get(module_name)
       end
@@ -24,8 +22,7 @@ module Raptor
   end
 
   class Delegator
-    def initialize(resource, delegate_name)
-      @resource = resource
+    def initialize(delegate_name)
       @delegate_name = delegate_name
     end
 
@@ -43,7 +40,7 @@ module Raptor
     end
 
     def delegate_method
-      DelegateFinder.new(@resource.resource_module, @delegate_name).find
+      DelegateFinder.new(@delegate_name).find
     end
 
     def inference_sources(request, route_path)

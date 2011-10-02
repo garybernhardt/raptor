@@ -5,20 +5,18 @@ describe Raptor::DelegateFinder do
 
   module AModule
     module Child
-      module Grandchild
-        def self.a_method
-        end
+      def self.a_method
       end
     end
   end
 
   it "finds constants in the module" do
-    method = DelegateFinder.new(AModule, "Child::Grandchild.a_method").find
-    method.should == AModule::Child::Grandchild.method(:a_method)
+    method = DelegateFinder.new("AModule::Child.a_method").find
+    method.should == AModule::Child.method(:a_method)
   end
 
   it "finds constants not in the module" do
-    method = DelegateFinder.new(AModule, "Object.new").find
+    method = DelegateFinder.new("Object.new").find
     method.should == Object.method(:new)
   end
 end
@@ -26,10 +24,9 @@ end
 describe Raptor::Delegator do
   it "returns nil if the delegate is nil" do
     Raptor::InferenceSources.stub(:new) { stub(:to_hash => {}) }
-    resource = stub("resource")
     request = stub("request")
     route_path = "/my_resource"
-    delegator = Raptor::Delegator.new(resource, nil)
+    delegator = Raptor::Delegator.new(nil)
     delegator.delegate(request, route_path).should be_nil
   end
 end

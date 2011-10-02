@@ -27,5 +27,9 @@ describe Raptor::Resource do
   it "knows the requirements" do
     resource.requirements.should == [FakeResources::Post::LoggedInRequirement]
   end
+
+  it "knows the module path" do
+    resource.module_path.should == "FakeResources::Post"
+  end
 end
 

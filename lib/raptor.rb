@@ -52,6 +52,10 @@ module Raptor
       @resource_module.const_get(name)
     end
 
+    def module_path
+      @resource_module.name
+    end
+
     def one_presenter
       @resource_module.const_get(:PresentsOne)
     end
