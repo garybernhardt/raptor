@@ -56,7 +56,7 @@ Resources are composed of plain old Ruby objects. Sometimes, Raptor uses convent
 
 ## Routes
 
-Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects, enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions [TODO], and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
+Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects, enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions, and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
 
     module Posts
       Routes = Raptor.routes(self) do
