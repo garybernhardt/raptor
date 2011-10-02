@@ -5,10 +5,10 @@ module Raptor
     end
 
     def find
-      domain_module.method(@method_name)
+      target_module.method(@method_name)
     end
 
-    def domain_module
+    def target_module
       the_module = Object
       module_path_components.each do |module_name|
         the_module = the_module.const_get(module_name)
