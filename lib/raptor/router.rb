@@ -174,7 +174,10 @@ module Raptor
 
     def self.for_resource(resource, action, http_method, path, params)
       route_options = RouteOptions.new(resource, params)
-      criteria = RouteCriteria.new(http_method, path, route_options.requirements)
+      requirements = route_options.requirements + [
+        HttpMethodRequirement.new(http_method)
+      ]
+      criteria = RouteCriteria.new(path, requirements)
       delegator = Delegator.new(route_options.delegate_name)
       new(action, criteria, delegator, route_options.responder_for(action), route_options)
     end
@@ -192,29 +195,20 @@ module Raptor
     def match?(request)
       # XXX: use a single request-wide InferenceSources
       inference_sources = InferenceSources.new(request, path).to_hash
-      @criteria.match?(request.request_method,
-                       request.path_info,
-                       inference_sources)
+      @criteria.match?(request.path_info, inference_sources)
     end
   end
 
   class RouteCriteria
     attr_reader :path
 
-    def initialize(http_method, path, requirements)
-      @http_method = http_method
+    def initialize(path, requirements)
       @path = path
       @requirements = requirements
     end
 
-    def match?(http_method, path, inference_sources)
-      match_http_method?(http_method) &&
-        match_path?(path) &&
-        match_requirements?(inference_sources)
-    end
-
-    def match_http_method?(http_method)
-      http_method == @http_method
+    def match?(path, inference_sources)
+      match_path?(path) && match_requirements?(inference_sources)
     end
 
     def match_path?(path)
@@ -238,6 +232,16 @@ module Raptor
                               inference_sources).args
         requirement.match?(*args)
       end
+    end
+  end
+
+  class HttpMethodRequirement
+    def initialize(http_method)
+      @http_method = http_method
+    end
+
+    def match?(http_method)
+      http_method == @http_method
     end
   end
 end

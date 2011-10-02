@@ -1,21 +1,6 @@
 require './spec/spec_helper'
 
 describe Raptor::RouteCriteria do
-  describe "http method matching" do
-    it "matches if the methods are the same" do
-      match?('GET', 'GET').should == true
-    end
-
-    it "doesn't match if the methods are different" do
-      match?('GET', 'PUT').should == false
-    end
-
-    def match?(method1, method2)
-      Raptor::RouteCriteria.new(method1, '/path', []).
-        match?(method2, '/path', {})
-    end
-  end
-
   describe "path matching" do
     it "matches if the paths are the same" do
       match?('/post/new', '/post/new').should == true
@@ -39,8 +24,7 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(route, url)
-      Raptor::RouteCriteria.new('GET', route, []).
-        match?('GET', url, {})
+      Raptor::RouteCriteria.new(route, []).match?(url, {})
     end
   end
 
@@ -54,8 +38,8 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(requirement)
-      criteria = Raptor::RouteCriteria.new("GET", "/url", [requirement])
-      criteria.match?("GET", "/url", {})
+      criteria = Raptor::RouteCriteria.new("/url", [requirement])
+      criteria.match?("/url", {})
     end
   end
 
@@ -67,8 +51,8 @@ describe Raptor::RouteCriteria do
         end
       end
       inference_sources = {:path => "/the/path"}
-      criteria = Raptor::RouteCriteria.new("GET", "/url", [requirement])
-      criteria.match?("GET", "/url", inference_sources).should be_true
+      criteria = Raptor::RouteCriteria.new("/url", [requirement])
+      criteria.match?("/url", inference_sources).should be_true
     end
   end
 end
