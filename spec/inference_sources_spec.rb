@@ -2,7 +2,7 @@ require './lib/raptor/inference'
 
 describe Raptor::InferenceSources do
   let(:record) { stub }
-  let(:params) { stub}
+  let(:params) { stub }
   let(:request) { stub(:params => params,
                        :path_info => '/foo/5',
                        :request_method => "GET") }
