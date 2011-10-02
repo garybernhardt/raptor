@@ -31,6 +31,10 @@ describe Raptor::InferenceSources do
     sources.with_record(record).to_hash.fetch(:record).should == record
   end
 
+  it "infers the whole request" do
+    sources.to_hash.fetch(:request).should == request
+  end
+
   it "infers other model objects"
 end
 

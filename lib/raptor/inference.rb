@@ -46,7 +46,8 @@ module Raptor
     def request_sources
       {:path => @request.path_info,
        :params => @request.params,
-       :http_method => @request.request_method}
+       :http_method => @request.request_method,
+       :request => @request}
     end
 
     def path_arg_sources
