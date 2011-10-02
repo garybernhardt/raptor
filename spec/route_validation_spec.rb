@@ -11,7 +11,8 @@ describe "route validation" do
   end
 
   it "doesn't reject routes that have different redirects" do
-    with_redirects = stub(:name => :update, :redirects => {:ValidationError => :edit})
+    with_redirects = stub(:name => :update,
+                          :redirects => {:ValidationError => :edit})
     without_redirects =  stub(:name => :update, :redirects => {})
     routes = [with_redirects, without_redirects]
     Raptor::ValidatesRoutes.validate!(routes)

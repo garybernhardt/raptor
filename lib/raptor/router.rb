@@ -23,7 +23,8 @@ module Raptor
     end
 
     def log_routing_of(route, request)
-      Raptor.log %{#{@resource.resource_name} routing #{request.path_info.inspect} to #{route.path.inspect}}
+      Raptor.log "#{@resource.resource_name} " +
+        "routing #{request.path_info.inspect} to #{route.path.inspect}"
     end
 
     def route_for_request(request)
@@ -48,39 +49,39 @@ module Raptor
     end
 
     def show(params={})
-      params[:to] = "#{mod}::Record.find_by_id" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.find_by_id" unless params.key?(:to)
       route(:show, "GET", "/#{base}/:id", params)
     end
 
     def new(params={})
-      params[:to] = "#{mod}::Record.new" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.new" unless params.key?(:to)
       route(:new, "GET", "/#{base}/new", params)
     end
 
     def index(params={})
-      params[:to] = "#{mod}::Record.all" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.all" unless params.key?(:to)
       route(:index, "GET", "/#{base}", params)
     end
 
     def create(params={})
-      params[:to] = "#{mod}::Record.create" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.create" unless params.key?(:to)
       route(:create, "POST", "/#{base}",
             {:redirect => :show, ValidationError => :new}.merge(params))
     end
 
     def edit(params={})
-      params[:to] = "#{mod}::Record.find_by_id" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.find_by_id" unless params.key?(:to)
       route(:edit, "GET", "/#{base}/:id/edit", params)
     end
 
     def update(params={})
-      params[:to] = "#{mod}::Record.find_and_update" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.find_and_update" unless params.key?(:to)
       route(:update, "PUT", "/#{base}/:id",
             {:redirect => :show, ValidationError => :edit}.merge(params))
     end
 
     def destroy(params={})
-      params[:to] = "#{mod}::Record.destroy" unless params.has_key?(:to)
+      params[:to] = "#{mod}::Record.destroy" unless params.key?(:to)
       route(:destroy, "DELETE", "/#{base}/:id",
             {:redirect => :index}.merge(params))
     end
@@ -153,7 +154,8 @@ module Raptor
   class Route
     attr_reader :name, :path
 
-    def initialize(name, path, requirements, delegator, responder, exception_actions)
+    def initialize(name, path, requirements, delegator, responder,
+                   exception_actions)
       @name = name
       @path = path
       @requirements = requirements

@@ -119,7 +119,8 @@ describe Raptor::Router do
     context "index" do
       it "finds all records" do
         request = request('GET', '/with_no_behavior')
-        Routes.call(request).body.join('').strip.should match /record 1\s+record 2/
+        body = Routes.call(request).body.join('').strip
+        body.should match /record 1\s+record 2/
       end
     end
 

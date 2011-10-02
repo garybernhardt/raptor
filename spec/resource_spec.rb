@@ -1,7 +1,9 @@
 require './spec/spec_helper'
 
 describe Raptor::Resource do
-  let(:camel_case_resource) { Raptor::Resource.new(stub(:name => 'CamelCase')) }
+  let(:camel_case_resource) do
+    Raptor::Resource.new(stub(:name => 'CamelCase'))
+  end
   let(:resource) { Raptor::Resource.new(FakeResources::Post) }
 
   it "knows resources' names" do

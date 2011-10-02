@@ -4,7 +4,8 @@ describe Raptor::RedirectResponder do
   let(:resource) do
     # XXX: #loldemeter
     routes = stub
-    routes.stub(:route_named).with(:show) { stub(:path => "/my_resource/:id") }
+    routes.stub(:route_named).with(:show).
+      and_return(stub(:path => "/my_resource/:id"))
     routes.stub(:route_named).with(:index) { stub(:path => "/my_resource") }
     stub(:name => "my_resource", :routes => routes)
   end
