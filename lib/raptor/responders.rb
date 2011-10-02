@@ -19,8 +19,9 @@ module Raptor
       response = Rack::Response.new
       path = @resource.routes.route_named(@target_route_name).path
       if record
-        # XXX: Generalize replace
-        path = path.gsub(/:id/) { record.id.to_s }
+        path = path.gsub(/:\w+/) do |match|
+          record.send(match.sub(/^:/, '')).to_s
+        end
       end
       redirect_to(response, path)
       response

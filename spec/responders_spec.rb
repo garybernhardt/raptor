@@ -9,13 +9,13 @@ describe Raptor::RedirectResponder do
     stub(:name => "my_resource", :routes => routes)
   end
 
-  it "fills record IDs in route names" do
+  it "fills route variables with record methods" do
     response = redirect_to_action(:show, stub('record', :id => 1))
     response.status.should == 302
     response['Location'].should == "/my_resource/1"
   end
 
-  it "redirects to routes without IDs in them" do
+  it "redirects to routes without variables in them" do
     response = redirect_to_action(:index, stub('record'))
     response.status.should == 302
     response['Location'].should == "/my_resource"
