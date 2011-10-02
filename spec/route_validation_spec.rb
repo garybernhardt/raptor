@@ -1,4 +1,5 @@
 require './lib/raptor/validation'
+
 describe "route validation" do
   it "rejects routes with exactly the same path and redirects" do
     route = stub(:name => :index, :redirects => {})
