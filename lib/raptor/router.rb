@@ -27,11 +27,11 @@ module Raptor
     end
 
     def route_for_request(request)
-      @routes.find {|r| r.match?(request) } or raise NoRouteMatches
+      @routes.find { |route| route.match?(request) } or raise NoRouteMatches
     end
 
     def route_named(action_name)
-      @routes.find { |r| r.name == action_name }
+      @routes.find { |route| route.name == action_name }
     end
   end
 
