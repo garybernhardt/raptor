@@ -162,11 +162,12 @@ module Raptor
   class NoRouteMatches < RuntimeError; end
 
   class Route
-    attr_reader :name, :redirects
+    attr_reader :name, :path, :redirects
 
-    def initialize(name, criteria, delegator, responder, redirects)
+    def initialize(name, path, requirements, delegator, responder, redirects)
       @name = name
-      @criteria = criteria
+      @path = path
+      @requirements = requirements
       @delegator = delegator
       @responder = responder
       @redirects = redirects
@@ -178,37 +179,34 @@ module Raptor
         HttpMethodRequirement.new(http_method),
         PathRequirement.new(path),
       ]
-      criteria = RouteCriteria.new(path, requirements)
       delegator = Delegator.new(route_options.delegate_name)
-      new(action, criteria, delegator, route_options.responder_for(action), route_options)
+      responder = route_options.responder_for(action)
+      new(action, path, requirements, delegator, responder, route_options)
     end
 
     def respond_to_request(request)
-      record = @delegator.delegate(request, @criteria.path)
-      inference_sources = InferenceSources.new(request, path)
+      record = @delegator.delegate(request, @path)
+      inference_sources = InferenceSources.new(request, @path)
       @responder.respond(record, inference_sources)
-    end
-
-    def path
-      @criteria.path
     end
 
     def match?(request)
       # XXX: use a single request-wide InferenceSources
-      inference_sources = InferenceSources.new(request, path).to_hash
-      @criteria.match?(request.path_info, inference_sources)
+      inference_sources = InferenceSources.new(request, @path).to_hash
+      RouteCriteria.new(@path, @requirements).match?(request)
     end
   end
 
   class RouteCriteria
-    attr_reader :path
-
     def initialize(path, requirements)
-      @path = path
       @requirements = requirements
+      @path = path
     end
 
-    def match?(path, inference_sources)
+    def match?(request)
+      # XXX: use a single request-wide InferenceSources
+      inference_sources = InferenceSources.new(request,
+                                               request.path_info).to_hash
       @requirements.all? do |requirement|
         args = InfersArgs.new(requirement.method(:match?),
                               inference_sources).args

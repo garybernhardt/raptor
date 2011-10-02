@@ -11,7 +11,8 @@ describe Raptor::RouteCriteria do
 
   def match?(requirement)
     criteria = Raptor::RouteCriteria.new("/url", [requirement])
-    criteria.match?("/url", {})
+    request = request("GET", "/")
+    criteria.match?(request)
   end
 
   it "infers requirement arguments" do
@@ -20,9 +21,9 @@ describe Raptor::RouteCriteria do
         path == "/the/path"
       end
     end
-    inference_sources = {:path => "/the/path"}
     criteria = Raptor::RouteCriteria.new("/url", [requirement])
-    criteria.match?("/url", inference_sources).should be_true
+    request = request("GET", "/the/path")
+    criteria.match?(request).should be_true
   end
 end
 
