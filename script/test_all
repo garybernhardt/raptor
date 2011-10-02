@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+rspec spec
+
+for file in `find spec -iname '*_spec.rb'`; do
+  echo "Running $file"
+  rspec $file
+done
+
