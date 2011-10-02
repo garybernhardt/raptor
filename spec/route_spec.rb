@@ -92,13 +92,13 @@ describe Raptor::Router do
       end
 
       it "runs normally if the requirement matches" do
-        Raptor::Template.stub(:new) { stub(:render => "rendered") }
         resource.stub(:requirements => [FailingRequirement])
         router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
-                :to => "Object.new", :require => :matching)
+                :to => "Object.new", :require => :matching,
+                :text => "it worked")
         end
-        router.call(req).body.join('').strip.should == "rendered"
+        router.call(req).body.join('').strip.should == "it worked"
       end
     end
 
