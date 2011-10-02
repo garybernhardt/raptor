@@ -1,4 +1,6 @@
-require './spec/spec_helper'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor"
 
 describe Raptor::App do
   module Resource1

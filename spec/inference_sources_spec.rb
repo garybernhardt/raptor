@@ -1,4 +1,6 @@
-require './lib/raptor/inference'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/inference"
 
 describe Raptor::InferenceSources do
   let(:record) { stub }

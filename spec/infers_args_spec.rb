@@ -1,4 +1,6 @@
-require './spec/spec_helper'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/inference"
 
 describe Raptor::InfersArgs do
   def method_taking_id(id); id; end

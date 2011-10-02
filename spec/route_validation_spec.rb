@@ -1,4 +1,6 @@
-require './lib/raptor/validation'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/validation"
 
 describe "route validation" do
   it "rejects routes with exactly the same path and redirects" do

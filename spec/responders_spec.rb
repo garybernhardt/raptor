@@ -1,5 +1,6 @@
-require_relative "../lib/raptor/responders"
 require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/responders"
 
 describe Raptor::RedirectResponder do
   before { Raptor.stub(:log) }

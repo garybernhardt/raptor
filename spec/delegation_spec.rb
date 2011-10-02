@@ -1,4 +1,7 @@
-require_relative 'spec_helper'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/delegation"
+require_relative "../lib/raptor/inference"
 
 describe Raptor::DelegateFinder do
   include Raptor

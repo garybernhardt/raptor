@@ -1,4 +1,7 @@
-require './spec/spec_helper'
+require "rack"
+require_relative "spec_helper"
+require_relative "../lib/raptor/router"
+require_relative "../lib/raptor/inference"
 
 describe Raptor::RouteCriteria do
   it "matches if the requirement matches" do

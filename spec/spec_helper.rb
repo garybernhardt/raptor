@@ -1,7 +1,3 @@
-$LOAD_PATH << "lib" << "spec"
-require 'raptor'
-require 'fake_resources'
-
 def env(method, path, body="")
   {'REQUEST_METHOD' => method,
    'PATH_INFO' => path,

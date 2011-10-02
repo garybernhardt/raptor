@@ -1,3 +1,5 @@
+require "erb"
+
 module Raptor
   class PlaintextResponder
     def initialize(text)
