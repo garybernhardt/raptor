@@ -77,6 +77,7 @@ describe Raptor::Router do
     end
 
     describe "requirements" do
+      # XXX: Isolate these specs
       it "raises an error if the requirement doesn't match" do
         resource = stub(:requirements => [FailingRequirement])
         router = Raptor::Router.build(resource) do
@@ -93,6 +94,16 @@ describe Raptor::Router do
         router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :matching,
+                :text => "it worked")
+        end
+        router.call(req).body.join('').strip.should == "it worked"
+      end
+
+      it "injects arguments into the requirement" do
+        resource.stub(:requirements => [ArgumentRequirement])
+        router = Raptor::Router.build(resource) do
+          route(:my_action, "GET", "/things",
+                :to => "Object.new", :require => :argument,
                 :text => "it worked")
         end
         router.call(req).body.join('').strip.should == "it worked"
@@ -216,6 +227,12 @@ end
 
 class MatchingRequirement
   def self.match?
+    true
+  end
+end
+
+class ArgumentRequirement
+  def self.match?(path)
     true
   end
 end

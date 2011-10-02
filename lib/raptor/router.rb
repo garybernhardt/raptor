@@ -190,7 +190,11 @@ module Raptor
     end
 
     def match?(request)
-      @criteria.match?(request.request_method, request.path_info)
+      # XXX: use a single request-wide InferenceSources
+      inference_sources = InferenceSources.new(request, path).to_hash
+      @criteria.match?(request.request_method,
+                       request.path_info,
+                       inference_sources)
     end
   end
 
@@ -203,10 +207,10 @@ module Raptor
       @requirements = requirements
     end
 
-    def match?(http_method, path)
+    def match?(http_method, path, inference_sources)
       match_http_method?(http_method) &&
         match_path?(path) &&
-        match_requirements?
+        match_requirements?(inference_sources)
     end
 
     def match_http_method?(http_method)
@@ -228,8 +232,12 @@ module Raptor
       path.split('/')
     end
 
-    def match_requirements?
-      @requirements.all?(&:match?)
+    def match_requirements?(inference_sources)
+      @requirements.all? do |requirement|
+        args = InfersArgs.new(requirement.method(:match?),
+                              inference_sources).args
+        requirement.match?(*args)
+      end
     end
   end
 end

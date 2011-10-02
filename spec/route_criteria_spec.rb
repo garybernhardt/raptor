@@ -11,7 +11,8 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(method1, method2)
-      Raptor::RouteCriteria.new(method1, '/path', []).match?(method2, '/path')
+      Raptor::RouteCriteria.new(method1, '/path', []).
+        match?(method2, '/path', {})
     end
   end
 
@@ -38,7 +39,8 @@ describe Raptor::RouteCriteria do
     end
 
     def match?(route, url)
-      Raptor::RouteCriteria.new('GET', route, []).match?('GET', url)
+      Raptor::RouteCriteria.new('GET', route, []).
+        match?('GET', url, {})
     end
   end
 
@@ -53,7 +55,20 @@ describe Raptor::RouteCriteria do
 
     def match?(requirement)
       criteria = Raptor::RouteCriteria.new("GET", "/url", [requirement])
-      criteria.match?("GET", "/url")
+      criteria.match?("GET", "/url", {})
+    end
+  end
+
+  describe "argument inference" do
+    it "infers requirement arguments" do
+      requirement = Module.new do
+        def self.match?(path)
+          path == "/the/path"
+        end
+      end
+      inference_sources = {:path => "/the/path"}
+      criteria = Raptor::RouteCriteria.new("GET", "/url", [requirement])
+      criteria.match?("GET", "/url", inference_sources).should be_true
     end
   end
 end
