@@ -189,8 +189,6 @@ module Raptor
     end
 
     def match?(request)
-      # XXX: use a single request-wide InferenceSources
-      inference_sources = InferenceSources.new(request, @path).to_hash
       RouteCriteria.new(@path, @requirements).match?(request)
     end
   end
@@ -202,7 +200,6 @@ module Raptor
     end
 
     def match?(request)
-      # XXX: use a single request-wide InferenceSources
       inference_sources = InferenceSources.new(request,
                                                request.path_info).to_hash
       @requirements.all? do |requirement|
