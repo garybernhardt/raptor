@@ -175,7 +175,8 @@ module Raptor
     def self.for_resource(resource, action, http_method, path, params)
       route_options = RouteOptions.new(resource, params)
       requirements = route_options.requirements + [
-        HttpMethodRequirement.new(http_method)
+        HttpMethodRequirement.new(http_method),
+        PathRequirement.new(path),
       ]
       criteria = RouteCriteria.new(path, requirements)
       delegator = Delegator.new(route_options.delegate_name)
@@ -208,25 +209,6 @@ module Raptor
     end
 
     def match?(path, inference_sources)
-      match_path?(path) && match_requirements?(inference_sources)
-    end
-
-    def match_path?(path)
-      return false if components(@path).length != components(path).length
-      path_component_pairs(path).all? do |route_component, path_component|
-        route_component[0] == ':' && path_component || route_component == path_component
-      end
-    end
-
-    def path_component_pairs(path)
-      components(@path).zip(components(path))
-    end
-
-    def components(path)
-      path.split('/')
-    end
-
-    def match_requirements?(inference_sources)
       @requirements.all? do |requirement|
         args = InfersArgs.new(requirement.method(:match?),
                               inference_sources).args
@@ -242,6 +224,27 @@ module Raptor
 
     def match?(http_method)
       http_method == @http_method
+    end
+  end
+
+  class PathRequirement
+    def initialize(path)
+      @path = path
+    end
+
+    def match?(path)
+      return false if components(@path).length != components(path).length
+      path_component_pairs(path).all? do |route_component, path_component|
+        route_component[0] == ':' && path_component || route_component == path_component
+      end
+    end
+
+    def path_component_pairs(path)
+      components(@path).zip(components(path))
+    end
+
+    def components(path)
+      path.split('/')
     end
   end
 end
