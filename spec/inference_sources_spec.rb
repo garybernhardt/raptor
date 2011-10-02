@@ -3,9 +3,15 @@ require './lib/raptor/inference'
 describe Raptor::InferenceSources do
   let(:record) { stub }
   let(:params) { stub}
-  let(:request) { stub(:params => params, :path_info => '/foo/5') }
+  let(:request) { stub(:params => params,
+                       :path_info => '/foo/5',
+                       :request_method => "GET") }
   let(:route_path) { '/foo/:id' }
   let(:sources) { Raptor::InferenceSources.new(request, route_path) }
+
+  it "infers http method" do
+    sources.to_hash.fetch(:http_method).should == "GET"
+  end
 
   it "infers path" do
     sources.to_hash.fetch(:path).should == "/foo/5"

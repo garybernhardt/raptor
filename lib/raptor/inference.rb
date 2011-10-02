@@ -40,7 +40,9 @@ module Raptor
     end
 
     def request_sources
-      {:path => @request.path_info, :params => @request.params}
+      {:path => @request.path_info,
+       :params => @request.params,
+       :http_method => @request.request_method}
     end
 
     def path_arg_sources
