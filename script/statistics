@@ -4,7 +4,7 @@ start=$1
 end=$2
 
 run() {
-    echo "XXX Count,Require Time,Prod Lines,Spec Lines,Spec Count,Spec Runtime,Spec End-to-End"
+    echo "Hash,XXX Count,Require Time,Prod Lines,Spec Lines,Spec Count,Spec Runtime,Spec End-to-End"
     full_command="echo $hash,$xxx_count,$require_time,$prod_lines,$spec_lines,$spec_count,$spec_runtime,$spec_end_to_end"
     $(dirname $0)/run-command-on-git-revisions -v $start $end "$full_command"
 }
