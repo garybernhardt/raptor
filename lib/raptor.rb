@@ -34,8 +34,6 @@ module Raptor
   end
 
   class Resource
-    attr_reader :resource_module
-
     def initialize(resource_module)
       @resource_module = resource_module
     end
