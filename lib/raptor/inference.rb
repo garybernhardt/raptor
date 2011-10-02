@@ -1,4 +1,6 @@
 module Raptor
+  # XXX: InfersArgs should call the method with the args so the caller doesn't
+  # have to
   class InfersArgs
     def initialize(method, sources)
       @method = method
