@@ -221,6 +221,9 @@ describe Raptor::Router do
       end
     end
   end
+
+  it "tunnels PUTs over POSTs"
+  it "tunnels DELETEs over POSTs"
 end
 
 class FailingRequirement
