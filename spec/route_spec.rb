@@ -51,8 +51,6 @@ describe Raptor::Router do
     Resource::Routes.call(req).body.join.strip.should == "the text"
   end
 
-  it "rejects routes with both a render and a redirect"
-
   describe "routes" do
     let(:resource) do
       resource = stub(:resource_name => "Things",

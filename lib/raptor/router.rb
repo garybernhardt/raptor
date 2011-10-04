@@ -95,6 +95,7 @@ module Raptor
     end
 
     def route(action, http_method, path, params={})
+      Raptor::ValidatesRoutes.validate_route_params!(params)
       route = Route.for_resource(@resource, action, http_method, path, params)
       @routes << route
       route
