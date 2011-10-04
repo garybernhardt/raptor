@@ -35,7 +35,7 @@ An application is just a Ruby script:
     require 'posts'
     require 'users'
 
-    App = Raptor.new([Posts, Users])
+    App = Raptor::App.new([Posts, Users])
 
 `App` is now a Rack app, so you can create a standard config.ru:
 
