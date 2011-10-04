@@ -9,6 +9,9 @@ require_relative 'raptor/delegation'
 require_relative 'raptor/validation'
 
 module Raptor
+  # XXX: Instead of giving the resource when a route is defined, pass it in
+  # when the app calls the route. That simplifies route declaration and will
+  # probably simplify the object graph as well.
   def self.routes(resource, &block)
     resource = Resource.new(resource)
     Router.build(resource, &block)
