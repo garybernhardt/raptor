@@ -20,7 +20,7 @@ R-A-P-T-O-R, taken in order of importance:
 
 There are some other components that act as plumbing in your app:
 
-**Inferables**: Raptor will infer which arguments your objects need based on their names. Inferables are providers for those arguments. For example, you might write an inferable that provides current\_user for any method that needs it.
+**Inferables**: Raptor will infer which arguments your objects need based on their names. Inferables are providers for those arguments [TODO]. For example, you might write an inferable that provides current\_user for any method that needs it.
 
 **Requirements**: These are higher-level routing constraints based on more than just the URL or HTTP method. For example, you could create a route that's only triggered for paying users.
 
