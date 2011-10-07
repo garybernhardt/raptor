@@ -1,1 +1,1 @@
-rvm use 1.9.2@raptor
+rvm use 1.9.2@raptor --create
