@@ -58,7 +58,7 @@ module Raptor
 
     def create_presenter(record, inference_sources)
       sources = inference_sources.with_record(record).to_hash
-      InfersArgs.new(@presenter_class.method(:new), sources).call
+      Inference.new(sources).call(@presenter_class.method(:new))
     end
   end
 

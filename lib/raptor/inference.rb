@@ -1,33 +1,33 @@
 module Raptor
-  # XXX: InfersArgs should call the method with the args so the caller doesn't
+  # XXX: Inference should call the method with the args so the caller doesn't
   # have to
-  class InfersArgs
-    def initialize(method, sources)
-      @method = method
+  class Inference
+    def initialize(sources)
       @sources = sources
     end
 
-    def call
-      @method.call(*args)
+    def call(method)
+      method.call(*args(method))
     end
 
-    def args
-      parameters.select do |type, name|
+    def args(method)
+      method = method_for_inference(method)
+      parameters(method).select do |type, name|
         name && type != :rest && type != :block
       end.map do |type, name|
         @sources.fetch(name)
       end
     end
 
-    def parameters
-      method_for_inference.parameters
+    def parameters(method)
+      method.parameters
     end
 
-    def method_for_inference
-      if @method.name == :new
-        @method.receiver.instance_method(:initialize)
+    def method_for_inference(method)
+      if method.name == :new
+        method.receiver.instance_method(:initialize)
       else
-        @method
+        method
       end
     end
   end

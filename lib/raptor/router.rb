@@ -203,7 +203,7 @@ module Raptor
       inference_sources = InferenceSources.new(request,
                                                request.path_info).to_hash
       @requirements.all? do |requirement|
-        InfersArgs.new(requirement.method(:match?), inference_sources).call
+        Inference.new(inference_sources).call(requirement.method(:match?))
       end
     end
   end
