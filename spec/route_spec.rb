@@ -91,6 +91,7 @@ describe Raptor::Router do
       end
 
       it "runs normally if the requirement matches" do
+        pending "Why isn't this failing? It references FailingRequirement, not MatchingRequirement"
         resource.stub(:requirements => [FailingRequirement])
         router = Raptor::Router.build(resource) do
           route(:my_action, "GET", "/things",
