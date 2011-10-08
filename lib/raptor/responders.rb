@@ -94,10 +94,6 @@ module Raptor
       @template_path = template_path
     end
 
-    def exists?
-      File.exists?(full_template_path)
-    end
-
     def render
       template.result(@presenter.instance_eval { binding })
     end
