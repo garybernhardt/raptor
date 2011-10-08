@@ -178,9 +178,7 @@ module Raptor
 
     def respond_to_request(request)
       record = @delegator.delegate(request, @path)
-      # XXX: Collapse these instantiations
-      sources = InferenceSources.new(request, @path).to_hash
-      inference = Inference.new(sources)
+      inference = Inference.for_request(request, @path)
       @responder.respond(record, inference)
     end
 
@@ -205,7 +203,8 @@ module Raptor
       inference_sources = InferenceSources.new(request,
                                                request.path_info).to_hash
       @requirements.all? do |requirement|
-        Inference.new(inference_sources).call(requirement.method(:match?))
+        inference = Inference.for_request(request, request.path_info)
+        inference.call(requirement.method(:match?))
       end
     end
   end

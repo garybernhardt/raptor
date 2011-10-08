@@ -6,6 +6,11 @@ module Raptor
       @sources = sources
     end
 
+    def self.for_request(request, route_path)
+      sources = InferenceSources.new(request, route_path).to_hash
+      new(sources)
+    end
+
     def call(method)
       method.call(*args(method))
     end

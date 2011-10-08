@@ -40,9 +40,7 @@ module Raptor
     end
 
     def inference(request, route_path)
-      # XXX: Collapse these instantiations
-      sources = InferenceSources.new(request, route_path).to_hash
-      Inference.new(sources)
+      Inference.for_request(request, route_path)
     end
   end
 end
