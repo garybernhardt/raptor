@@ -178,8 +178,10 @@ module Raptor
 
     def respond_to_request(request)
       record = @delegator.delegate(request, @path)
-      inference_sources = InferenceSources.new(request, @path)
-      @responder.respond(record, inference_sources)
+      # XXX: Collapse these instantiations
+      sources = InferenceSources.new(request, @path).to_hash
+      inference = Inference.new(sources)
+      @responder.respond(record, inference)
     end
 
     def action_for_exception(e)

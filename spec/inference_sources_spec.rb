@@ -3,7 +3,6 @@ require_relative "spec_helper"
 require_relative "../lib/raptor/inference"
 
 describe Raptor::InferenceSources do
-  let(:record) { stub }
   let(:params) { stub }
   let(:request) { stub(:params => params,
                        :path_info => '/foo/5',
@@ -25,10 +24,6 @@ describe Raptor::InferenceSources do
 
   it "infers IDs from paths" do
     sources.to_hash.fetch(:id).should == 5
-  end
-
-  it "infers record" do
-    sources.with_record(record).to_hash.fetch(:record).should == record
   end
 
   it "infers the whole request" do

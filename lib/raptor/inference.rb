@@ -30,17 +30,21 @@ module Raptor
         method
       end
     end
+
+    def add_record(record)
+      sources = @sources.merge(:record => record)
+      Inference.new(sources)
+    end
   end
 
   class InferenceSources
-    def initialize(request, route_path, record=nil)
+    def initialize(request, route_path)
       @request = request
       @route_path = route_path
-      @record = record
     end
 
     def to_hash
-      request_sources.merge(path_arg_sources).merge(record_sources)
+      request_sources.merge(path_arg_sources)
     end
 
     def request_sources
@@ -62,14 +66,6 @@ module Raptor
 
     def path_component_pairs
       @route_path.split('/').zip(@request.path_info.split('/'))
-    end
-
-    def record_sources
-      @record ? {:record => @record} : {}
-    end
-
-    def with_record(record)
-      InferenceSources.new(@request, @route_path, record)
     end
   end
 end

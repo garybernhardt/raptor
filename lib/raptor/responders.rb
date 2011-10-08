@@ -6,7 +6,7 @@ module Raptor
       @text = text
     end
 
-    def respond(record, inference_sources)
+    def respond(record, inference)
       Rack::Response.new(@text)
     end
   end
@@ -17,7 +17,7 @@ module Raptor
       @target_route_name = target_route_name
     end
 
-    def respond(record, inference_sources)
+    def respond(record, inference)
       response = Rack::Response.new
       path = @resource.routes.route_named(@target_route_name).path
       if record
@@ -43,8 +43,8 @@ module Raptor
       @presenter_class = presenter_class
     end
 
-    def respond(record, inference_sources)
-      presenter = create_presenter(record, inference_sources)
+    def respond(record, inference)
+      presenter = create_presenter(record, inference)
       Rack::Response.new(render(presenter))
     end
 
@@ -56,9 +56,9 @@ module Raptor
       "#{@resource.path_component}/#{@template_name}.html.erb"
     end
 
-    def create_presenter(record, inference_sources)
-      sources = inference_sources.with_record(record).to_hash
-      Inference.new(sources).call(@presenter_class.method(:new))
+    def create_presenter(record, inference)
+      inference = inference.add_record(record)
+      inference.call(@presenter_class.method(:new))
     end
   end
 
@@ -68,11 +68,11 @@ module Raptor
       @template_name = template_name
     end
 
-    def respond(record, inference_sources)
+    def respond(record, inference)
       responder = TemplateResponder.new(@resource,
                                         @template_name,
                                         presenter_class)
-      responder.respond(record, inference_sources)
+      responder.respond(record, inference)
     end
 
     def plural?

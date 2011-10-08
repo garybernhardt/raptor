@@ -10,6 +10,7 @@ describe Raptor::Inference do
   def method_taking_splat(*); 'nothing'; end
   def method_taking_nothing; 'nothing' end
   def method_taking_only_a_block(&block); 'nothing' end
+  def method_taking_record(record); record; end
 
   let(:params) { stub }
   let(:sources) { {:params => params, :id => 5} }
@@ -38,6 +39,13 @@ describe Raptor::Inference do
   it "infers arguments from initialize for the new method" do
     method = ObjectWithInitializerTakingParams.method(:new)
     inference.call(method).params.should == params
+  end
+
+  it "infers records once it's been given one" do
+    record = stub
+    method = method(:method_taking_record)
+    inference_with_record = inference.add_record(record)
+    inference_with_record.call(method).should == record
   end
 end
 

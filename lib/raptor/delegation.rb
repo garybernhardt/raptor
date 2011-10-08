@@ -29,8 +29,8 @@ module Raptor
     def delegate(request, route_path)
       return nil if @delegate_name.nil?
       Raptor.log("Delegating to #{@delegate_name}")
-      sources = inference_sources(request, route_path)
-      record = Inference.new(sources).call(delegate_method)
+      inference = inference(request, route_path)
+      record = inference.call(delegate_method)
       Raptor.log("Delegate returned #{record}")
       record
     end
@@ -39,8 +39,10 @@ module Raptor
       DelegateFinder.new(@delegate_name).find
     end
 
-    def inference_sources(request, route_path)
-      InferenceSources.new(request, route_path).to_hash
+    def inference(request, route_path)
+      # XXX: Collapse these instantiations
+      sources = InferenceSources.new(request, route_path).to_hash
+      Inference.new(sources)
     end
   end
 end
