@@ -49,7 +49,11 @@ module Raptor
     end
 
     def template(presenter)
-      Template.new(presenter, @resource.path_component, @template_name)
+      Template.new(presenter, template_path)
+    end
+
+    def template_path
+      "#{@resource.path_component}/#{@template_name}.html.erb"
     end
 
     def create_presenter(record, inference_sources)
@@ -85,14 +89,13 @@ module Raptor
   end
 
   class Template
-    def initialize(presenter, resource_path_component, template_name)
+    def initialize(presenter, template_path)
       @presenter = presenter
-      @resource_path_component = resource_path_component
-      @template_name = template_name
+      @template_path = template_path
     end
 
     def exists?
-      File.exists?(template_path)
+      File.exists?(full_template_path)
     end
 
     def render
@@ -100,11 +103,11 @@ module Raptor
     end
 
     def template
-      ERB.new(File.new(template_path).read)
+      ERB.new(File.new(full_template_path).read)
     end
 
-    def template_path
-      "views/#{@resource_path_component}/#{@template_name}.html.erb"
+    def full_template_path
+      "views/#{@template_path}"
     end
   end
 end
