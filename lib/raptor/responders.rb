@@ -45,11 +45,11 @@ module Raptor
 
     def respond(record, inference_sources)
       presenter = create_presenter(record, inference_sources)
-      Rack::Response.new(template(presenter).render)
+      Rack::Response.new(render(presenter))
     end
 
-    def template(presenter)
-      Template.new(presenter, template_path)
+    def render(presenter)
+      Template.render(presenter, template_path)
     end
 
     def template_path
@@ -92,6 +92,10 @@ module Raptor
     def initialize(presenter, template_path)
       @presenter = presenter
       @template_path = template_path
+    end
+
+    def self.render(presenter, template_path)
+      new(presenter, template_path).render
     end
 
     def render
