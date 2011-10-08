@@ -110,8 +110,6 @@ describe Raptor::Router do
         router.call(req).body.join('').strip.should == "it worked"
       end
     end
-
-    it "sets no-cache by default"
   end
 
   describe "default routes" do
