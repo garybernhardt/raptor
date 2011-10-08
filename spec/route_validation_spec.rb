@@ -26,4 +26,6 @@ describe "route validation" do
       Raptor::ValidatesRoutes.validate_route_params!(empty_params)
     end
   end
+
+  it "gives a reasonable error if there's no presenter in the params"
 end
