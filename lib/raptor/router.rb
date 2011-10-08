@@ -125,7 +125,7 @@ module Raptor
       elsif text
         PlaintextResponder.new(text)
       else
-        TemplateResponder.new(@resource, action)
+        ActionTemplateResponder.new(@resource, action)
       end
     end
 
