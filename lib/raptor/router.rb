@@ -47,6 +47,10 @@ module Raptor
       @routes
     end
 
+    def root(params={})
+      route(:root, "GET", "/", params)
+    end
+
     def show(params={})
       params[:to] = "#{mod}::Record.find_by_id" unless params.key?(:to)
       route(:show, "GET", "/#{base}/:id",
@@ -112,7 +116,7 @@ module Raptor
     end
 
     def delegate_name
-      @params.fetch(:to)
+      @params.fetch(:to, "Raptor::NullDelegate.do_nothing")
     end
 
     def exception_actions
@@ -124,14 +128,17 @@ module Raptor
     def responder_for(action)
       redirect = @params[:redirect]
       text = @params[:text]
+      presenter = @params[:present]
+      template_path = @params[:render]
+
       if redirect
         RedirectResponder.new(@resource, redirect)
       elsif text
         PlaintextResponder.new(text)
+      elsif template_path
+        TemplateResponder.new(@resource, presenter, template_path)
       else
-        ActionTemplateResponder.new(@resource,
-                                    @params[:present],
-                                    action)
+        ActionTemplateResponder.new(@resource, presenter, action)
       end
     end
 
@@ -245,6 +252,12 @@ module Raptor
 
     def components(path)
       path.split('/')
+    end
+  end
+
+  class NullDelegate
+    def self.do_nothing
+      self
     end
   end
 end

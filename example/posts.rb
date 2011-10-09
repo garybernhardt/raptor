@@ -2,6 +2,7 @@ require_relative 'fake_record'
 
 module Posts
   Routes = Raptor.routes(self) do
+    root :render => "root", :present => :many
     index
     new
     show

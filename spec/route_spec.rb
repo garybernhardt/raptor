@@ -111,6 +111,16 @@ describe Raptor::Router do
         router.call(req).body.join('').strip.should == "it worked"
       end
     end
+
+    describe "root route" do
+      it "is a normal route" do
+        router = Raptor::Router.build(resource) do
+          root :text => "it worked"
+        end
+        req = request("GET", "/")
+        router.call(req).body.join.strip.should == "it worked"
+      end
+    end
   end
 
   describe "default routes" do
