@@ -40,7 +40,7 @@ describe Raptor::ActionTemplateResponder do
   it "renders templates" do
     resource = stub(:path_component => "posts",
                     :one_presenter => APresenter)
-    responder = ActionTemplateResponder.new(resource, :one, "show")
+    responder = ActionTemplateResponder.new(resource, :one, :show)
     record = stub
     inference = Inference.new({})
     Template.stub(:render).with(APresenter.new, "posts/show.html.erb").
