@@ -38,10 +38,10 @@ module Raptor
   end
 
   class TemplateResponder
-    def initialize(resource, template_name, presenter_class)
+    def initialize(resource, presenter_name, template_name)
       @resource = resource
+      @presenter_name = presenter_name
       @template_name = template_name
-      @presenter_class = presenter_class
     end
 
     def respond(record, inference)
@@ -59,33 +59,26 @@ module Raptor
 
     def create_presenter(record, inference)
       inference = inference.add_record(record)
-      inference.call(@presenter_class.method(:new))
+      inference.call(presenter_class.method(:new))
+    end
+
+    def presenter_class
+      @resource.send("#{@presenter_name}_presenter")
     end
   end
 
   class ActionTemplateResponder
-    def initialize(resource, template_name)
+    def initialize(resource, presenter_name, template_name)
       @resource = resource
+      @presenter_name = presenter_name
       @template_name = template_name
     end
 
     def respond(record, inference)
       responder = TemplateResponder.new(@resource,
-                                        @template_name,
-                                        presenter_class)
+                                        @presenter_name,
+                                        @template_name)
       responder.respond(record, inference)
-    end
-
-    def plural?
-      @template_name == :index
-    end
-
-    def presenter_class
-      if plural?
-        @resource.many_presenter
-      else
-        @resource.one_presenter
-      end
     end
   end
 

@@ -49,17 +49,20 @@ module Raptor
 
     def show(params={})
       params[:to] = "#{mod}::Record.find_by_id" unless params.key?(:to)
-      route(:show, "GET", "/#{base}/:id", params)
+      route(:show, "GET", "/#{base}/:id",
+            {:present => :one}.merge(params))
     end
 
     def new(params={})
       params[:to] = "#{mod}::Record.new" unless params.key?(:to)
-      route(:new, "GET", "/#{base}/new", params)
+      route(:new, "GET", "/#{base}/new",
+            {:present => :one}.merge(params))
     end
 
     def index(params={})
       params[:to] = "#{mod}::Record.all" unless params.key?(:to)
-      route(:index, "GET", "/#{base}", params)
+      route(:index, "GET", "/#{base}",
+            {:present => :many}.merge(params))
     end
 
     def create(params={})
@@ -70,7 +73,8 @@ module Raptor
 
     def edit(params={})
       params[:to] = "#{mod}::Record.find_by_id" unless params.key?(:to)
-      route(:edit, "GET", "/#{base}/:id/edit", params)
+      route(:edit, "GET", "/#{base}/:id/edit",
+            {:present => :one}.merge(params))
     end
 
     def update(params={})
@@ -125,7 +129,9 @@ module Raptor
       elsif text
         PlaintextResponder.new(text)
       else
-        ActionTemplateResponder.new(@resource, action)
+        ActionTemplateResponder.new(@resource,
+                                    @params[:present],
+                                    action)
       end
     end
 
