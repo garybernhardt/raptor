@@ -38,10 +38,10 @@ module Raptor
   end
 
   class TemplateResponder
-    def initialize(resource, presenter_name, template_name)
+    def initialize(resource, presenter_name, template_path)
       @resource = resource
       @presenter_name = presenter_name
-      @template_name = template_name
+      @template_path = template_path
     end
 
     def respond(record, inference)
@@ -54,7 +54,7 @@ module Raptor
     end
 
     def template_path
-      "#{@resource.path_component}/#{@template_name}.html.erb"
+      "#{@template_path}.html.erb"
     end
 
     def create_presenter(record, inference)
@@ -77,8 +77,12 @@ module Raptor
     def respond(record, inference)
       responder = TemplateResponder.new(@resource,
                                         @presenter_name,
-                                        @template_name)
+                                        template_path)
       responder.respond(record, inference)
+    end
+
+    def template_path
+      "#{@resource.path_component}/#{@template_name}"
     end
   end
 
