@@ -22,6 +22,7 @@ module Raptor
       path = @resource.routes.route_named(@target_route_name).path
       if record
         path = path.gsub(/:\w+/) do |match|
+          # XXX: Untrusted send
           record.send(match.sub(/^:/, '')).to_s
         end
       end
