@@ -1,11 +1,5 @@
 module Raptor
   class ValidatesRoutes
-    def self.validate!(routes)
-      raise Raptor::ConflictingRoutes if pairs(routes).any? do |a, b|
-        same_names?(a,b) && same_redirects?(a,b)
-      end
-    end
-
     def self.validate_route_params!(params)
       raise Raptor::ConflictingRoutes if params[:redirect] && params[:render]
     end
