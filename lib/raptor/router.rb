@@ -213,8 +213,6 @@ module Raptor
     end
 
     def match?(request)
-      inference_sources = InferenceSources.new(request,
-                                               request.path_info).to_hash
       @requirements.all? do |requirement|
         inference = Inference.for_request(request, request.path_info)
         inference.call(requirement.method(:match?))
