@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    raptor (0.0.1)
+      rack
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -16,5 +22,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rack
+  raptor!
   rspec
