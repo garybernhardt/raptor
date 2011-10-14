@@ -20,7 +20,7 @@ R-A-P-T-O-R, taken in order of importance:
 
 There are some other components that act as plumbing in your app:
 
-**Inferables**: Raptor will infer which arguments your objects need based on their names. Inferables are providers for those arguments [TODO]. For example, you might write an inferable that provides current\_user for any method that needs it.
+**Dependency Injection**: Raptor will inject which arguments your objects need based on the argument names. Inferables are providers for those arguments [TODO]. For example, you might write an inferable that provides current\_user for any method that needs it.
 
 **Requirements**: These are higher-level routing constraints based on more than just the URL or HTTP method. For example, you could create a route that's only triggered for paying users.
 
@@ -121,7 +121,7 @@ If your `show` route needs to do more than simply retrieve a record, that's not 
 
 The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::PresentsOne from the profile and renders `views/profiles/show.html.erb` with it.
 
-Raptor will infer arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
+Raptor will inject arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
 ## Specifying the authentication mechanism
 
@@ -130,7 +130,7 @@ Raptor will infer arguments to all kinds of things: domain objects, as shown her
 The seven routes' exact behavior differs, but shares this skeleton:
 
 - Step through all routes, choosing the first that matches.
-- Delegate to the domain object, which may be a record, inferring arguments as needed.
+- Delegate to the domain object, which may be a record, injecting arguments as needed.
   - If an exception is raised, route it and end this process
 - Instantiate the presenter with the domain object
 - Pass the presenter to the template
