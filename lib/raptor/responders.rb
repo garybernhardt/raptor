@@ -6,7 +6,7 @@ module Raptor
       @text = text
     end
 
-    def respond(record, inference)
+    def respond(record, injector)
       Rack::Response.new(@text)
     end
   end
@@ -17,7 +17,7 @@ module Raptor
       @target_route_name = target_route_name
     end
 
-    def respond(record, inference)
+    def respond(record, injector)
       response = Rack::Response.new
       path = @resource.routes.route_named(@target_route_name).path
       if record
@@ -44,8 +44,8 @@ module Raptor
       @template_path = template_path
     end
 
-    def respond(record, inference)
-      presenter = create_presenter(record, inference)
+    def respond(record, injector)
+      presenter = create_presenter(record, injector)
       Rack::Response.new(render(presenter))
     end
 
@@ -57,9 +57,9 @@ module Raptor
       "#{@template_path}.html.erb"
     end
 
-    def create_presenter(record, inference)
-      inference = inference.add_record(record)
-      inference.call(presenter_class.method(:new))
+    def create_presenter(record, injector)
+      injector = injector.add_record(record)
+      injector.call(presenter_class.method(:new))
     end
 
     def presenter_class
@@ -74,11 +74,11 @@ module Raptor
       @template_name = template_name
     end
 
-    def respond(record, inference)
+    def respond(record, injector)
       responder = TemplateResponder.new(@resource,
                                         @presenter_name,
                                         template_path)
-      responder.respond(record, inference)
+      responder.respond(record, injector)
     end
 
     def template_path

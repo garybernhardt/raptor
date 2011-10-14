@@ -1,7 +1,7 @@
 require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor/delegation"
-require_relative "../lib/raptor/inference"
+require_relative "../lib/raptor/injector"
 
 describe Raptor::DelegateFinder do
   include Raptor
@@ -26,7 +26,7 @@ end
 
 describe Raptor::Delegator do
   it "returns nil if the delegate is nil" do
-    Raptor::InferenceSources.stub(:new) { stub(:to_hash => {}) }
+    Raptor::InjectionSources.stub(:new) { stub(:to_hash => {}) }
     request = stub("request")
     route_path = "/my_resource"
     delegator = Raptor::Delegator.new(nil)

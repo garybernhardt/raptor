@@ -1,13 +1,14 @@
 module Raptor
   # XXX: Inference should call the method with the args so the caller doesn't
   # have to
-  class Inference
+  #
+  class Injector
     def initialize(sources)
       @sources = sources
     end
 
     def self.for_request(request, route_path)
-      sources = InferenceSources.new(request, route_path).to_hash
+      sources = InjectionSources.new(request, route_path).to_hash
       new(sources)
     end
 
@@ -16,7 +17,7 @@ module Raptor
     end
 
     def args(method)
-      method = method_for_inference(method)
+      method = injection_method(method)
       parameters(method).select do |type, name|
         name && type != :rest && type != :block
       end.map do |type, name|
@@ -28,7 +29,7 @@ module Raptor
       method.parameters
     end
 
-    def method_for_inference(method)
+    def injection_method(method)
       if method.name == :new
         method.receiver.instance_method(:initialize)
       else
@@ -38,11 +39,11 @@ module Raptor
 
     def add_record(record)
       sources = @sources.merge(:record => record)
-      Inference.new(sources)
+      Injector.new(sources)
     end
   end
 
-  class InferenceSources
+  class InjectionSources
     def initialize(request, route_path)
       @request = request
       @route_path = route_path

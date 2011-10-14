@@ -1,7 +1,7 @@
 require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor/responders"
-require_relative "../lib/raptor/inference"
+require_relative "../lib/raptor/injector"
 
 describe Raptor::RedirectResponder do
   before { Raptor.stub(:log) }
@@ -29,8 +29,8 @@ describe Raptor::RedirectResponder do
 
   def redirect_to_action(action, record)
     responder = Raptor::RedirectResponder.new(resource, action)
-    inference_sources = {}
-    response = responder.respond(record, inference_sources)
+    injection_sources = {}
+    response = responder.respond(record, injection_sources)
   end
 end
 
@@ -42,10 +42,10 @@ describe Raptor::ActionTemplateResponder do
                     :one_presenter => APresenter)
     responder = ActionTemplateResponder.new(resource, :one, :show)
     record = stub
-    inference = Inference.new({})
+    injector = Injector.new({})
     Template.stub(:render).with(APresenter.new, "posts/show.html.erb").
       and_return("it worked")
-    response = responder.respond(record, inference)
+    response = responder.respond(record, injector)
     response.body.join.strip.should == "it worked"
   end
 end
