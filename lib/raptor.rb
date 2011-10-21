@@ -3,7 +3,7 @@ require 'rack'
 
 require_relative 'raptor/shorty'
 require_relative 'raptor/router'
-require_relative 'raptor/inference'
+require_relative 'raptor/injector'
 require_relative 'raptor/responders'
 require_relative 'raptor/delegation'
 require_relative 'raptor/validation'

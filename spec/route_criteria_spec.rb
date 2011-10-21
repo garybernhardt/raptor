@@ -1,7 +1,7 @@
 require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor/router"
-require_relative "../lib/raptor/inference"
+require_relative "../lib/raptor/injector"
 
 describe Raptor::RouteCriteria do
   it "matches if the requirement matches" do
@@ -18,7 +18,7 @@ describe Raptor::RouteCriteria do
     criteria.match?(request)
   end
 
-  it "infers requirement arguments" do
+  it "injects requirement arguments" do
     requirement = Module.new do
       def self.match?(path)
         path == "/the/path"

@@ -235,7 +235,6 @@ describe Raptor::Router do
   it "allows overriding of the presenter class"
   it "uses consistent degelate terminology instead of sometimes calling them records"
   it "doesn't require .html.erb on template names"
-  it "uses injector terminology, not inference terminology"
 end
 
 class FailingRequirement

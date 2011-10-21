@@ -191,8 +191,8 @@ module Raptor
 
     def respond_to_request(request)
       record = @delegator.delegate(request, @path)
-      inference = Inference.for_request(request, @path)
-      @responder.respond(record, inference)
+      injector = Injector.for_request(request, @path)
+      @responder.respond(record, injector)
     end
 
     def action_for_exception(e)
@@ -213,11 +213,9 @@ module Raptor
     end
 
     def match?(request)
-      inference_sources = InferenceSources.new(request,
-                                               request.path_info).to_hash
       @requirements.all? do |requirement|
-        inference = Inference.for_request(request, request.path_info)
-        inference.call(requirement.method(:match?))
+        injector = Injector.for_request(request, request.path_info)
+        injector.call(requirement.method(:match?))
       end
     end
   end

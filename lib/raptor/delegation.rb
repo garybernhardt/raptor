@@ -29,8 +29,8 @@ module Raptor
     def delegate(request, route_path)
       return nil if @delegate_name.nil?
       Raptor.log("Delegating to #{@delegate_name}")
-      inference = inference(request, route_path)
-      record = inference.call(delegate_method)
+      injector = injector(request, route_path)
+      record = injector.call(delegate_method)
       Raptor.log("Delegate returned #{record}")
       record
     end
@@ -39,8 +39,8 @@ module Raptor
       DelegateFinder.new(@delegate_name).find
     end
 
-    def inference(request, route_path)
-      Inference.for_request(request, route_path)
+    def injector(request, route_path)
+      Injector.for_request(request, route_path)
     end
   end
 end
