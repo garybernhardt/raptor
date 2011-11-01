@@ -109,7 +109,7 @@ If your `show` route needs to do more than simply retrieve a record, that's not 
 
     module Profiles
       Routes = Raptor.routes(self) do
-        show "Profile.from_user"
+        show :to => "Profile.from_user"
       end
 
       class Profile
