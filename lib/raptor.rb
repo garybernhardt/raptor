@@ -27,7 +27,7 @@ module Raptor
       Raptor.log "App: routing #{request.request_method} #{request.path_info}"
       @resources.each do |resource|
         begin
-          return resource::Routes.call(request)
+          return resource.routes.call(request)
         rescue NoRouteMatches
         end
       end
@@ -66,7 +66,7 @@ module Raptor
     end
 
     def routes
-      @resource_module::Routes
+      @resource_module.routes
     end
 
     def requirements

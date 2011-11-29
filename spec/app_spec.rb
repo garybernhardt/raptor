@@ -4,12 +4,12 @@ require_relative "../lib/raptor"
 
 describe Raptor::App do
   module Resource1
-    Routes = Raptor.routes(self) { index :to => "Object.new" }
+    def self.routes; Raptor.routes(self) { index :to => "Object.new" }; end
     class PresentsMany; end
   end
 
   module Resource2
-    Routes = Raptor.routes(self) { index :to => "Object.new" }
+    def self.routes; Raptor.routes(self) { index :to => "Object.new" }; end
     class PresentsMany; end
   end
 

@@ -6,10 +6,12 @@ module FakeResources::Post
   #   - A template that says "It's #{post.title}!"
   #   - A route that redirects to a domain object
 
-  Routes = Raptor.routes(self) do
-    new :to => 'FakeResources::Post::Record.new'
-    show :to => 'FakeResources::Post::Record.find_by_id'
-    update :to => 'FakeResources::Post::UpdatesPosts.update!'
+  def self.routes
+    Raptor.routes(self) do
+      new :to => 'FakeResources::Post::Record.new'
+      show :to => 'FakeResources::Post::Record.find_by_id'
+      update :to => 'FakeResources::Post::UpdatesPosts.update!'
+    end
   end
 
   class PresentsOne
@@ -50,14 +52,16 @@ module FakeResources::Post
 end
 
 module FakeResources::WithNoBehavior
-  Routes = Raptor.routes(self) do
-    edit
-    update
-    new
-    show
-    index
-    create
-    destroy
+  def self.routes
+    Raptor.routes(self) do
+      edit
+      update
+      new
+      show
+      index
+      create
+      destroy
+    end
   end
 
   class PresentsOne
@@ -88,8 +92,10 @@ module FakeResources::WithNoBehavior
 end
 
 module FakeResources::WithUndefinedMethodCallInIndex
-  Routes = Raptor.routes(self) do
-    index
+  def self.routes
+    Raptor.routes(self) do
+      index
+    end
   end
 end
 

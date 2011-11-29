@@ -6,7 +6,7 @@ require_relative "fake_resources"
 describe Raptor::Router do
   it "routes requests through the record, presenter, and template" do
     request = request('GET', '/post/5')
-    rendered = FakeResources::Post::Routes.call(request)
+    rendered = FakeResources::Post.routes.call(request)
     rendered.body.join('').strip.should == "It's FIRST POST!"
   end
 
@@ -14,7 +14,7 @@ describe Raptor::Router do
     it "raises an error" do
       request = request('GET', '/doesnt_exist')
       expect do
-        FakeResources::Post::Routes.call(request)
+        FakeResources::Post.routes.call(request)
       end.to raise_error(Raptor::NoRouteMatches)
     end
   end
@@ -22,7 +22,7 @@ describe Raptor::Router do
   it "delegates to the named object, not just Record" do
     request = request('PUT', '/post/5')
     expect do
-      FakeResources::Post::Routes.call(request)
+      FakeResources::Post.routes.call(request)
     end.to raise_error(FakeResources::Post::NotSupportedError)
   end
 
@@ -42,13 +42,15 @@ describe Raptor::Router do
 
   it "can render text" do
     class Resource
-      Routes = Raptor.routes(self) do
-        index :to => "Object.new", :text => "the text"
+      def self.routes
+        Raptor.routes(self) do
+          index :to => "Object.new", :text => "the text"
+        end
       end
     end
 
     req = request("GET", "/resource")
-    Resource::Routes.call(req).body.join.strip.should == "the text"
+    Resource.routes.call(req).body.join.strip.should == "the text"
   end
 
   describe "routes" do
@@ -125,11 +127,14 @@ describe Raptor::Router do
 
   describe "default routes" do
     include FakeResources::WithNoBehavior
+    def routes
+      FakeResources::WithNoBehavior.routes
+    end
 
     context "index" do
       it "finds all records" do
         request = request('GET', '/with_no_behavior')
-        body = Routes.call(request).body.join('').strip
+        body = routes.call(request).body.join('').strip
         body.should match /record 1\s+record 2/
       end
     end
@@ -137,14 +142,14 @@ describe Raptor::Router do
     context "show" do
       it "retrieves a single record" do
         request = request('GET', '/with_no_behavior/2')
-        Routes.call(request).body.join('').strip.should == "record 2"
+        routes.call(request).body.join('').strip.should == "record 2"
       end
     end
 
     context "new" do
       it "renders a template" do
         request = request('GET', '/with_no_behavior/new')
-        Routes.call(request).body.join('').strip.should == "<form>New</form>"
+        routes.call(request).body.join('').strip.should == "<form>New</form>"
       end
     end
 
@@ -160,18 +165,18 @@ describe Raptor::Router do
 
       it "creates records" do
         Record.should_receive(:create)
-        Routes.call(req)
+        routes.call(req)
       end
 
       it "redirects to show" do
-        response = Routes.call(req)
+        response = routes.call(req)
         response.status.should == 302
         response['Location'].should == "/with_no_behavior/7"
       end
 
       it "re-renders new on errors" do
         Record.stub(:create).and_raise(Raptor::ValidationError)
-        response = Routes.call(req)
+        response = routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
     end
@@ -179,7 +184,7 @@ describe Raptor::Router do
     context "edit" do
       it "renders a template" do
         request = request('GET', '/with_no_behavior/7/edit')
-        Routes.call(request).body.join('').strip.should == "<form>Edit</form>"
+        routes.call(request).body.join('').strip.should == "<form>Edit</form>"
       end
     end
 
@@ -196,18 +201,18 @@ describe Raptor::Router do
 
       it "updates records" do
         Record.should_receive(:find_and_update)
-        Routes.call(req)
+        routes.call(req)
       end
 
       it "redirects to show" do
-        response = Routes.call(req)
+        response = routes.call(req)
         response.status.should == 302
         response['Location'].should == "/with_no_behavior/7"
       end
 
       it "re-renders edit on failure" do
         Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
-        response = Routes.call(req)
+        response = routes.call(req)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
     end
@@ -217,12 +222,12 @@ describe Raptor::Router do
 
       it "destroys records" do
         Record.should_receive(:destroy)
-        Routes.call(req)
+        routes.call(req)
       end
 
       it "redirects to index" do
         Record.stub(:destroy)
-        response = Routes.call(req)
+        response = routes.call(req)
         response.status.should == 302
         response['Location'].should == "/with_no_behavior"
       end
