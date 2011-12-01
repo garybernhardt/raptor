@@ -59,10 +59,12 @@ Resources are composed of plain old Ruby objects. Sometimes, Raptor uses convent
 Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects, enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions, and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
 
     module Posts
-      Routes = Raptor.routes(self) do
-        show
-        edit
-        update :require => :admin
+      def self.routes
+        Raptor.routes(self) do
+          show
+          edit
+          update :require => :admin
+        end
       end
 
       class PresentsOne
@@ -108,8 +110,10 @@ Requirements are always enforced immediately after record retrieval.
 If your `show` route needs to do more than simply retrieve a record, that's not a problem. You can route to any method:
 
     module Profiles
-      Routes = Raptor.routes(self) do
-        show :to => "Profile.from_user"
+      def self.routes
+        Raptor.routes(self) do
+          show :to => "Profile.from_user"
+        end
       end
 
       class Profile
