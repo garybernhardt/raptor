@@ -161,3 +161,7 @@ The seven routes' exact behavior differs, but shares this skeleton:
 
 https://github.com/nateware/redis-objects
 
+## Misc TODOs
+
+Build an example of implementing an access policy at the routing layer. Something like `DocumentAccessRequirement#match?(user, document)`, with a corresponding `:require => document_access` in the route.
+
