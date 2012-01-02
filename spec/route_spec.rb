@@ -160,11 +160,11 @@ describe Raptor::Router do
       end
 
       before do
-        Record.stub(:create) { bob }
+        FakeResources::WithNoBehavior::Record.stub(:create) { bob }
       end
 
       it "creates records" do
-        Record.should_receive(:create)
+        FakeResources::WithNoBehavior::Record.should_receive(:create)
         routes.call(req)
       end
 
@@ -175,7 +175,7 @@ describe Raptor::Router do
       end
 
       it "re-renders new on errors" do
-        Record.stub(:create).and_raise(Raptor::ValidationError)
+        FakeResources::WithNoBehavior::Record.stub(:create).and_raise(Raptor::ValidationError)
         response = routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
@@ -196,11 +196,11 @@ describe Raptor::Router do
       end
 
       before do
-        Record.stub(:find_and_update) { bob }
+        FakeResources::WithNoBehavior::Record.stub(:find_and_update) { bob }
       end
 
       it "updates records" do
-        Record.should_receive(:find_and_update)
+        FakeResources::WithNoBehavior::Record.should_receive(:find_and_update)
         routes.call(req)
       end
 
@@ -211,7 +211,7 @@ describe Raptor::Router do
       end
 
       it "re-renders edit on failure" do
-        Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
+        FakeResources::WithNoBehavior::Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
         response = routes.call(req)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
@@ -221,12 +221,12 @@ describe Raptor::Router do
       let(:req) { request('DELETE', '/with_no_behavior/7', StringIO.new('')) }
 
       it "destroys records" do
-        Record.should_receive(:destroy)
+       FakeResources::WithNoBehavior::Record.should_receive(:destroy)
         routes.call(req)
       end
 
       it "redirects to index" do
-        Record.stub(:destroy)
+        FakeResources::WithNoBehavior::Record.stub(:destroy)
         response = routes.call(req)
         response.status.should == 302
         response['Location'].should == "/with_no_behavior"

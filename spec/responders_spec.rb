@@ -35,15 +35,13 @@ describe Raptor::RedirectResponder do
 end
 
 describe Raptor::ActionTemplateResponder do
-  include Raptor
-
   it "renders templates" do
     resource = stub(:path_component => "posts",
                     :one_presenter => APresenter)
-    responder = ActionTemplateResponder.new(resource, :one, :show)
+    responder = Raptor::ActionTemplateResponder.new(resource, :one, :show)
     record = stub
-    injector = Injector.new({})
-    Template.stub(:render).with(APresenter.new, "posts/show.html.erb").
+    injector = Raptor::Injector.new({})
+    Raptor::Template.stub(:render).with(APresenter.new, "posts/show.html.erb").
       and_return("it worked")
     response = responder.respond(record, injector)
     response.body.join.strip.should == "it worked"

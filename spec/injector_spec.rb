@@ -3,7 +3,6 @@ require_relative "spec_helper"
 require_relative "../lib/raptor/injector"
 
 describe Raptor::Injector do
-  include Raptor
 
   def method_taking_id(id); id; end
   def method_taking_params(params); params; end
@@ -14,7 +13,7 @@ describe Raptor::Injector do
 
   let(:params) { stub }
   let(:sources) { {:params => params, :id => 5} }
-  let(:injector) { Injector.new(sources) }
+  let(:injector) { Raptor::Injector.new(sources) }
 
   it "injects required arguments for delegate methods" do
     injector.call(method(:method_taking_id)).should == 5

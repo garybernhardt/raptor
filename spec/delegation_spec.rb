@@ -4,8 +4,6 @@ require_relative "../lib/raptor/delegation"
 require_relative "../lib/raptor/injector"
 
 describe Raptor::DelegateFinder do
-  include Raptor
-
   module AModule
     module Child
       def self.a_method
@@ -14,12 +12,12 @@ describe Raptor::DelegateFinder do
   end
 
   it "finds constants in the module" do
-    method = DelegateFinder.new("AModule::Child.a_method").find
+    method = Raptor::DelegateFinder.new("AModule::Child.a_method").find
     method.should == AModule::Child.method(:a_method)
   end
 
   it "finds constants not in the module" do
-    method = DelegateFinder.new("Object.new").find
+    method = Raptor::DelegateFinder.new("Object.new").find
     method.should == Object.method(:new)
   end
 end
