@@ -45,7 +45,7 @@ module FakeResources::Post
     end
 
     def self.find_by_id(id)
-      records = {5 => Record.new({})}
+      records = {5 => Record.new()}
       records.fetch(id)
     end
   end
