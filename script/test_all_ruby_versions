@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+rvm 1.9.2@raptor,1.9.3@raptor exec script/test
+
