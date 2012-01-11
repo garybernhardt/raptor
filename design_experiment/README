@@ -18,26 +18,27 @@ Records
   Post
 
 Responsibility breakdown:
-  - Routes are the same Raptor routes as ever. Then can route out to different
+  - Routes are the same Raptor routes as ever. They can route out to different
     actions/redirects based on the interactor's response.
   - Injectables provide objects for Raptor's implicit DI. For example, the
     `post_params` injectable does what it sounds like, so that
     Interactors::CreatePost can take a `post_params` argument without worrying
     about where it came from. These are class methods directly on the
     Injectables module.
-  - Interactors contain the application's business logic. They return (or
-    raise) response models that are defined directly in the interactor's
-    class (or maybe from a shared location if appropriate).
-  - Models wrap database records to provide simple mutations and data
-    wrappers. For example, Post#publish updates the published flag and saves.
-    These don't necessarily map to records one-to-one. For example, the
-    AnonymousUser model exists to avoid nil current_user, and doesn't map to
-    anything in the database.
+  - Interactors contain the application's logic. They return (or raise)
+    response models that are usually defined directly in the interactor's class
+    (or maybe from a shared location if appropriate).
+  - Models wrap database records to provide simple mutations and data wrappers.
+    For example, Post#publish updates the published flag and saves.  These
+    don't necessarily map to records one-to-one. For example, the AnonymousUser
+    model exists to avoid a nil current_user, and doesn't map to anything in
+    the database.
   - Records are straight-up database records. No methods; just field
     definitions.
 
-This hierarchy doesn't correspond to the file layout. The files are grouped by
-topic. For example, posts.rb contains both Interactors::CreatePost and the
-post_params injectable. The modules in the system will be reopened many times
-as code is loaded. This gives us lasagna files instead of ravioli files.
+This hierarchy doesn't correspond to the file layout. Instead, files are
+grouped by topic. For example, posts.rb contains Interactors::CreatePost, the
+post_params injectable, and the Post model. Modules in the system will be
+reopened many times as code is loaded, giving us lasagna files instead of
+ravioli files.
 
