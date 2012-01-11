@@ -1,10 +1,4 @@
-require "raptor/shorty"
-
-module Injectables
-  def self.post_params(params)
-    params.fetch(:post)
-  end
-end
+require_relative "fake_raptor"
 
 module Interactors
   class CreatePost
@@ -24,6 +18,29 @@ module Interactors
       end
 
       PostSaved.new(current_user, post)
+    end
+  end
+end
+
+module Injectables
+  def self.post_params(params)
+    params.fetch(:post)
+  end
+end
+
+module Models
+  class Post
+    extend Raptor::Model
+    delegate [:title, :body] => :@record
+
+    def publish
+      @record.update_attributes(:published => true)
+      @record.save!
+    end
+
+    def save_as_draft
+      @record.update_attributes(:published => false)
+      @record.save!
     end
   end
 end

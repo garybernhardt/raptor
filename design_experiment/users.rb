@@ -10,3 +10,16 @@ module Injectables
   end
 end
 
+module Models
+  class User
+    extend Raptor::Model
+    delegate [:email, :posts] => :@record
+
+    def anonymous?; false; end
+  end
+
+  class AnonymousUser
+    def anonymous?; true; end
+  end
+end
+
