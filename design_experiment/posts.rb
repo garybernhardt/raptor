@@ -2,7 +2,7 @@ require_relative "fake_raptor"
 
 module Interactors
   class CreatePost
-    class PostSaved < Struct.new(:current_user, :post); end
+    PostSaved = Struct.new(:current_user, :post)
     class ValidationFailure < RuntimeError
       takes :current_user, :post
     end
