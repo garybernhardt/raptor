@@ -165,3 +165,9 @@ https://github.com/nateware/redis-objects
 
 Build an example of implementing an access policy at the routing layer. Something like `DocumentAccessRequirement#match?(user, document)`, with a corresponding `:require => document_access` in the route.
 
+## LICENSE
+
+Released under the MIT license:
+
+* http://www.opensource.org/licenses/MIT
+
