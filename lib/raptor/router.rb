@@ -101,7 +101,7 @@ module Raptor
     end
 
     def last_parent_path_component
-      @parent_path.split(/\//).last
+      @parent_path.split(/\//).last or raise CantInferModulePathsForRootRoutes
     end
 
     def default_single_presenter
@@ -124,6 +124,8 @@ module Raptor
       route
     end
   end
+
+  class CantInferModulePathsForRootRoutes < RuntimeError; end
 
   class RouteOptions
     def initialize(app_module, parent_path, params)

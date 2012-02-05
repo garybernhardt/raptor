@@ -276,8 +276,16 @@ describe Raptor::Router do
     end
   end
 
+  it "errors when asked to create guess a presenter for a root URL like GET /" do
+    app_module = Module.new
+    expect do
+      Raptor::BuildsRoutes.new(app_module).build do
+        index
+      end
+    end.to raise_error(Raptor::CantInferModulePathsForRootRoutes)
+  end
+
   it "routes to nested routes"
-  it "errors when asked to create guess a presenter for a root URL like GET /"
   it "tunnels PUTs over POSTs"
   it "tunnels DELETEs over POSTs"
   it "stores templates in templates directory, not views"
