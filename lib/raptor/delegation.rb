@@ -30,10 +30,10 @@ module Raptor
 
     def delegate(request, route_path)
       return nil if @delegate_name.nil?
-      Raptor.log("Delegating to #{@delegate_name}")
+      Raptor.log("Delegating to #{@delegate_name.inspect}")
       injector = injector(request, route_path)
       record = injector.call(delegate_method)
-      Raptor.log("Delegate returned #{record}")
+      Raptor.log("Delegate returned #{record.inspect}")
       record
     end
 
