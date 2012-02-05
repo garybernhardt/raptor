@@ -46,6 +46,8 @@ describe Raptor::Injector do
     injector_with_record = injector.add_record(record)
     injector_with_record.call(method).should == record
   end
+
+  it "throws a human-readable error when no source is found for an argument"
 end
 
 class ObjectWithInitializerTakingParams

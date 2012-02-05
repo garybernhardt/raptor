@@ -6,20 +6,20 @@ module Raptor
       @text = text
     end
 
-    def respond(record, injector)
+    def respond(route, record, injector)
       Rack::Response.new(@text)
     end
   end
 
   class RedirectResponder
-    def initialize(resource, target_route_name)
-      @resource = resource
+    def initialize(app_module, target_route_name)
+      @app_module = app_module
       @target_route_name = target_route_name
     end
 
-    def respond(record, injector)
+    def respond(route, record, injector)
       response = Rack::Response.new
-      path = @resource.routes.route_named(@target_route_name).path
+      path = route.neighbor_named(@target_route_name).path
       if record
         path = path.gsub(/:\w+/) do |match|
           # XXX: Untrusted send
@@ -30,6 +30,12 @@ module Raptor
       response
     end
 
+    def target_path
+      @route_neighbors.select do |route|
+        route.name == @target_route_name
+      end
+    end
+
     def redirect_to(response, location)
       Raptor.log("Redirecting to #{location}")
       response.status = 302
@@ -38,13 +44,13 @@ module Raptor
   end
 
   class TemplateResponder
-    def initialize(resource, presenter_name, template_path)
-      @resource = resource
+    def initialize(app_module, presenter_name, template_path)
+      @app_module = app_module
       @presenter_name = presenter_name
       @template_path = template_path
     end
 
-    def respond(record, injector)
+    def respond(route, record, injector)
       presenter = create_presenter(record, injector)
       Rack::Response.new(render(presenter))
     end
@@ -63,26 +69,29 @@ module Raptor
     end
 
     def presenter_class
-      @resource.send("#{@presenter_name}_presenter")
+      constant_name = Raptor::Util.camel_case(@presenter_name)
+      @app_module::Presenters.const_get(constant_name)
     end
   end
 
   class ActionTemplateResponder
-    def initialize(resource, presenter_name, template_name)
-      @resource = resource
+    def initialize(app_module, presenter_name, parent_path, template_name)
+      @app_module = app_module
       @presenter_name = presenter_name
+      @parent_path = parent_path
       @template_name = template_name
     end
 
-    def respond(record, injector)
-      responder = TemplateResponder.new(@resource,
+    def respond(route, record, injector)
+      responder = TemplateResponder.new(@app_module,
                                         @presenter_name,
                                         template_path)
-      responder.respond(record, injector)
+      responder.respond(route, record, injector)
     end
 
     def template_path
-      "#{@resource.path_component}/#{@template_name}"
+      # XXX: Support multiple template directories
+      "#{@parent_path}/#{@template_name}"
     end
   end
 
@@ -105,7 +114,7 @@ module Raptor
     end
 
     def full_template_path
-      "views/#{@template_path}"
+      "views#{@template_path}"
     end
   end
 end

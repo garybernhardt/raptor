@@ -1,29 +1,18 @@
 require_relative 'fake_record'
 
-module Posts
-  def self.routes
-    Raptor.routes(self) do
-      root :render => "root", :present => :many
-      index
-      new
-      show
-      create
-      edit
-      update
-      destroy
-    end
+module Presenters
+  class Post
+    takes :post
+    let(:id) { @post.id }
+    let(:title) { @post.title }
   end
 
-  class PresentsOne
-    takes :record
-    let(:id) { @record.id }
-    let(:title) { @record.title }
+  class PostList
+    let(:all) { Records::Post.all }
   end
+end
 
-  class PresentsMany
-    let(:all) { Record.all }
-  end
-
+module Records
   class Record < FakeRecord.new(:title)
   end
 end

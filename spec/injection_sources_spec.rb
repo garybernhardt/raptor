@@ -5,9 +5,9 @@ require_relative "../lib/raptor/injector"
 describe Raptor::InjectionSources do
   let(:params) { stub }
   let(:request) { stub(:params => params,
-                       :path_info => '/foo/5',
+                       :path_info => '/5',
                        :request_method => "GET") }
-  let(:route_path) { '/foo/:id' }
+  let(:route_path) { '/:id' }
   let(:sources) { Raptor::InjectionSources.new(request, route_path) }
 
   it "injects http method" do
@@ -15,7 +15,7 @@ describe Raptor::InjectionSources do
   end
 
   it "injects path" do
-    sources.to_hash.fetch(:path).should == "/foo/5"
+    sources.to_hash.fetch(:path).should == "/5"
   end
 
   it "injects request params" do

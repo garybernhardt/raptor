@@ -3,27 +3,26 @@ require_relative "spec_helper"
 require_relative "../lib/raptor"
 
 describe Raptor::App do
-  module Resource1
-    def self.routes; Raptor.routes(self) { index :to => "Object.new" }; end
-    class PresentsMany; end
+  module App
+    Routes = Raptor.routes(self) do
+      path 'post' do
+        index :to => "Object.new"
+      end
+    end
+
+    module Presenters
+      class PostList
+      end
+    end
   end
 
-  module Resource2
-    def self.routes; Raptor.routes(self) { index :to => "Object.new" }; end
-    class PresentsMany; end
-  end
-
-  let(:app) { Raptor::App.new([Resource1, Resource2]) }
+  let(:app) { Raptor::App.new(App) }
 
   it "routes to multiple resources" do
-    File.stub(:new).with("views/resource1/index.html.erb").
-      and_return(stub(:read => "Resource 1 response"))
-    File.stub(:new).with("views/resource2/index.html.erb").
-      and_return(stub(:read => "Resource 2 response"))
-    env = env('GET', '/resource1')
-    app.call(env).body.join('').strip.should == "Resource 1 response"
-    env = env('GET', '/resource2')
-    app.call(env).body.join('').strip.should == "Resource 2 response"
+    File.stub(:new).with("views/post/index.html.erb").
+      and_return(stub(:read => "Template content"))
+    env = env('GET', '/post')
+    app.call(env).body.join('').strip.should == "Template content"
   end
 
   it "raises an error if no route matches" do

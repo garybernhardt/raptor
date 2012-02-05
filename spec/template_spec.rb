@@ -8,14 +8,14 @@ describe Raptor::Template do
     File.stub(:new) { StringIO.new("<% undefined_method %>") }
 
     expect do
-      Raptor::Template.render(presenter, "posts/show.html.erb").render
+      Raptor::Template.render(presenter, "/posts/show.html.erb").render
     end.to raise_error(NameError,
                        /undefined local variable or method `undefined_method'/)
   end
 
   it "renders the template" do
     presenter = stub("presenter")
-    rendered = Raptor::Template.render(presenter, "with_no_behavior/new.html.erb")
+    rendered = Raptor::Template.render(presenter, "/with_no_behavior/new.html.erb")
     rendered.strip.should == "<form>New</form>"
   end
 end
