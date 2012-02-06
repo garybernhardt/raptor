@@ -15,7 +15,15 @@ describe Raptor::Template do
 
   it "renders the template" do
     presenter = stub("presenter")
-    rendered = Raptor::Template.render(presenter, "/with_no_behavior/new.html.erb")
+    rendered = Raptor::Template.render(presenter,
+                                       "/with_no_behavior/new.html.erb")
+    rendered.strip.should == "<form>New</form>"
+  end
+
+  it "inserts a slash if there isn't one on the template path" do
+    presenter = stub("presenter")
+    rendered = Raptor::Template.render(presenter,
+                                       "with_no_behavior/new.html.erb")
     rendered.strip.should == "<form>New</form>"
   end
 end

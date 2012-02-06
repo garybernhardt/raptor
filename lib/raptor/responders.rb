@@ -114,7 +114,9 @@ module Raptor
     end
 
     def full_template_path
-      "views#{@template_path}"
+      template_path = @template_path
+      template_path = "/#{template_path}" unless template_path =~ /^\//
+      "views#{template_path}"
     end
   end
 end
