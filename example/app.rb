@@ -5,8 +5,8 @@ require_relative 'posts'
 
 module Blog
   Routes = Raptor.routes(self) do
-    path "posts" do
-      root :render => "root", :present => :many
+    root :render => "root", :present => :post_list
+    path "post" do
       index
       new
       show

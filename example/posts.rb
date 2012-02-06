@@ -1,19 +1,21 @@
 require_relative 'fake_record'
 
-module Presenters
-  class Post
-    takes :post
-    let(:id) { @post.id }
-    let(:title) { @post.title }
+module Blog
+  module Presenters
+    class Post
+      takes :record
+      let(:id) { @record.id }
+      let(:title) { @record.title }
+    end
+
+    class PostList
+      let(:all) { Records::Post.all }
+    end
   end
 
-  class PostList
-    let(:all) { Records::Post.all }
-  end
-end
-
-module Records
-  class Record < FakeRecord.new(:title)
+  module Records
+    class Post < FakeRecord.new(:title)
+    end
   end
 end
 

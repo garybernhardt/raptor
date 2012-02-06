@@ -1,2 +1,2 @@
 require './app'
-run App
+run Blog::App
