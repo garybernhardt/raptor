@@ -48,9 +48,6 @@ describe Raptor::Router do
         new :to => "App::Records::Post.new", :redirect => :index
         index
       end
-      path "sub_path" do
-        index :to => 'FakeResources::Post::Record.all'
-      end
     end
   end
 
