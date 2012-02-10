@@ -1,7 +1,6 @@
 require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
-require_relative "fake_resources"
 
 describe Raptor::Router do
   module App
