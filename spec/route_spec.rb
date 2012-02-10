@@ -3,7 +3,7 @@ require_relative "spec_helper"
 require_relative "../lib/raptor"
 
 describe Raptor::Router do
-  module App
+  module RouterTestApp
     module Presenters
       class Post
         def initialize(record)
@@ -35,7 +35,7 @@ describe Raptor::Router do
     module Presenters
       class PostList
         def all
-          App::Records::Post.all
+          RouterTestApp::Records::Post.all
         end
       end
     end
@@ -44,7 +44,8 @@ describe Raptor::Router do
         new; show; index; create; edit; update; destroy
       end
       path "post_with_redirect" do
-        new :to => "App::Records::Post.new", :redirect => :index
+        new :to => "RouterTestApp::Records::Post.new",
+          :redirect => :index
         index
       end
     end
@@ -54,15 +55,15 @@ describe Raptor::Router do
     it "raises an error" do
       request = request('GET', '/doesnt_exist')
       expect do
-        App::Routes.call(request)
+        RouterTestApp::Routes.call(request)
       end.to raise_error(Raptor::NoRouteMatches)
     end
   end
 
   it "delegates to the named object, not just Record" do
-    router = Raptor::Router.build(App) do
+    router = Raptor::Router.build(RouterTestApp) do
       path "post" do
-        new :to => "App::Records::Post.raises_key_error"
+        new :to => "RouterTestApp::Records::Post.raises_key_error"
       end
     end
     request = request('GET', '/post/new')
@@ -71,14 +72,14 @@ describe Raptor::Router do
 
   it "allows overriding of redirect in standard routes" do
     request = request("GET", "/post_with_redirect/new")
-    response = App::Routes.call(request)
+    response = RouterTestApp::Routes.call(request)
     response.status.should == 302
     # XXX: Why is there a trailing slash on this URL?
     response["Location"].should == "/post_with_redirect/"
   end
 
   it "can render text" do
-    routes = Raptor.routes(App) do
+    routes = Raptor.routes(RouterTestApp) do
       path "posts" do
         index :to => "Object.new", :text => "the text"
       end
@@ -90,7 +91,7 @@ describe Raptor::Router do
 
   describe "routes" do
     let(:router) do
-      router = Raptor::Router.build(App) do
+      router = Raptor::Router.build(RouterTestApp) do
         route(:my_action, "GET", "/things", :to => "Object.delegate",
               :text => "")
       end
@@ -159,7 +160,7 @@ describe Raptor::Router do
 
     describe "root route" do
       it "is a normal route" do
-        router = Raptor::Router.build(App) do
+        router = Raptor::Router.build(RouterTestApp) do
           root :text => "it worked"
         end
         req = request("GET", "/")
@@ -172,7 +173,7 @@ describe Raptor::Router do
     context "index" do
       it "finds all records" do
         request = request('GET', '/post')
-        body = App::Routes.call(request).body.join('').strip
+        body = RouterTestApp::Routes.call(request).body.join('').strip
         body.should match /record 1\s+record 2/
       end
     end
@@ -180,14 +181,15 @@ describe Raptor::Router do
     context "show" do
       it "retrieves a single record" do
         request = request('GET', '/post/2')
-        App::Routes.call(request).body.join('').strip.should == "It's RECORD 2!"
+        response = RouterTestApp::Routes.call(request)
+        response.body.join('').strip.should == "It's RECORD 2!"
       end
     end
 
     context "new" do
       it "renders a template" do
         request = request('GET', '/post/new')
-        response = App::Routes.call(request)
+        response = RouterTestApp::Routes.call(request)
         response.body.join('').strip.should == "<form>New</form>"
       end
     end
@@ -196,24 +198,24 @@ describe Raptor::Router do
       let(:req) { request('POST', '/post', StringIO.new("")) }
 
       before do
-        App::Records::Post.stub(:create) { stub(:id => 1) }
+        RouterTestApp::Records::Post.stub(:create) { stub(:id => 1) }
       end
 
       it "creates records" do
-        App::Records::Post.should_receive(:create)
-        App::Routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:create)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to show" do
-        response = App::Routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
         response['Location'].should == "/post/1"
       end
 
       it "re-renders new on errors" do
-        App::Records::Post.stub(:create).
+        RouterTestApp::Records::Post.stub(:create).
           and_raise(Raptor::ValidationError)
-        response = App::Routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
     end
@@ -221,7 +223,7 @@ describe Raptor::Router do
     context "edit" do
       it "renders a template" do
         request = request('GET', '/post/1/edit')
-        response = App::Routes.call(request)
+        response = RouterTestApp::Routes.call(request)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
     end
@@ -232,24 +234,24 @@ describe Raptor::Router do
       end
 
       before do
-        App::Records::Post.stub(:find_and_update) { stub(:id => 1) }
+        RouterTestApp::Records::Post.stub(:find_and_update) { stub(:id => 1) }
       end
 
       it "updates records" do
-        App::Records::Post.should_receive(:find_and_update)
-        App::Routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:find_and_update)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to show" do
-        response = App::Routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
         response['Location'].should == "/post/1"
       end
 
       it "re-renders edit on failure" do
-        App::Records::Post.stub(:find_and_update).
+        RouterTestApp::Records::Post.stub(:find_and_update).
           and_raise(Raptor::ValidationError)
-        response = App::Routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
     end
@@ -258,13 +260,13 @@ describe Raptor::Router do
       let(:req) { request('DELETE', '/post/7', StringIO.new('')) }
 
       it "destroys records" do
-        App::Records::Post.should_receive(:destroy)
-        App::Routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:destroy)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to index" do
-        App::Records::Post.stub(:destroy)
-        response = App::Routes.call(req)
+        RouterTestApp::Records::Post.stub(:destroy)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
         # XXX: Why is there a trailing slash on this URL?
         response['Location'].should == "/post/"
