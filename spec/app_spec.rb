@@ -18,7 +18,7 @@ describe Raptor::App do
 
   let(:app) { Raptor::App.new(App) }
 
-  it "routes to multiple resources" do
+  it "routes to resources" do
     File.stub(:new).with("views/post/index.html.erb").
       and_return(stub(:read => "Template content"))
     env = env('GET', '/post')
