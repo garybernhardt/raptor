@@ -3,12 +3,18 @@ module Raptor
   # have to
   #
   class Injector
+    class UnknownInjectable < RuntimeError
+      def initialize(name)
+        super("Unknown injectable name: #{name.inspect}")
+      end
+    end
+
     def initialize(sources)
       @sources = sources
     end
 
     def self.for_request(request, route_path)
-      sources = InjectionSources.new(request, route_path).to_hash
+      sources = Injectables::All.new(request, route_path).sources
       new(sources)
     end
 
@@ -21,7 +27,8 @@ module Raptor
       parameters(method).select do |type, name|
         name && type != :rest && type != :block
       end.map do |type, name|
-        @sources.fetch(name)
+        source_proc = @sources[name] or raise UnknownInjectable.new(name)
+        source_proc.call
       end
     end
 
@@ -38,40 +45,59 @@ module Raptor
     end
 
     def add_record(record)
-      sources = @sources.merge(:record => record)
+      sources = @sources.merge(:record => lambda { record })
       Injector.new(sources)
     end
   end
 
-  class InjectionSources
-    def initialize(request, route_path)
-      @request = request
-      @route_path = route_path
-    end
-
-    def to_hash
-      request_sources.merge(path_arg_sources)
-    end
-
-    def request_sources
-      {:path => @request.path_info,
-       :params => @request.params,
-       :http_method => @request.request_method,
-       :request => @request}
-    end
-
-    def path_arg_sources
-      args = {}
-      path_component_pairs.select do |route_component, path_component|
-        route_component[0] == ':'
-      end.each do |x, y|
-        args[x[1..-1].to_sym] = y.to_i
+  module Injectables
+    class All
+      def initialize(request, route_path)
+        @injectables = [Request.new(request),
+                        RouteVariable.new(request, route_path)]
       end
-      args
+
+      def sources
+        @injectables.map(&:sources).inject(&:merge)
+      end
     end
 
-    def path_component_pairs
-      @route_path.split('/').zip(@request.path_info.split('/'))
+    class Request
+      def initialize(request)
+        @request = request
+      end
+
+      def sources
+        {:request => lambda { @request },
+         :http_method => lambda { @request.request_method },
+         :path => lambda { @request.path_info },
+         :params => lambda { @request.params }
+        }
+      end
+    end
+
+    class RouteVariable
+      def initialize(request, route_path)
+        @request = request
+        @route_path = route_path
+      end
+
+      def sources
+        Hash[path_component_pairs.map do |name, value|
+          [name, lambda { value }]
+        end]
+      end
+
+      def path_component_pairs
+        all_pairs = @route_path.split('/').zip(@request.path_info.split('/'))
+        variable_pairs = all_pairs.select do |name, value|
+          name =~ /^:/
+        end
+        variable_pairs_without_colons = variable_pairs.map do |name, value|
+          [name.sub(/^:/, "").to_sym, value]
+        end
+        variable_pairs_without_colons
+      end
     end
   end
 end

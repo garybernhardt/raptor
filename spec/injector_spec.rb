@@ -12,7 +12,9 @@ describe Raptor::Injector do
   def method_taking_record(record); record; end
 
   let(:params) { stub }
-  let(:sources) { {:params => params, :id => 5} }
+  let(:sources) do
+    {:params => lambda { params }, :id => lambda { 5 } }
+  end
   let(:injector) { Raptor::Injector.new(sources) }
 
   it "injects required arguments for delegate methods" do
@@ -47,7 +49,12 @@ describe Raptor::Injector do
     injector_with_record.call(method).should == record
   end
 
-  it "throws a human-readable error when no source is found for an argument"
+  it "throws an error when no source is found for an argument" do
+    klass = Class.new { def f(unknown_argument); end }
+    expect do
+      injector.call(klass.new.method(:f))
+    end.to raise_error(Raptor::Injector::UnknownInjectable)
+  end
 end
 
 class ObjectWithInitializerTakingParams

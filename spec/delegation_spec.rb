@@ -24,7 +24,7 @@ end
 
 describe Raptor::Delegator do
   it "returns nil if the delegate is nil" do
-    Raptor::InjectionSources.stub(:new) { stub(:to_hash => {}) }
+    Raptor::Injectables::All.stub(:new) { stub(:sources => {}) }
     request = stub("request")
     route_path = "/my_resource"
     delegator = Raptor::Delegator.new(AModule, nil)
