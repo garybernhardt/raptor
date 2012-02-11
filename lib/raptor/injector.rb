@@ -1,7 +1,4 @@
 module Raptor
-  # XXX: Inference should call the method with the args so the caller doesn't
-  # have to
-  #
   class Injector
     class UnknownInjectable < RuntimeError
       def initialize(name)
