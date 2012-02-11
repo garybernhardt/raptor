@@ -39,6 +39,7 @@ describe Raptor::Router do
         end
       end
     end
+
     Routes = Raptor::Router.build(self) do
       path "post" do
         new; show; index; create; edit; update; destroy
@@ -48,15 +49,6 @@ describe Raptor::Router do
           :redirect => :index
         index
       end
-    end
-  end
-
-  describe "when a route isn't defined" do
-    it "raises an error" do
-      request = request('GET', '/doesnt_exist')
-      expect do
-        RouterTestApp::Routes.call(request)
-      end.to raise_error(Raptor::NoRouteMatches)
     end
   end
 
