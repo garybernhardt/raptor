@@ -1,68 +1,97 @@
 require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
-require_relative "fake_resources"
 
 describe Raptor::Router do
-  it "routes requests through the record, presenter, and template" do
-    request = request('GET', '/post/5')
-    rendered = FakeResources::Post.routes.call(request)
-    rendered.body.join('').strip.should == "It's FIRST POST!"
+  module RouterTestApp
+    module Presenters
+      class Post
+        def initialize(record)
+          @record = record
+        end
+
+        def title
+          @record.title.upcase
+        end
+      end
+    end
+
+    module Records
+      class Post < Struct.new(:id, :title)
+        def self.all
+          [new(1, "record 1"), new(2, "record 2")]
+        end
+        def self.find_by_id(id)
+          all.find { |post| post.id == id }
+        end
+        def self.raises_key_error
+          raise KeyError
+        end
+        def self.create
+        end
+      end
+    end
+
+    module Presenters
+      class PostList
+        def all
+          RouterTestApp::Records::Post.all
+        end
+      end
+    end
+    Routes = Raptor::Router.build(self) do
+      path "post" do
+        new; show; index; create; edit; update; destroy
+      end
+      path "post_with_redirect" do
+        new :to => "RouterTestApp::Records::Post.new",
+          :redirect => :index
+        index
+      end
+    end
   end
 
   describe "when a route isn't defined" do
     it "raises an error" do
       request = request('GET', '/doesnt_exist')
       expect do
-        FakeResources::Post.routes.call(request)
+        RouterTestApp::Routes.call(request)
       end.to raise_error(Raptor::NoRouteMatches)
     end
   end
 
   it "delegates to the named object, not just Record" do
-    request = request('PUT', '/post/5')
-    expect do
-      FakeResources::Post.routes.call(request)
-    end.to raise_error(FakeResources::Post::NotSupportedError)
+    router = Raptor::Router.build(RouterTestApp) do
+      path "post" do
+        new :to => "RouterTestApp::Records::Post.raises_key_error"
+      end
+    end
+    request = request('GET', '/post/new')
+    expect { router.call(request) }.to raise_error(KeyError)
   end
 
   it "allows overriding of redirect in standard routes" do
-    # XXX: Remove circular reference between resource and route
-    resource = stub
-    builder = Raptor::BuildsRoutes.new(resource)
-    route = builder.route(:index, "GET", "/resource",
-                          :to => "Object.new", :redirect => :index)
-    resource.stub(:routes) { Raptor::Router.new(resource, [route]) }
-    request = request("GET", "/resource")
-
-    response = route.respond_to_request(request)
+    request = request("GET", "/post_with_redirect/new")
+    response = RouterTestApp::Routes.call(request)
     response.status.should == 302
-    response["Location"].should == "/resource"
+    # XXX: Why is there a trailing slash on this URL?
+    response["Location"].should == "/post_with_redirect/"
   end
 
   it "can render text" do
-    class Resource
-      def self.routes
-        Raptor.routes(self) do
-          index :to => "Object.new", :text => "the text"
-        end
+    routes = Raptor.routes(RouterTestApp) do
+      path "posts" do
+        index :to => "Object.new", :text => "the text"
       end
     end
 
-    req = request("GET", "/resource")
-    Resource.routes.call(req).body.join.strip.should == "the text"
+    req = request("GET", "/posts")
+    routes.call(req).body.join.strip.should == "the text"
   end
 
   describe "routes" do
-    let(:resource) do
-      resource = stub(:resource_name => "Things",
-                      :class_named => Object,
-                      :one_presenter => Class.new,
-                      :path_component => "things")
-    end
-
     let(:router) do
-      router = Raptor::Router.build(resource) do
+      router = Raptor::Router.build(RouterTestApp) do
         route(:my_action, "GET", "/things", :to => "Object.delegate",
               :text => "")
       end
@@ -79,11 +108,20 @@ describe Raptor::Router do
       router.route_named(:my_action).path.should == "/things"
     end
 
+    it "errors if route_named is asked for a route that doesn't exist"
+
     describe "requirements" do
       # XXX: Isolate these specs
       it "raises an error if the requirement doesn't match" do
-        resource = stub(:requirements => [FailingRequirement])
-        router = Raptor::Router.build(resource) do
+        app_module = Module.new
+        app_module::Requirements = Module.new
+        app_module::Requirements::Failing = Class.new do
+          def self.match?
+            false
+          end
+        end
+
+        router = Raptor::Router.build(app_module) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :failing)
         end
@@ -104,8 +142,14 @@ describe Raptor::Router do
       end
 
       it "injects arguments into the requirement" do
-        resource.stub(:requirements => [ArgumentRequirement])
-        router = Raptor::Router.build(resource) do
+        app_module = Module.new
+        app_module::Requirements = Module.new
+        app_module::Requirements::Argument = Class.new do
+          def self.match?(path)
+            true
+          end
+        end
+        router = Raptor::Router.build(app_module) do
           route(:my_action, "GET", "/things",
                 :to => "Object.new", :require => :argument,
                 :text => "it worked")
@@ -116,7 +160,7 @@ describe Raptor::Router do
 
     describe "root route" do
       it "is a normal route" do
-        router = Raptor::Router.build(resource) do
+        router = Raptor::Router.build(RouterTestApp) do
           root :text => "it worked"
         end
         req = request("GET", "/")
@@ -126,114 +170,120 @@ describe Raptor::Router do
   end
 
   describe "default routes" do
-    include FakeResources::WithNoBehavior
-    def routes
-      FakeResources::WithNoBehavior.routes
-    end
-
     context "index" do
       it "finds all records" do
-        request = request('GET', '/with_no_behavior')
-        body = routes.call(request).body.join('').strip
+        request = request('GET', '/post')
+        body = RouterTestApp::Routes.call(request).body.join('').strip
         body.should match /record 1\s+record 2/
       end
     end
 
     context "show" do
       it "retrieves a single record" do
-        request = request('GET', '/with_no_behavior/2')
-        routes.call(request).body.join('').strip.should == "record 2"
+        request = request('GET', '/post/2')
+        response = RouterTestApp::Routes.call(request)
+        response.body.join('').strip.should == "It's RECORD 2!"
       end
     end
 
     context "new" do
       it "renders a template" do
-        request = request('GET', '/with_no_behavior/new')
-        routes.call(request).body.join('').strip.should == "<form>New</form>"
+        request = request('GET', '/post/new')
+        response = RouterTestApp::Routes.call(request)
+        response.body.join('').strip.should == "<form>New</form>"
       end
     end
 
     context "create" do
-      let(:bob) { stub(:name => "bob", :id => 7) }
-      let(:req) do
-        request('POST', '/with_no_behavior', StringIO.new('name=bob'))
-      end
+      let(:req) { request('POST', '/post', StringIO.new("")) }
 
       before do
-        FakeResources::WithNoBehavior::Record.stub(:create) { bob }
+        RouterTestApp::Records::Post.stub(:create) { stub(:id => 1) }
       end
 
       it "creates records" do
-        FakeResources::WithNoBehavior::Record.should_receive(:create)
-        routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:create)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to show" do
-        response = routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
-        response['Location'].should == "/with_no_behavior/7"
+        response['Location'].should == "/post/1"
       end
 
       it "re-renders new on errors" do
-        FakeResources::WithNoBehavior::Record.stub(:create).and_raise(Raptor::ValidationError)
-        response = routes.call(req)
+        RouterTestApp::Records::Post.stub(:create).
+          and_raise(Raptor::ValidationError)
+        response = RouterTestApp::Routes.call(req)
         response.body.join('').strip.should == "<form>New</form>"
       end
     end
 
     context "edit" do
       it "renders a template" do
-        request = request('GET', '/with_no_behavior/7/edit')
-        routes.call(request).body.join('').strip.should == "<form>Edit</form>"
+        request = request('GET', '/post/1/edit')
+        response = RouterTestApp::Routes.call(request)
+        response.body.join('').strip.should == "<form>Edit</form>"
       end
     end
 
     context "update" do
-      let(:bob) { stub(:name => "bob", :id => 7) }
-
       let(:req) do
-        request('PUT', '/with_no_behavior/7', StringIO.new('name=bob'))
+        request('PUT', '/post/7', StringIO.new(''))
       end
 
       before do
-        FakeResources::WithNoBehavior::Record.stub(:find_and_update) { bob }
+        RouterTestApp::Records::Post.stub(:find_and_update) { stub(:id => 1) }
       end
 
       it "updates records" do
-        FakeResources::WithNoBehavior::Record.should_receive(:find_and_update)
-        routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:find_and_update)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to show" do
-        response = routes.call(req)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
-        response['Location'].should == "/with_no_behavior/7"
+        response['Location'].should == "/post/1"
       end
 
       it "re-renders edit on failure" do
-        FakeResources::WithNoBehavior::Record.stub(:find_and_update).and_raise(Raptor::ValidationError)
-        response = routes.call(req)
+        RouterTestApp::Records::Post.stub(:find_and_update).
+          and_raise(Raptor::ValidationError)
+        response = RouterTestApp::Routes.call(req)
         response.body.join('').strip.should == "<form>Edit</form>"
       end
     end
 
     context "destroy" do
-      let(:req) { request('DELETE', '/with_no_behavior/7', StringIO.new('')) }
+      let(:req) { request('DELETE', '/post/7', StringIO.new('')) }
 
       it "destroys records" do
-       FakeResources::WithNoBehavior::Record.should_receive(:destroy)
-        routes.call(req)
+        RouterTestApp::Records::Post.should_receive(:destroy)
+        RouterTestApp::Routes.call(req)
       end
 
       it "redirects to index" do
-        FakeResources::WithNoBehavior::Record.stub(:destroy)
-        response = routes.call(req)
+        RouterTestApp::Records::Post.stub(:destroy)
+        response = RouterTestApp::Routes.call(req)
         response.status.should == 302
-        response['Location'].should == "/with_no_behavior"
+        # XXX: Why is there a trailing slash on this URL?
+        response['Location'].should == "/post/"
       end
     end
   end
 
+  it "errors when asked to create guess a presenter for a root URL like GET /" do
+    app_module = Module.new
+    expect do
+      Raptor::BuildsRoutes.new(app_module).build do
+        index
+      end
+    end.to raise_error(Raptor::CantInferModulePathsForRootRoutes)
+  end
+
+  it "routes to nested routes"
   it "tunnels PUTs over POSTs"
   it "tunnels DELETEs over POSTs"
   it "stores templates in templates directory, not views"
@@ -242,20 +292,8 @@ describe Raptor::Router do
   it "doesn't require .html.erb on template names"
 end
 
-class FailingRequirement
-  def self.match?
-    false
-  end
-end
-
 class MatchingRequirement
   def self.match?
-    true
-  end
-end
-
-class ArgumentRequirement
-  def self.match?(path)
     true
   end
 end

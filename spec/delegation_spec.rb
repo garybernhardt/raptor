@@ -12,12 +12,12 @@ describe Raptor::DelegateFinder do
   end
 
   it "finds constants in the module" do
-    method = Raptor::DelegateFinder.new("AModule::Child.a_method").find
+    method = Raptor::DelegateFinder.new(AModule, "Child.a_method").find
     method.should == AModule::Child.method(:a_method)
   end
 
   it "finds constants not in the module" do
-    method = Raptor::DelegateFinder.new("Object.new").find
+    method = Raptor::DelegateFinder.new(AModule, "Object.new").find
     method.should == Object.method(:new)
   end
 end
@@ -27,7 +27,7 @@ describe Raptor::Delegator do
     Raptor::InjectionSources.stub(:new) { stub(:to_hash => {}) }
     request = stub("request")
     route_path = "/my_resource"
-    delegator = Raptor::Delegator.new(nil)
+    delegator = Raptor::Delegator.new(AModule, nil)
     delegator.delegate(request, route_path).should be_nil
   end
 end
