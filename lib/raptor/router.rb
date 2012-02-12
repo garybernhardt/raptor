@@ -217,8 +217,8 @@ module Raptor
     end
 
     def respond_to_request(request)
-      record = @delegator.delegate(request, @path)
       injector = Injector.for_request(request, @path)
+      record = @delegator.delegate(injector)
       @responder.respond(self, record, injector)
     end
 

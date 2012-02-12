@@ -1,7 +1,6 @@
 require "rack"
 require_relative "spec_helper"
-require_relative "../lib/raptor/delegation"
-require_relative "../lib/raptor/injector"
+require_relative "../lib/raptor"
 
 describe Raptor::DelegateFinder do
   module AModule
@@ -24,20 +23,15 @@ end
 
 describe Raptor::Delegator do
   it "returns nil if the delegate is nil" do
-    Raptor::Injectables::All.stub(:new) { stub(:sources => {}) }
-    request = stub("request")
-    route_path = "/my_resource"
+    injector = Raptor::Injector.new({})
     delegator = Raptor::Delegator.new(AModule, nil)
-    delegator.delegate(request, route_path).should be_nil
+    delegator.delegate(injector).should be_nil
   end
 
   it "calls the named method" do
     delegator = Raptor::Delegator.new(Object, "Hash.new")
-    request = stub(:request).as_null_object
-    route_path = stub(:route_path).as_null_object
     injector = Raptor::Injector.new({})
-    Raptor::Injector.stub(:for_request).with(request, route_path) { injector }
-    delegator.delegate(request, route_path).should == {}
+    delegator.delegate(injector).should == {}
   end
 end
 
