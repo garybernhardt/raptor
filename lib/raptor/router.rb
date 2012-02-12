@@ -185,8 +185,9 @@ module Raptor
   class Route
     attr_reader :name, :path
 
-    def initialize(name, path, requirements, delegator, responder,
+    def initialize(app_module, name, path, requirements, delegator, responder,
                    exception_actions)
+      @app_module = app_module
       @name = name
       @path = path
       @requirements = requirements
@@ -212,13 +213,15 @@ module Raptor
       ]
       delegator = Delegator.new(app_module, route_options.delegate_name)
       responder = route_options.responder_for(action)
-      new(action, path, requirements, delegator, responder,
+      new(app_module, action, path, requirements, delegator, responder,
           route_options.exception_actions)
     end
 
     def respond_to_request(request)
-      record = @delegator.delegate(request, @path)
-      injector = Injector.for_request(request, @path)
+      injector = Injector.new.
+        add_request(request).
+        add_route_path(request, @path)
+      record = @delegator.delegate(injector)
       @responder.respond(self, record, injector)
     end
 
@@ -241,7 +244,9 @@ module Raptor
 
     def match?(request)
       @requirements.all? do |requirement|
-        injector = Injector.for_request(request, request.path_info)
+        injector = Injector.new.
+          add_request(request).
+          add_route_path(request, @path)
         injector.call(requirement.method(:match?))
       end
     end

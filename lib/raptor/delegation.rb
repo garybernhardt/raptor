@@ -1,7 +1,7 @@
 module Raptor
   class DelegateFinder
-    def initialize(app_module, delegate_name)
-      @app_module = app_module
+    def initialize(starting_module, delegate_name)
+      @starting_module = starting_module
       @module_path, @method_name = delegate_name.split('.')
     end
 
@@ -10,7 +10,7 @@ module Raptor
     end
 
     def target_module
-      the_module = @app_module
+      the_module = @starting_module
       module_path_components.each do |module_name|
         the_module = the_module.const_get(module_name)
       end
@@ -23,26 +23,21 @@ module Raptor
   end
 
   class Delegator
-    def initialize(app_module, delegate_name)
-      @app_module = app_module
+    def initialize(starting_module, delegate_name)
+      @starting_module = starting_module
       @delegate_name = delegate_name
     end
 
-    def delegate(request, route_path)
+    def delegate(injector)
       return nil if @delegate_name.nil?
       Raptor.log("Delegating to #{@delegate_name.inspect}")
-      injector = injector(request, route_path)
       record = injector.call(delegate_method)
       Raptor.log("Delegate returned #{record.inspect}")
       record
     end
 
     def delegate_method
-      DelegateFinder.new(@app_module, @delegate_name).find
-    end
-
-    def injector(request, route_path)
-      Injector.for_request(request, route_path)
+      DelegateFinder.new(@starting_module, @delegate_name).find
     end
   end
 end
