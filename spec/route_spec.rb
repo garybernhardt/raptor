@@ -52,14 +52,6 @@ describe Raptor::Router do
     end
   end
 
-  it "allows overriding of redirect in standard routes" do
-    request = request("GET", "/post_with_redirect/new")
-    response = RouterTestApp::Routes.call(request)
-    response.status.should == 302
-    # XXX: Why is there a trailing slash on this URL?
-    response["Location"].should == "/post_with_redirect/"
-  end
-
   it "can render text" do
     routes = Raptor.routes(RouterTestApp) do
       path "posts" do
@@ -86,6 +78,14 @@ describe Raptor::Router do
   end
 
   describe "default routes" do
+    it "allows overriding of redirect in default routes" do
+      request = request("GET", "/post_with_redirect/new")
+      response = RouterTestApp::Routes.call(request)
+      response.status.should == 302
+      # XXX: Why is there a trailing slash on this URL?
+      response["Location"].should == "/post_with_redirect/"
+    end
+
     context "index" do
       it "finds all records" do
         request = request('GET', '/post')
