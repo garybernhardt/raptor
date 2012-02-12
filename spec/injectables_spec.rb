@@ -41,18 +41,3 @@ describe Raptor::Injectables::RouteVariable do
   end
 end
 
-describe Raptor::Injectables::All do
-  let(:req) do
-    request("GET", "/posts/5")
-  end
-  subject { Raptor::Injectables::All.new(req, "/posts/:id") }
-
-  it "injects request injectables" do
-    subject.sources.fetch(:request).call.should == req
-  end
-
-  it "injects route variable injectables" do
-    subject.sources.fetch(:id).call.should == "5"
-  end
-end
-

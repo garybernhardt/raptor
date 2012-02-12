@@ -6,13 +6,8 @@ module Raptor
       end
     end
 
-    def initialize(sources)
+    def initialize(sources={})
       @sources = sources
-    end
-
-    def self.for_request(request, route_path)
-      sources = Injectables::All.new(request, route_path).sources
-      new(sources)
     end
 
     def call(method)
@@ -45,20 +40,20 @@ module Raptor
       sources = @sources.merge(:record => lambda { record })
       Injector.new(sources)
     end
+
+    def add_request(request)
+      sources = @sources.merge(Injectables::Request.new(request).sources)
+      Injector.new(sources)
+    end
+
+    def add_route_path(request, route_path)
+      sources = @sources.merge(
+        Injectables::RouteVariable.new(request, route_path).sources)
+      Injector.new(sources)
+    end
   end
 
   module Injectables
-    class All
-      def initialize(request, route_path)
-        @injectables = [Request.new(request),
-                        RouteVariable.new(request, route_path)]
-      end
-
-      def sources
-        @injectables.map(&:sources).inject(&:merge)
-      end
-    end
-
     class Request
       def initialize(request)
         @request = request

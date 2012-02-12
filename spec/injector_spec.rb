@@ -55,6 +55,22 @@ describe Raptor::Injector do
     injector_with_record = injector.add_record(record)
     injector_with_record.call(method).should == record
   end
+
+  it "injects requests once it's been given one" do
+    def method_taking_request(request); request; end
+    request = stub
+    method = method(:method_taking_request)
+    injector_with_request = injector.add_request(request)
+    injector_with_request.call(method).should == request
+  end
+
+  it "injects route variables once it's been given the route path" do
+    def method_taking_id(id); id; end
+    request = stub(:path_info => "/posts/5")
+    method = method(:method_taking_id)
+    injector_with_route_path = injector.add_route_path(request, "/posts/:id")
+    injector_with_route_path.call(method).should == "5"
+  end
 end
 
 class ObjectWithInitializerTakingParams

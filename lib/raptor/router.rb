@@ -217,7 +217,9 @@ module Raptor
     end
 
     def respond_to_request(request)
-      injector = Injector.for_request(request, @path)
+      injector = Injector.new.
+        add_request(request).
+        add_route_path(request, @path)
       record = @delegator.delegate(injector)
       @responder.respond(self, record, injector)
     end
@@ -241,7 +243,9 @@ module Raptor
 
     def match?(request)
       @requirements.all? do |requirement|
-        injector = Injector.for_request(request, request.path_info)
+        injector = Injector.new.
+          add_request(request).
+          add_route_path(request, @path)
         injector.call(requirement.method(:match?))
       end
     end
