@@ -30,5 +30,14 @@ describe Raptor::Delegator do
     delegator = Raptor::Delegator.new(AModule, nil)
     delegator.delegate(request, route_path).should be_nil
   end
+
+  it "calls the named method" do
+    delegator = Raptor::Delegator.new(Object, "Hash.new")
+    request = stub(:request).as_null_object
+    route_path = stub(:route_path).as_null_object
+    injector = Raptor::Injector.new({})
+    Raptor::Injector.stub(:for_request).with(request, route_path) { injector }
+    delegator.delegate(request, route_path).should == {}
+  end
 end
 

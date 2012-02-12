@@ -52,16 +52,6 @@ describe Raptor::Router do
     end
   end
 
-  it "delegates to the named object, not just Record" do
-    router = Raptor::Router.build(RouterTestApp) do
-      path "post" do
-        new :to => "Object.delegated_by_raptor"
-      end
-    end
-    Object.should_receive(:delegated_by_raptor)
-    router.call(request('GET', '/post/new'))
-  end
-
   it "allows overriding of redirect in standard routes" do
     request = request("GET", "/post_with_redirect/new")
     response = RouterTestApp::Routes.call(request)
