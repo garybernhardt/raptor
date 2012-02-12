@@ -15,11 +15,11 @@ module Raptor
       route = route_for_request(injector, request)
       log_routing_of(route, request)
       begin
-        route.respond_to_request(request)
+        route.respond_to_request(injector, request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
         action = route.action_for_exception(e) or raise
-        route_named(action).respond_to_request(request)
+        route_named(action).respond_to_request(injector, request)
       end
     end
 
@@ -238,10 +238,8 @@ module Raptor
           options.exception_actions)
     end
 
-    def respond_to_request(request)
-      injector = Injector.new.
-        add_request(request).
-        add_route_path(request, @path)
+    def respond_to_request(injector, request)
+      injector = injector.add_route_path(request, @path)
       record = @delegator.delegate(injector)
       @responder.respond(self, record, injector)
     end

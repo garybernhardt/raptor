@@ -8,9 +8,11 @@ describe Raptor::Route do
   it "errors if redirect target doesn't exist"
 
   it "can render text" do
+    injector = Raptor::Injector.new
     route = Raptor::BuildsRoutes.new(AModule).root(:text => "the text")
     req = request("GET", "/posts")
-    route.respond_to_request(req).body.join.strip.should == "the text"
+    response = route.respond_to_request(injector, req)
+    response.body.join.strip.should == "the text"
   end
 
   it "routes to nested routes"
