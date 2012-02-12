@@ -2,6 +2,8 @@ require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
 
+module AModule; end
+
 describe Raptor::Router do
   module RouterTestApp
     module Presenters
@@ -52,28 +54,13 @@ describe Raptor::Router do
     end
   end
 
-  it "can render text" do
-    routes = Raptor.routes(RouterTestApp) do
-      path "posts" do
-        index :to => "Object.new", :text => "the text"
-      end
-    end
-
-    req = request("GET", "/posts")
-    routes.call(req).body.join.strip.should == "the text"
-  end
-
-  describe "router" do
+  describe "routes" do
     it "errors if redirect target doesn't exist"
 
-    describe "root route" do
-      it "is a normal route" do
-        router = Raptor::Router.build(RouterTestApp) do
-          root :text => "it worked"
-        end
-        req = request("GET", "/")
-        router.call(req).body.join.strip.should == "it worked"
-      end
+    it "can render text" do
+      route = Raptor::BuildsRoutes.new(AModule).root(:text => "the text")
+      req = request("GET", "/posts")
+      route.respond_to_request(req).body.join.strip.should == "the text"
     end
   end
 
