@@ -38,24 +38,7 @@ module Raptor
     end
   end
 
-  class BuildsRoutes
-    def initialize(app_module, parent_path="")
-      @app_module = app_module
-      @parent_path = parent_path
-      @routes = []
-    end
-
-    def build(&block)
-      instance_eval(&block)
-      @routes
-    end
-
-    def path(sub_path_name, &block)
-      routes = BuildsRoutes.new(@app_module, "/" + sub_path_name).build(&block)
-      routes.each { |route| route.add_neighbors(routes) }
-      @routes += routes
-    end
-
+  module StandardRoutes
     def root(params={})
       route(:root, "GET", "/", params)
     end
@@ -100,6 +83,27 @@ module Raptor
       params[:to] = "#{record_module}.destroy" unless params.key?(:to)
       route(:destroy, "DELETE", "/:id",
             {:redirect => :index}.merge(params))
+    end
+  end
+
+  class BuildsRoutes
+    include StandardRoutes
+
+    def initialize(app_module, parent_path="")
+      @app_module = app_module
+      @parent_path = parent_path
+      @routes = []
+    end
+
+    def build(&block)
+      instance_eval(&block)
+      @routes
+    end
+
+    def path(sub_path_name, &block)
+      routes = BuildsRoutes.new(@app_module, "/" + sub_path_name).build(&block)
+      routes.each { |route| route.add_neighbors(routes) }
+      @routes += routes
     end
 
     def last_parent_path_component
