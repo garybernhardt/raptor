@@ -18,7 +18,9 @@ module Raptor
     end
 
     def call(method)
-      method.call(*args(method))
+      args = self.args(method)
+      Raptor.log("Injecting #{method.inspect} with #{args.inspect}")
+      method.call(*args)
     end
 
     def args(method)
