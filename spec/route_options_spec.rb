@@ -1,7 +1,6 @@
 require "rack"
 require_relative "spec_helper"
-require_relative "../lib/raptor/router"
-require_relative "../lib/raptor/responders"
+require "raptor"
 
 describe Raptor::RouteOptions do
   let(:app_module) { stub(:app_module) }
@@ -27,8 +26,8 @@ describe Raptor::RouteOptions do
         and_return(responder)
       options = Raptor::RouteOptions.new(app_module,
                                          parent_path,
-                                         {:present => "post"})
-      options.responder_for(:show).should == responder
+                                         :action => :show, :present => "post")
+      options.responder.should == responder
     end
 
     it "renders the action's template by default" do
@@ -38,8 +37,8 @@ describe Raptor::RouteOptions do
         and_return(template_responder)
       options = Raptor::RouteOptions.new(app_module,
                                          parent_path,
-                                         :present => "post")
-      options.responder_for(:show).should == template_responder
+                                         :action => :show, :present => "post")
+      options.responder.should == template_responder
     end
 
     it "uses the explicit template if one is given" do
@@ -49,13 +48,17 @@ describe Raptor::RouteOptions do
         and_return(template_responder)
       options = Raptor::RouteOptions.new(
         app_module, parent_path, :present => "post", :render => "show")
-      options.responder_for(:show).should == template_responder
+      options.responder.should == template_responder
     end
   end
 
   it "delegates to nothing when there's no :to" do
-    options = Raptor::RouteOptions.new(app_module, parent_path, {})
-    options.delegate_name.should == "Raptor::NullDelegate.do_nothing"
+    options = Raptor::RouteOptions.new(Object, parent_path, {})
+    injector = stub(:injector)
+    the_delegate = stub(:the_delegate)
+    injector.stub(:call).with(Raptor::NullDelegate.method(:do_nothing)).
+      and_return(the_delegate)
+    options.delegator.delegate(injector).should == the_delegate
   end
 end
 

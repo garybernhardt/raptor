@@ -125,7 +125,10 @@ module Raptor
     def route(action, http_method, path, params={})
       path = @parent_path + path
       Raptor::ValidatesRoutes.validate_route_params!(params)
-      route = Route.for_app_module(@app_module, action, http_method, @parent_path, path, params)
+      params = params.merge(:action => action,
+                            :http_method => http_method,
+                            :path => path)
+      route = Route.for_app_module(@app_module, @parent_path, params)
       @routes << route
       route
     end
@@ -134,15 +137,21 @@ module Raptor
   class CantInferModulePathsForRootRoutes < RuntimeError; end
 
   class RouteOptions
+    NULL_DELEGATE_NAME = "Raptor::NullDelegate.do_nothing"
+
     def initialize(app_module, parent_path, params)
       @app_module = app_module
       @parent_path = parent_path
       @params = params
     end
 
-    def delegate_name
-      null_delegate = "Raptor::NullDelegate.do_nothing"
-      @params.fetch(:to, null_delegate)
+    def action; @params.fetch(:action); end
+    def http_method; @params.fetch(:http_method); end
+    def path; @params.fetch(:path); end
+
+    def delegator
+      delegate_name = @params.fetch(:to, NULL_DELEGATE_NAME)
+      Raptor::Delegator.new(@app_module, delegate_name)
     end
 
     def exception_actions
@@ -151,7 +160,7 @@ module Raptor
       end
     end
 
-    def responder_for(action)
+    def responder
       redirect = @params[:redirect]
       text = @params[:text]
       presenter = @params[:present].to_s
@@ -169,6 +178,15 @@ module Raptor
     end
 
     def requirements
+      standard_requirements + custom_requirements
+    end
+
+    def standard_requirements
+      [HttpMethodRequirement.new(http_method),
+       PathRequirement.new(path)]
+    end
+
+    def custom_requirements
       return [] unless @params.has_key?(:require)
       name = @params.fetch(:require).to_s
       Requirements.new(@app_module).matching(name)
@@ -211,16 +229,15 @@ module Raptor
       @neighbors.find { |route| route.name == name }
     end
 
-    def self.for_app_module(app_module, action, http_method, parent_path, path, params)
-      route_options = RouteOptions.new(app_module, parent_path, params)
-      requirements = route_options.requirements + [
-        HttpMethodRequirement.new(http_method),
-        PathRequirement.new(path),
-      ]
-      delegator = Delegator.new(app_module, route_options.delegate_name)
-      responder = route_options.responder_for(action)
-      new(app_module, action, path, requirements, delegator, responder,
-          route_options.exception_actions)
+    def self.for_app_module(app_module, parent_path, params)
+      options = RouteOptions.new(app_module, parent_path, params)
+      new(app_module,
+          options.action,
+          options.path,
+          options.requirements,
+          options.delegator,
+          options.responder,
+          options.exception_actions)
     end
 
     def respond_to_request(request)
