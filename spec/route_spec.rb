@@ -71,74 +71,8 @@ describe Raptor::Router do
     routes.call(req).body.join.strip.should == "the text"
   end
 
-  describe "routes" do
-    let(:router) do
-      router = Raptor::Router.build(RouterTestApp) do
-        route(:my_action, "GET", "/things", :to => "Object.delegate",
-              :text => "")
-      end
-    end
-
-    let(:req) { request("GET", "/things") }
-
-    it "propagates exceptions raised in delegates" do
-      Object.stub(:delegate).and_raise(RuntimeError)
-      expect { router.call(req) }.to raise_error(RuntimeError)
-    end
-
-    it "knows routes' paths" do
-      router.route_named(:my_action).path.should == "/things"
-    end
-
+  describe "router" do
     it "errors if route_named is asked for a route that doesn't exist"
-
-    describe "requirements" do
-      # XXX: Isolate these specs
-      it "raises an error if the requirement doesn't match" do
-        app_module = Module.new
-        app_module::Requirements = Module.new
-        app_module::Requirements::Failing = Class.new do
-          def self.match?
-            false
-          end
-        end
-
-        router = Raptor::Router.build(app_module) do
-          route(:my_action, "GET", "/things",
-                :to => "Object.new", :require => :failing)
-        end
-        expect do
-          router.call(req)
-        end.to raise_error(Raptor::NoRouteMatches)
-      end
-
-      it "runs normally if the requirement matches" do
-        pending "Why isn't this failing? It references FailingRequirement, not MatchingRequirement"
-        resource.stub(:requirements => [FailingRequirement])
-        router = Raptor::Router.build(resource) do
-          route(:my_action, "GET", "/things",
-                :to => "Object.new", :require => :matching,
-                :text => "it worked")
-        end
-        router.call(req).body.join('').strip.should == "it worked"
-      end
-
-      it "injects arguments into the requirement" do
-        app_module = Module.new
-        app_module::Requirements = Module.new
-        app_module::Requirements::Argument = Class.new do
-          def self.match?(path)
-            true
-          end
-        end
-        router = Raptor::Router.build(app_module) do
-          route(:my_action, "GET", "/things",
-                :to => "Object.new", :require => :argument,
-                :text => "it worked")
-        end
-        router.call(req).body.join('').strip.should == "it worked"
-      end
-    end
 
     describe "root route" do
       it "is a normal route" do
