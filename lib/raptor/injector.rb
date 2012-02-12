@@ -6,8 +6,15 @@ module Raptor
       end
     end
 
-    def initialize(sources={})
-      @sources = sources
+    def initialize(injectables=[])
+      @injectables = injectables
+    end
+
+    def sources
+      # Merge all injectables' sources into a single hash
+      @sources ||= @injectables.map do |injectable|
+        injectable.sources(self)
+      end.inject(&:merge)
     end
 
     def call(method)
@@ -19,7 +26,7 @@ module Raptor
       parameters(method).select do |type, name|
         name && type != :rest && type != :block
       end.map do |type, name|
-        source_proc = @sources[name] or raise UnknownInjectable.new(name)
+        source_proc = sources[name] or raise UnknownInjectable.new(name)
         source_proc.call
       end
     end
@@ -37,19 +44,53 @@ module Raptor
     end
 
     def add_record(record)
-      sources = @sources.merge(:record => lambda { record })
-      Injector.new(sources)
+      Injector.new(@injectables +
+                   [Raptor::Injectables::Fixed.new(:record, record)])
     end
 
     def add_request(request)
-      sources = @sources.merge(Injectables::Request.new(request).sources)
-      Injector.new(sources)
+      injectables = @injectables + [Injectables::Request.new(request)]
+      Injector.new(injectables)
     end
 
     def add_route_path(request, route_path)
-      sources = @sources.merge(
-        Injectables::RouteVariable.new(request, route_path).sources)
-      Injector.new(sources)
+      injectables = @injectables + [Injectables::RouteVariable.new(request,
+                                                                   route_path)]
+      Injector.new(injectables)
+    end
+  end
+
+  module Injectables
+    class All
+      def initialize(app_module, request, route_path)
+        @custom_injectable = Custom.new(app_module)
+        @injectables = [Request.new(request),
+                        RouteVariable.new(request, route_path)]
+      end
+
+      def sources(injector)
+        injectables = @injectables + @custom_injectable.injectables(injector)
+        injectables.map do |injectable|
+          injectable.sources(injector)
+        end.inject(&:merge)
+      end
+    end
+
+    class Custom
+      def initialize(app_module)
+        @app_module = app_module
+      end
+
+      def injectables(injector)
+        injectables_module = @app_module::Injectables
+        injectables_module.constants.map do |const_name|
+          injectables_module.const_get(const_name)
+        end.select do |const|
+          const.is_a?(Class)
+        end.map do |const|
+          injector.call(const.method(:new))
+        end
+      end
     end
   end
 
@@ -59,7 +100,7 @@ module Raptor
         @request = request
       end
 
-      def sources
+      def sources(injector)
         {:request => lambda { @request },
          :http_method => lambda { @request.request_method },
          :path => lambda { @request.path_info },
@@ -74,7 +115,7 @@ module Raptor
         @route_path = route_path
       end
 
-      def sources
+      def sources(injector)
         Hash[path_component_pairs.map do |name, value|
           [name, lambda { value }]
         end]
@@ -89,6 +130,16 @@ module Raptor
           [name.sub(/^:/, "").to_sym, value]
         end
         variable_pairs_without_colons
+      end
+    end
+
+    class Fixed
+      def initialize(name, value)
+        @name, @value = name, value
+      end
+
+      def sources(injector)
+        {@name => lambda { @value } }
       end
     end
   end

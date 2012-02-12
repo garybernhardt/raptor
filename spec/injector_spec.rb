@@ -3,26 +3,18 @@ require_relative "spec_helper"
 require_relative "../lib/raptor/injector"
 
 describe Raptor::Injector do
-
   def method_taking_id(id); id; end
-  def method_taking_params(params); params; end
   def method_taking_splat(*); 'nothing'; end
   def method_taking_nothing; 'nothing' end
   def method_taking_only_a_block(&block); 'nothing' end
   def method_taking_record(record); record; end
 
-  let(:params) { stub }
-  let(:sources) do
-    {:params => lambda { params }, :id => lambda { 5 } }
+  let(:injector) do
+    Raptor::Injector.new([Raptor::Injectables::Fixed.new(:id, 5)])
   end
-  let(:injector) { Raptor::Injector.new(sources) }
 
   it "injects required arguments for delegate methods" do
     injector.call(method(:method_taking_id)).should == 5
-  end
-
-  it "injects :params" do
-    injector.call(method(:method_taking_params)).should == params
   end
 
   it "injects [] when the method only takes optional parameters" do
@@ -38,8 +30,8 @@ describe Raptor::Injector do
   end
 
   it "injects arguments from initialize for the new method" do
-    method = ObjectWithInitializerTakingParams.method(:new)
-    injector.call(method).params.should == params
+    method = ObjectWithInitializerTakingId.method(:new)
+    injector.call(method).id.should == 5
   end
 
   it "throws an error when no source is found for an argument" do
@@ -73,10 +65,10 @@ describe Raptor::Injector do
   end
 end
 
-class ObjectWithInitializerTakingParams
-  attr_reader :params
-  def initialize(params)
-    @params = params
+class ObjectWithInitializerTakingId
+  attr_reader :id
+  def initialize(id)
+    @id = id
   end
 end
 

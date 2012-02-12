@@ -30,8 +30,7 @@ describe Raptor::RedirectResponder do
 
   def redirect_to_action(action, record)
     responder = Raptor::RedirectResponder.new(app_module, action)
-    injection_sources = {}
-    response = responder.respond(route, record, injection_sources)
+    response = responder.respond(route, record, Raptor::Injector.new)
   end
 end
 
@@ -43,7 +42,7 @@ describe Raptor::ActionTemplateResponder do
     responder = Raptor::ActionTemplateResponder.new(app_module, 'post', 'posts', :show)
     record = stub
     route = stub
-    injector = Raptor::Injector.new({})
+    injector = Raptor::Injector.new([])
     Raptor::Template.stub(:render).with(PostPresenter.new, "posts/show.html.erb").
       and_return("it worked")
     response = responder.respond(route, record, injector)
