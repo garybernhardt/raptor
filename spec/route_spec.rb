@@ -64,7 +64,7 @@ describe Raptor::Router do
   end
 
   describe "router" do
-    it "errors if route_named is asked for a route that doesn't exist"
+    it "errors if redirect target doesn't exist"
 
     describe "root route" do
       it "is a normal route" do
