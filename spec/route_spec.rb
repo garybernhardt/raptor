@@ -259,9 +259,7 @@ describe Raptor::Router do
   it "errors when asked to create guess a presenter for a root URL like GET /" do
     app_module = Module.new
     expect do
-      Raptor::BuildsRoutes.new(app_module).build do
-        index
-      end
+      Raptor::BuildsRoutes.new(app_module).index
     end.to raise_error(Raptor::CantInferModulePathsForRootRoutes)
   end
 
