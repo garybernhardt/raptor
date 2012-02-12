@@ -12,7 +12,13 @@ module Raptor
 
     def call(request)
       injector = Injector.new.add_request(request)
-      route = route_for_request(injector, request)
+      begin
+        route = route_for_request(injector, request)
+      rescue NoRouteMatches
+        Raptor.log("No route matches")
+        return Rack::Response.new("", 404)
+      end
+
       begin
         route.respond_to_request(injector, request)
       rescue Exception => e

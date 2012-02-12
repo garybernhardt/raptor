@@ -24,12 +24,5 @@ describe Raptor::App do
     env = env('GET', '/post')
     app.call(env).body.join('').strip.should == "Template content"
   end
-
-  it "raises an error if no route matches" do
-    env = env('GET', '/resource_that_doesnt_exist/5')
-    expect do
-      app.call(env)
-    end.to raise_error(Raptor::NoRouteMatches)
-  end
 end
 
