@@ -4,6 +4,10 @@ https://github.com/garybernhardt/raptor
 
 ## DESCRIPTION
 
+Raptor is an experimental web framework that encourages simple, decoupled objects. There are no base classes and as little "DSL" as possible. Raptor is not MVC; at least, not in the way that frameworks like Rails is.
+
+## Components
+
 R-A-P-T-O-R, taken in order of importance:
 
 **A: Application**: The entire Raptor application is an object that conforms to the Rack interface. You can pass it around if you like. Even mount it as part of a larger Rack app if you like.
