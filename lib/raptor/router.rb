@@ -11,7 +11,8 @@ module Raptor
     end
 
     def call(request)
-      route = route_for_request(request)
+      injector = Injector.new.add_request(request)
+      route = route_for_request(injector, request)
       log_routing_of(route, request)
       begin
         route.respond_to_request(request)
@@ -27,8 +28,9 @@ module Raptor
         "Routing #{request.path_info.inspect} to #{route.path.inspect}")
     end
 
-    def route_for_request(request)
-      @routes.find { |route| route.match?(request) } or raise NoRouteMatches
+    def route_for_request(injector, request)
+      @routes.find { |route| route.match?(injector, request) } or
+        raise NoRouteMatches
     end
 
     def route_named(action_name)
@@ -231,22 +233,8 @@ module Raptor
       end.values.first
     end
 
-    def match?(request)
-      RouteCriteria.new(@path, @requirements).match?(request)
-    end
-  end
-
-  class RouteCriteria
-    def initialize(path, requirements)
-      @requirements = requirements
-      @path = path
-    end
-
-    def match?(request)
+    def match?(injector, request)
       @requirements.all? do |requirement|
-        injector = Injector.new.
-          add_request(request).
-          add_route_path(request, @path)
         injector.call(requirement.method(:match?))
       end
     end
