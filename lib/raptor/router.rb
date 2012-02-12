@@ -209,9 +209,8 @@ module Raptor
   class Route
     attr_reader :name, :path
 
-    def initialize(app_module, name, path, requirements, delegator, responder,
+    def initialize(name, path, requirements, delegator, responder,
                    exception_actions)
-      @app_module = app_module
       @name = name
       @path = path
       @requirements = requirements
@@ -231,8 +230,7 @@ module Raptor
 
     def self.for_app_module(app_module, parent_path, params)
       options = RouteOptions.new(app_module, parent_path, params)
-      new(app_module,
-          options.action,
+      new(options.action,
           options.path,
           options.requirements,
           options.delegator,
