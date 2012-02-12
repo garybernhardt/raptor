@@ -13,7 +13,6 @@ module Raptor
     def call(request)
       injector = Injector.new.add_request(request)
       route = route_for_request(injector, request)
-      log_routing_of(route, request)
       begin
         route.respond_to_request(injector, request)
       rescue Exception => e
@@ -21,11 +20,6 @@ module Raptor
         action = route.action_for_exception(e) or raise
         route_named(action).respond_to_request(injector, request)
       end
-    end
-
-    def log_routing_of(route, request)
-      Raptor.log(
-        "Routing #{request.path_info.inspect} to #{route.path.inspect}")
     end
 
     def route_for_request(injector, request)
@@ -239,6 +233,7 @@ module Raptor
     end
 
     def respond_to_request(injector, request)
+      Raptor.log("Routing #{request.path_info.inspect} to #{path.inspect}")
       injector = injector.add_route_path(request, @path)
       record = @delegator.delegate(injector)
       @responder.respond(self, record, injector)
