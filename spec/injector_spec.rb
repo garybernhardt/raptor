@@ -42,18 +42,18 @@ describe Raptor::Injector do
     injector.call(method).params.should == params
   end
 
-  it "injects records once it's been given one" do
-    record = stub
-    method = method(:method_taking_record)
-    injector_with_record = injector.add_record(record)
-    injector_with_record.call(method).should == record
-  end
-
   it "throws an error when no source is found for an argument" do
     klass = Class.new { def f(unknown_argument); end }
     expect do
       injector.call(klass.new.method(:f))
     end.to raise_error(Raptor::Injector::UnknownInjectable)
+  end
+
+  it "injects records once it's been given one" do
+    record = stub
+    method = method(:method_taking_record)
+    injector_with_record = injector.add_record(record)
+    injector_with_record.call(method).should == record
   end
 end
 
