@@ -63,6 +63,37 @@ describe Raptor::Injector do
     injector_with_route_path = injector.add_route_path(request, "/posts/:id")
     injector_with_route_path.call(method).should == "5"
   end
+
+  context "custom injectables" do
+    before do
+      module WithInjectables
+        module Injectables
+          class Fruit
+            def sources(injector)
+              {:watermelon => lambda { "fruity" } }
+            end
+          end
+        end
+      end
+
+      module WithoutInjectables
+      end
+    end
+
+    it "injects custom injectables" do
+      def takes_watermelon(watermelon); watermelon; end
+      injector = Raptor::Injector.for_app_module(WithInjectables)
+      injector.call(method(:takes_watermelon)).should == "fruity"
+    end
+
+    it "doesn't require the Injectables module to exist" do
+      def takes_request(request); request; end
+      request = stub(:request)
+      injector = Raptor::Injector.for_app_module(WithoutInjectables)
+      injector = injector.add_request(request)
+      injector.call(method(:takes_request)).should == request
+    end
+  end
 end
 
 class ObjectWithInitializerTakingId

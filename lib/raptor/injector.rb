@@ -4,6 +4,10 @@ module Raptor
       @injectables = injectables
     end
 
+    def self.for_app_module(app_module)
+      Injector.new([CustomInjectable.new(app_module)])
+    end
+
     def sources
       # Merge all injectables' sources into a single hash
       @sources ||= @injectables.map do |injectable|
@@ -62,39 +66,35 @@ module Raptor
     end
   end
 
-  module Injectables
-    class All
-      def initialize(app_module, request, route_path)
-        @custom_injectable = Custom.new(app_module)
-        @injectables = [Request.new(request),
-                        RouteVariable.new(request, route_path)]
-      end
-
-      def sources(injector)
-        injectables = @injectables + @custom_injectable.injectables(injector)
-        injectables.map do |injectable|
-          injectable.sources(injector)
-        end.inject(&:merge)
-      end
+  class CustomInjectable
+    def initialize(app_module)
+      @app_module = app_module
     end
 
-    class Custom
-      def initialize(app_module)
-        @app_module = app_module
-      end
+    def sources(injector)
+      injectables(injector).map do |injectable|
+        injectable.sources(injector)
+      end.inject(&:merge) || {}
+    end
 
-      def injectables(injector)
+    def injectables(injector)
+      begin
         injectables_module = @app_module::Injectables
-        injectables_module.constants.map do |const_name|
-          injectables_module.const_get(const_name)
-        end.select do |const|
-          const.is_a?(Class)
-        end.map do |const|
-          injector.call(const.method(:new))
-        end
+      rescue NameError
+        return []
+      end
+
+      injectables_module.constants.map do |const_name|
+        injectables_module.const_get(const_name)
+      end.select do |const|
+        const.is_a?(Class)
+      end.map do |const|
+        injector.call(const.method(:new))
       end
     end
+  end
 
+  module Injectables
     class Request
       def initialize(request)
         @request = request

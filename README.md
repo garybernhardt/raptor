@@ -110,7 +110,7 @@ To define your own injectables , just define a class:
 ```ruby
 class MyApp::Injectables::Fruit
   def sources(injector)
-    {:watermelon => "tasty"}
+    {:watermelon => lambda { "tasty" } }
   end
 end
 ```
