@@ -23,14 +23,14 @@ end
 
 describe Raptor::Delegator do
   it "returns nil if the delegate is nil" do
-    injector = Raptor::Injector.new({})
+    injector = Raptor::Injector.new([])
     delegator = Raptor::Delegator.new(AModule, nil)
     delegator.delegate(injector).should be_nil
   end
 
   it "calls the named method" do
     delegator = Raptor::Delegator.new(Object, "Hash.new")
-    injector = Raptor::Injector.new({})
+    injector = Raptor::Injector.new([])
     delegator.delegate(injector).should == {}
   end
 end
