@@ -48,7 +48,7 @@ The second thing you notice: there's no controller! Yes; this is because control
 Routes can:
 
 - delegate requests to objects you create.
-- enforce constraints (like "user must be an admin" in the example above). [TODO]
+- enforce constraints (like "user must be an admin" in the example above).
 - redirect on success, or on certain exceptions, or both.
 - render views.
 - apply presenters before rendering.
