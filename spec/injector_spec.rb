@@ -1,6 +1,6 @@
 require "rack"
 require_relative "spec_helper"
-require_relative "../lib/raptor/injector"
+require "raptor"
 
 describe Raptor::Injector do
   def method_taking_id(id); id; end
