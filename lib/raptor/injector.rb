@@ -94,9 +94,7 @@ module Raptor
         end
       end
     end
-  end
 
-  module Injectables
     class Request
       def initialize(request)
         @request = request
