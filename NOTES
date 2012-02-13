@@ -1,0 +1,29 @@
+## Design Notes / Constraints
+
+- All scripts will comform to Unix argument conventions
+- All scripts will die immediately on ^C
+- All scripts, and framework loads, will take less than 100 ms
+- Autoreload will happen by killing and restarting, not in-place
+- Releases will follow semantic versioning
+
+## Sanity Notes
+
+- Mutating a record in a presenter is an error
+- No two injectables may register the same name
+
+## Testing
+
+- Running request tests generates transcripts of the requests as text files. Reviewing these on commit can reveal unintended changes.
+- Add request metatests that duplicate requests that should be idempotent (everything except POSTs) and verify that they actually are. (Good idea?)
+
+## Possible database layer primitives
+
+https://github.com/nateware/redis-objects
+
+## Misc TODOs
+
+Build an example of implementing an access policy at the routing layer. Something like `DocumentAccessRequirement#match?(user, document)`, with a corresponding `:require => document_access` in the route.
+
+Requirements should probably raise/return objects indicating HTTP status code instead of simply matching. That way, an auth requirement can cause a 403 instead of just a 404.
+
+

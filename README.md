@@ -4,42 +4,81 @@ https://github.com/garybernhardt/raptor
 
 ## DESCRIPTION
 
-Raptor is an experimental web framework that encourages simple, decoupled objects. There are no base classes and as little "DSL" as possible. Raptor is not MVC; at least, not in the way that frameworks like Rails is.
+Raptor is an experimental web framework that encourages simple, decoupled objects. There are no base classes and as little "DSL" as possible. Raptor is not MVC; at least, not in the way that frameworks like Rails are. An example would be handy right about now:
 
-## Components
+    module MyApp
+      Routes = Raptor.routes do
+        path "article"
+          show
+          index
+          update :require => :admin, :redirect => :index
+        end
+      end
 
-R-A-P-T-O-R, taken in order of importance:
+      module Records
+        class Article < YourFavoriteORM::Record
+          # Do as you please
+        end
+      end
 
-**A: Application**: The entire Raptor application is an object that conforms to the Rack interface. You can pass it around if you like. Even mount it as part of a larger Rack app if you like.
+      module Requirements
+        class Admin
+          def match?(params)
+            Records::Article.find_by_id(params[:user_id]).admin?
+          end
+        end
+      end
 
-**R: Routes**: More powerful than you're used to. They route both in (via URL, verb, etc.) and out (by mapping raised exceptions to redirects and renders).
+      module Presenters
+        class Article
+          def initialize(record); @record = record; end
+          def slug; @record.title.to_slug; end
+        end
+      end
+    end
 
-**O: [plain old] Objects**: No controllers. Put your logic in a plain old Ruby object. Raptor will pass it whatever it needs&mdash;database records, form parameters, the request URL, or nothing, if it needs nothing.
+The first thing you notice: that's a lot of modules! Yes it is. You can break them into files in whatever way you want, but Raptor does expect this layout once everything is loaded.
 
-**R: [database] Records**: You decide what this means. Your records just need to comform to Raptor's expected interface.
+The second thing you notice: there's no controller! Yes; this is because controllers are the devil. Instead, Raptor has an extremely powerful router:
 
-**P: Presenter**: All template rendering goes through a presenter. At the end of a request, the presenter is automatically instantiated and used to render the template.
+## Routes
 
-**T: Template**: Same as it ever was.
+Routes can:
 
-There are some other components that act as plumbing in your app:
+- delegate requests to objects you create.
+- enforce constraints (like "user must be an admin" in the example above). [TODO]
+- redirect on success, or on certain exceptions, or both.
+- render views.
+- apply presenters before rendering.
 
-**Dependency Injection**: Raptor will inject which arguments your objects need based on the argument names. Inferables are providers for those arguments [TODO]. For example, you might write an inferable that provides current\_user for any method that needs it.
+The `update` route in the above example uses the default update behavior we know and love: the same stuff you've written in a hundred Rails controller actions. This behavior is the default in Raptor, but is completely overrideable. Here we've overrided it to redirect to index instead of show, and to only work for admins. The request lifecycle is:
 
-**Requirements**: These are higher-level routing constraints based on more than just the URL or HTTP method. For example, you could create a route that's only triggered for paying users.
+1. Match PUT "/article/:id".
+1. Enforce the `:admin` requirement, defined by us in `MyApp::Requirements::Admin`. If the user isn't an admin, stop. The route doesn't match, even though the verb and path do.
+1. Call `MyApp::Records::Article.find_and_update`. It takes `id` and `params`. Raptor's dependency injector notices this, extracts the ID from the URL, as well as the params from the request, and passes them in.
+1. Redirect to `/article`, the index path. By default it would've gone to the show path, but we overrode it.
 
-Controllers are conspicuously absent from all of this. All of the controller's responsibilities are provided by these other mechanisms: selective code execution based on the objects in play (requirements), translation of exceptional conditions into redirects and renders (routes), and construction of a template rendering environment (presenters).
+In addition, if `find_and_update` raised `Raptor::ValidationError`, it would've redirected to `:edit`. If a template had been rendered, it would've gone through `MyApp::Presenters::Article`. The full expansion of the update route is:
+
+    route :update, "PUT", "article/:id",
+      :to => "MyApp::Records::Article.find_and_update",
+      :redirect => :show, ValidationError => :edit`
+
+All of the standard Raptor routes are syntactic sugar for these longer forms.
 
 ## Application structure
+
+By default, the router delegates to records. Records are not to contain application logic; delegation directly to records is only acceptable for very simple operations. For anything complex, it's your job to create relevant objects and point the router at them. Raptor provides you niceties related to the web: routing, presentation, template rendering, etc., but the core of your application&mdash;the logic&mdash;should have its own design that Raptor can't know ahead of time.
+
+Raptor currently has no database layer. The records themselves are your job. As long as they have methods that match Raptor's interface, you'll be fine.
+
+## Rack apps and serving
 
 An application is just a Ruby script:
 
     #!/usr/bin/env ruby
-
-    require 'posts'
-    require 'users'
-
-    App = Raptor::App.new([Posts, Users])
+    require 'article'
+    App = Raptor::App.new(MyApp)
 
 `App` is now a Rack app, so you can create a standard config.ru:
 
@@ -50,124 +89,27 @@ and run the app with `rackup`:
 
     $ rackup
 
-There's no autoloader and no discovery of your code: you explicitly require your resources, give them to Raptor, and get back a Rack app.
-
-## Resources
-
-An application is composed of resources. A resource includes database records, presenters, views, and routes, or any subset of those. Not all resources can be accessed directly through HTTP, and not all resources map directly onto database records.
-
-Resources are composed of plain old Ruby objects. Sometimes, Raptor uses conventions to instantiate or interact with them, but the objects themselves are simple. There are no base classes to inherit from. (The one exception to this is routing, because it's pure configuration.)
-
-## Routes
-
-Routes are the core of Raptor, and are much more powerful than in most web frameworks. They can delegate requests to domain objects, enforce request constraints (like "user must be an admin") [TODO], redirect based on exceptions, and render views. They also automatically apply presenters before rendering. For example, here's a `Posts` resource:
-
-    module Posts
-      def self.routes
-        Raptor.routes(self) do
-          show
-          edit
-          update :require => :admin
-        end
-      end
-
-      class PresentsOne
-        ...
-      end
-
-      class Record
-        ...
-      end
-    end
-
-`Posts` is the resource. It has routes, a presenter, and records in a database (never mind their implementation for now). Let's take the routes in order.
-
-`show` has no arguments, so it inherits the default show behavior:
-
-1. Match GET "/posts/:id"
-1. Extract the ID
-1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-1. Instantiate a `Posts::PresentsOne.new(record)`
-1. Render `views/posts/show.html.erb` with the presenter as its context
-
-Each of these is customizable, and each of the seven standard actions has a slightly different set of defaults, mostly in steps 2 and 3.
-
-`edit` is similar, except that it doesn't extract an ID from the URL or call a model method; it just constructs a presenter and renders a view.
-
-`update` is more interesting. It has an admin requirement, so the request lifecycle is:
-
-1. Match PUT "/posts/:id"
-1. Extract the ID
-1. Call `Posts::Record.find_by_id` with the ID, returning `record`
-1. Enforce the `:admin` requirement. If the user isn't an admin, return HTTP 403 Forbidden and end this process.
-1. Call `record.update_attributes`, passing in the incoming params
-1. Redirect to `/posts/:id` with the ID filled in
-
-## Requirements / constraints
-
-[TODO choose name of these things]
-
-Requirements are always enforced immediately after record retrieval.
+There's no autoloader and no discovery of your code: you explicitly require your source, give your app module to Raptor, and get a Rack app back.
 
 ## Complex behavior and the injector
 
-If your `show` route needs to do more than simply retrieve a record, that's not a problem. You can route to any method:
+Any method that Raptor calls will be injected: records, presenters, requirements, even other injectables. Injection is purely name-based: if you have a method named `request`, it will get the Rack request as an argument. It's your job not to ask for HTTP data in deep layers of your application, like records (unless you really want to, in which case you can, but you should at least feel guilty about it).
 
-    module Profiles
-      def self.routes
-        Raptor.routes(self) do
-          show :to => "Profile.from_user"
-        end
-      end
+Injection is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
-      class Profile
-        def self.from_user(user)
-          ...
+To define your own injectables , just define a class:
+
+    module MyApp
+      module Injectables
+        class Fruit
+          def sources(injector)
+            {:watermelon => "tasty"}
+          end
         end
       end
     end
 
-The `show` route here delegates to the `Profile.from_user` method, which presumably takes a `user` argument. Raptor knows that it needs to call this method, and it knows that the method takes a `user`. It looks through its list of injectables [TODO: name?] for one called "user". There is one by default, `Raptor::Injectables::CurrentUser`, which returns the current logged-in user. Raptor calls it to get the current user, then passes it to `Profile.from_user`. From there, it goes through the normal request process: it builds a Profiles::PresentsOne from the profile and renders `views/profiles/show.html.erb` with it.
-
-Raptor will inject arguments to all kinds of things: domain objects, as shown here, but also presenters, records, and requirements. This is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the actual request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing super easy and allows reuse (anyone who needs to create a post can use PostCreator!)
-
-## Specifying the authentication mechanism
-
-## General raptor request process
-
-The seven routes' exact behavior differs, but shares this skeleton:
-
-- Step through all routes, choosing the first that matches.
-- Delegate to the domain object, which may be a record, injecting arguments as needed.
-  - If an exception is raised, route it and end this process
-- Instantiate the presenter with the domain object
-- Pass the presenter to the template
-
-## Design Notes / Constraints
-
-- All scripts will comform to Unix argument conventions
-- All scripts will die immediately on ^C
-- All scripts, and framework loads, will take less than 100 ms
-- Autoreload will happen by killing and restarting, not in-place
-- Releases will follow semantic versioning
-
-## Sanity Notes
-
-- Mutating a record in a presenter is an error
-- No two injectables may register the same name
-
-## Testing
-
-- Running request tests generates transcripts of the requests as text files. Reviewing these on commit can reveal unintended changes.
-- Add request metatests that duplicate requests that should be idempotent (everything except POSTs) and verify that they actually are. (Good idea?)
-
-## Possible database layer primitives
-
-https://github.com/nateware/redis-objects
-
-## Misc TODOs
-
-Build an example of implementing an access policy at the routing layer. Something like `DocumentAccessRequirement#match?(user, document)`, with a corresponding `:require => document_access` in the route.
+Now, if Raptor calls one of your methods that takes a `watermelon` argument, it will be passed "tasty".
 
 ## LICENSE
 
