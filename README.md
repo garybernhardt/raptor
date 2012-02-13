@@ -6,36 +6,38 @@ https://github.com/garybernhardt/raptor
 
 Raptor is an experimental web framework that encourages simple, decoupled objects. There are no base classes and as little "DSL" as possible. Raptor is not MVC; at least, not in the way that frameworks like Rails are. An example would be handy right about now:
 
-    module MyApp
-      Routes = Raptor.routes do
-        path "article"
-          show
-          index
-          update :require => :admin, :redirect => :index
-        end
-      end
+```ruby
+module MyApp
+  Routes = Raptor.routes do
+    path "article"
+      show
+      index
+      update :require => :admin, :redirect => :index
+    end
+  end
 
-      module Records
-        class Article < YourFavoriteORM::Record
-          # Do as you please
-        end
-      end
+  module Records
+    class Article < YourFavoriteORM::Record
+      # Do as you please
+    end
+  end
 
-      module Requirements
-        class Admin
-          def match?(params)
-            Records::Article.find_by_id(params[:user_id]).admin?
-          end
-        end
-      end
-
-      module Presenters
-        class Article
-          def initialize(record); @record = record; end
-          def slug; @record.title.to_slug; end
-        end
+  module Requirements
+    class Admin
+      def match?(params)
+        Records::Article.find_by_id(params[:user_id]).admin?
       end
     end
+  end
+
+  module Presenters
+    class Article
+      def initialize(record); @record = record; end
+      def slug; @record.title.to_slug; end
+    end
+  end
+end
+```
 
 The first thing you notice: that's a lot of modules! Yes it is. You can break them into files in whatever way you want, but Raptor does expect this layout once everything is loaded.
 
@@ -76,18 +78,24 @@ Raptor currently has no database layer. The records themselves are your job. As 
 
 An application is just a Ruby script:
 
-    #!/usr/bin/env ruby
-    require 'article'
-    App = Raptor::App.new(MyApp)
+```ruby
+#!/usr/bin/env ruby
+require 'article'
+App = Raptor::App.new(MyApp)
+```
 
 `App` is now a Rack app, so you can create a standard config.ru:
 
-    require './app'
-    run App
+```ruby
+require './app'
+run App
+```
 
 and run the app with `rackup`:
 
-    $ rackup
+```
+$ rackup
+```
 
 There's no autoloader and no discovery of your code: you explicitly require your source, give your app module to Raptor, and get a Rack app back.
 
@@ -99,15 +107,11 @@ Injection is how form parameters are handled, for example. If your route delegat
 
 To define your own injectables , just define a class:
 
-    module MyApp
-      module Injectables
-        class Fruit
-          def sources(injector)
-            {:watermelon => "tasty"}
-          end
-        end
-      end
-    end
+module MyApp::Injectables::Fruit
+  def sources(injector)
+    {:watermelon => "tasty"}
+  end
+end
 
 Now, if Raptor calls one of your methods that takes a `watermelon` argument, it will be passed "tasty".
 
