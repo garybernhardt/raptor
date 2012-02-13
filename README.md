@@ -107,11 +107,13 @@ Injection is how form parameters are handled, for example. If your route delegat
 
 To define your own injectables , just define a class:
 
-module MyApp::Injectables::Fruit
+```ruby
+class MyApp::Injectables::Fruit
   def sources(injector)
     {:watermelon => "tasty"}
   end
 end
+```
 
 Now, if Raptor calls one of your methods that takes a `watermelon` argument, it will be passed "tasty".
 
