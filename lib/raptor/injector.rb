@@ -1,11 +1,5 @@
 module Raptor
   class Injector
-    class UnknownInjectable < RuntimeError
-      def initialize(name)
-        super("Unknown injectable name: #{name.inspect}")
-      end
-    end
-
     def initialize(injectables=[])
       @injectables = injectables
     end
@@ -59,6 +53,12 @@ module Raptor
       injectables = @injectables + [Injectables::RouteVariable.new(request,
                                                                    route_path)]
       Injector.new(injectables)
+    end
+  end
+
+  class UnknownInjectable < RuntimeError
+    def initialize(name)
+      super("Unknown injectable name: #{name.inspect}")
     end
   end
 

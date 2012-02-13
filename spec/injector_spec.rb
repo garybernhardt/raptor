@@ -38,7 +38,7 @@ describe Raptor::Injector do
     klass = Class.new { def f(unknown_argument); end }
     expect do
       injector.call(klass.new.method(:f))
-    end.to raise_error(Raptor::Injector::UnknownInjectable)
+    end.to raise_error(Raptor::UnknownInjectable)
   end
 
   it "injects records once it's been given one" do
