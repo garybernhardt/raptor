@@ -22,9 +22,7 @@ module Raptor
     end
 
     def call(env)
-      request = Rack::Request.new(env)
-      Raptor.log "App: routing #{request.request_method} #{request.path_info}"
-      return @app_module::Routes.call(request)
+      return Rack::MethodOverride.new(@app_module::Routes).call(env)
     end
   end
 

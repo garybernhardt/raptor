@@ -16,8 +16,6 @@ describe Raptor::Route do
   end
 
   it "routes to nested routes"
-  it "tunnels PUTs over POSTs"
-  it "tunnels DELETEs over POSTs"
   it "stores templates in templates directory, not views"
   it "allows overriding of the presenter class"
   it "uses consistent degelate terminology instead of sometimes calling them records"

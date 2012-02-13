@@ -53,8 +53,8 @@ end
 
 describe "default routes" do
   it "allows overriding of redirect in default routes" do
-    request = request("GET", "/post_with_redirect/new")
-    response = RouterTestApp::Routes.call(request)
+    env = env("GET", "/post_with_redirect/new")
+    response = RouterTestApp::Routes.call(env)
     response.status.should == 302
     # XXX: Why is there a trailing slash on this URL?
     response["Location"].should == "/post_with_redirect/"
@@ -62,30 +62,30 @@ describe "default routes" do
 
   context "index" do
     it "finds all records" do
-      request = request('GET', '/post')
-      body = RouterTestApp::Routes.call(request).body.join('').strip
+      env = env('GET', '/post')
+      body = RouterTestApp::Routes.call(env).body.join('').strip
       body.should match /record 1\s+record 2/
     end
   end
 
   context "show" do
     it "retrieves a single record" do
-      request = request('GET', '/post/2')
-      response = RouterTestApp::Routes.call(request)
+      env = env('GET', '/post/2')
+      response = RouterTestApp::Routes.call(env)
       response.body.join('').strip.should == "It's RECORD 2!"
     end
   end
 
   context "new" do
     it "renders a template" do
-      request = request('GET', '/post/new')
-      response = RouterTestApp::Routes.call(request)
+      env = env('GET', '/post/new')
+      response = RouterTestApp::Routes.call(env)
       response.body.join('').strip.should == "<form>New</form>"
     end
   end
 
   context "create" do
-    let(:req) { request('POST', '/post', StringIO.new("")) }
+    let(:req) { env('POST', '/post', StringIO.new("")) }
 
     before do
       RouterTestApp::Records::Post.stub(:create) { stub(:id => 1) }
@@ -112,15 +112,15 @@ describe "default routes" do
 
   context "edit" do
     it "renders a template" do
-      request = request('GET', '/post/1/edit')
-      response = RouterTestApp::Routes.call(request)
+      env = env('GET', '/post/1/edit')
+      response = RouterTestApp::Routes.call(env)
       response.body.join('').strip.should == "<form>Edit</form>"
     end
   end
 
   context "update" do
     let(:req) do
-      request('PUT', '/post/7', StringIO.new(''))
+      env('PUT', '/post/7', StringIO.new(''))
     end
 
     before do
@@ -147,7 +147,7 @@ describe "default routes" do
   end
 
   context "destroy" do
-    let(:req) { request('DELETE', '/post/7', StringIO.new('')) }
+    let(:req) { env('DELETE', '/post/7', StringIO.new('')) }
 
     it "destroys records" do
       RouterTestApp::Records::Post.should_receive(:destroy)
