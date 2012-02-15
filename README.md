@@ -32,8 +32,8 @@ module MyApp
 
   module Presenters
     class Article
-      def initialize(record); @record = record; end
-      def slug; @record.title.to_slug; end
+      def initialize(subject); @subject = subject; end
+      def slug; @subject.title.to_slug; end
     end
   end
 end
@@ -101,7 +101,7 @@ There's no autoloader and no discovery of your code: you explicitly require your
 
 ## Complex behavior and the injector
 
-Any method that Raptor calls will be injected: records, presenters, requirements, even other injectables. Injection is purely name-based: if you have a method named `request`, it will get the Rack request as an argument. It's your job not to ask for HTTP data in deep layers of your application, like records (unless you really want to, in which case you can, but you should at least feel guilty about it).
+Any method that Raptor calls will be injected: subjects, presenters, requirements, even other injectables. Injection is purely name-based: if you have a method named `request`, it will get the Rack request as an argument. It's your job not to ask for HTTP data in deep layers of your application, like records (unless you really want to, in which case you can, but you should at least feel guilty about it).
 
 Injection is how form parameters are handled, for example. If your route delegates to `PostCreator.create(params)`, Raptor will automatically inject the request params as an argument. You can do the stuff you'd do in a Rails controller without hard coupling yourself to an ActionController::Base class. The reduced coupling makes testing easy and allows reuse (anyone who needs to create a post can use PostCreator!)
 
