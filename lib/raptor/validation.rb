@@ -2,12 +2,21 @@ module Raptor
   class ValidatesRoutes
     def self.validate_route_params!(params)
       raise Raptor::ConflictingRoutes if params[:redirect] && params[:render]
+      if bad_delegate?(params[:to])
+        raise Raptor::BadDelegate.new("#{params[:to]} is not a good delegate name")
+      end
     end
 
     def self.pairs(routes)
       routes.product(routes).select do |x,y|
         x != y
       end
+    end
+
+    def self.bad_delegate?(delegate_name)
+      ['#','.'].select do |method_splitter|
+        delegate_name.include?(method_splitter)
+      end.empty?
     end
 
     def self.same_names?(a,b)
@@ -21,5 +30,6 @@ module Raptor
   end
 
   class ConflictingRoutes < RuntimeError; end
+  class BadDelegate < RuntimeError; end
 end
 
