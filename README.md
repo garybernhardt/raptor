@@ -9,7 +9,7 @@ Raptor is an experimental web framework that encourages simple, decoupled object
 ```ruby
 module MyApp
   Routes = Raptor.routes do
-    path "article"
+    path "article" do
       show
       index
       update :require => :admin, :redirect => :index
