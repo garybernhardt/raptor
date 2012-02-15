@@ -7,7 +7,7 @@ describe Raptor::Injector do
   def method_taking_splat(*); 'nothing'; end
   def method_taking_nothing; 'nothing' end
   def method_taking_only_a_block(&block); 'nothing' end
-  def method_taking_record(record); record; end
+  def method_taking_subject(subject); subject; end
 
   let(:injector) do
     Raptor::Injector.new([Raptor::Injectables::Fixed.new(:id, 5)])
@@ -41,11 +41,11 @@ describe Raptor::Injector do
     end.to raise_error(Raptor::UnknownInjectable)
   end
 
-  it "injects records once it's been given one" do
-    record = stub
-    method = method(:method_taking_record)
-    injector_with_record = injector.add_record(record)
-    injector_with_record.call(method).should == record
+  it "injects the subject once it's been given one" do
+    subject = stub
+    method = method(:method_taking_subject)
+    injector_with_subject = injector.add_subject(subject)
+    injector_with_subject.call(method).should == subject
   end
 
   it "injects requests once it's been given one" do

@@ -5,12 +5,12 @@ require "raptor"
 module RouterTestApp
   module Presenters
     class Post
-      def initialize(record)
-        @record = record
+      def initialize(subject)
+        @subject = subject
       end
 
       def title
-        @record.title.upcase
+        @subject.title.upcase
       end
     end
   end

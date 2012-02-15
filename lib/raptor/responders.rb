@@ -6,7 +6,7 @@ module Raptor
       @text = text
     end
 
-    def respond(route, record, injector)
+    def respond(route, subject, injector)
       Rack::Response.new(@text)
     end
   end
@@ -17,13 +17,13 @@ module Raptor
       @target_route_name = target_route_name
     end
 
-    def respond(route, record, injector)
+    def respond(route, subject, injector)
       response = Rack::Response.new
       path = route.neighbor_named(@target_route_name).path
-      if record
+      if subject
         path = path.gsub(/:\w+/) do |match|
           # XXX: Untrusted send
-          record.send(match.sub(/^:/, '')).to_s
+          subject.send(match.sub(/^:/, '')).to_s
         end
       end
       redirect_to(response, path)
@@ -50,8 +50,8 @@ module Raptor
       @template_path = template_path
     end
 
-    def respond(route, record, injector)
-      presenter = create_presenter(record, injector)
+    def respond(route, subject, injector)
+      presenter = create_presenter(subject, injector)
       Rack::Response.new(render(presenter))
     end
 
@@ -63,8 +63,8 @@ module Raptor
       "#{@template_path}.html.erb"
     end
 
-    def create_presenter(record, injector)
-      injector = injector.add_record(record)
+    def create_presenter(subject, injector)
+      injector = injector.add_subject(subject)
       injector.call(presenter_class.method(:new))
     end
 
@@ -82,11 +82,11 @@ module Raptor
       @template_name = template_name
     end
 
-    def respond(route, record, injector)
+    def respond(route, subject, injector)
       responder = TemplateResponder.new(@app_module,
                                         @presenter_name,
                                         template_path)
-      responder.respond(route, record, injector)
+      responder.respond(route, subject, injector)
     end
 
     def template_path
