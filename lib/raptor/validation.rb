@@ -14,6 +14,7 @@ module Raptor
     end
 
     def self.bad_delegate?(delegate_name)
+      return false if delegate_name.nil?
       ['#','.'].select do |method_splitter|
         delegate_name.include?(method_splitter)
       end.empty?
