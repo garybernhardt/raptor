@@ -104,7 +104,8 @@ module Raptor
         {:request => lambda { @request },
          :http_method => lambda { @request.request_method },
          :path => lambda { @request.path_info },
-         :params => lambda { @request.params }
+         :params => lambda { @request.params },
+         :env => lambda { @request.env }
         }
       end
     end

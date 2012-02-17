@@ -24,6 +24,10 @@ describe Raptor::Injectables::Request do
   it "injects request params" do
     subject.sources(injector).fetch(:params).call.should == {"param" => "value"}
   end
+
+  it "injects env" do
+    subject.sources(injector).fetch(:env).call.should == req.env
+  end
 end
 
 describe Raptor::Injectables::RouteVariable do
