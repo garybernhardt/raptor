@@ -3,9 +3,9 @@ require_relative 'fake_record'
 module Blog
   module Presenters
     class Post
-      takes :record
-      let(:id) { p @record; @record.id }
-      let(:title) { @record.title }
+      takes :subject
+      let(:id) { p @subject; @subject.id }
+      let(:title) { @subject.title }
     end
 
     class PostList

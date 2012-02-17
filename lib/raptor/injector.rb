@@ -43,9 +43,9 @@ module Raptor
       end
     end
 
-    def add_record(record)
+    def add_subject(subject)
       Injector.new(@injectables +
-                   [Raptor::Injectables::Fixed.new(:record, record)])
+                   [Raptor::Injectables::Fixed.new(:subject, subject)])
     end
 
     def add_request(request)
