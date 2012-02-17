@@ -101,7 +101,7 @@ module Raptor
       end
 
       def sources(injector)
-        {:request => lambda { @request },
+        {:rack_request => lambda { @request },
          :http_method => lambda { @request.request_method },
          :path => lambda { @request.path_info },
          :params => lambda { @request.params },

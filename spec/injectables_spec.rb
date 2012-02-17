@@ -10,7 +10,7 @@ describe Raptor::Injectables::Request do
   subject { Raptor::Injectables::Request.new(req) }
 
   it "injects the whole request" do
-    subject.sources(injector).fetch(:request).call.should == req
+    subject.sources(injector).fetch(:rack_request).call.should == req
   end
 
   it "injects the HTTP method" do
