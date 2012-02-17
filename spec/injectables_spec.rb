@@ -25,8 +25,8 @@ describe Raptor::Injectables::Request do
     subject.sources(injector).fetch(:params).call.should == {"param" => "value"}
   end
 
-  it "injects env" do
-    subject.sources(injector).fetch(:env).call.should == req.env
+  it "injects rack_env from request" do
+    subject.sources(injector).fetch(:rack_env).call.should == req.env
   end
 end
 
