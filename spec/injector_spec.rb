@@ -49,7 +49,7 @@ describe Raptor::Injector do
   end
 
   it "injects requests once it's been given one" do
-    def method_taking_request(request); request; end
+    def method_taking_request(rack_request); rack_request; end
     request = stub
     method = method(:method_taking_request)
     injector_with_request = injector.add_request(request)
@@ -87,7 +87,7 @@ describe Raptor::Injector do
     end
 
     it "doesn't require the Injectables module to exist" do
-      def takes_request(request); request; end
+      def takes_request(rack_request); rack_request; end
       request = stub(:request)
       injector = Raptor::Injector.for_app_module(WithoutInjectables)
       injector = injector.add_request(request)
