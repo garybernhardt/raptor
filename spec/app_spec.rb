@@ -26,13 +26,13 @@ describe Raptor::App do
     it "tunnels PUT over POST" do
       App::Routes.should_receive(:call).with(request_method('PUT'))
       Raptor::App.new(App).call(env('POST', '/irrelevant',
-                                            StringIO.new('_method=PUT')))
+                                    StringIO.new('_method=PUT')))
     end
 
     it "tunnels DELETE over POST" do
       App::Routes.should_receive(:call).with(request_method('DELETE'))
       Raptor::App.new(App).call(env('POST', '/irrelevant',
-                                               StringIO.new('_method=DELETE')))
+                                    StringIO.new('_method=DELETE')))
     end
   end
 
