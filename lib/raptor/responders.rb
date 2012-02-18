@@ -30,12 +30,6 @@ module Raptor
       response
     end
 
-    def target_path
-      @route_neighbors.select do |route|
-        route.name == @target_route_name
-      end
-    end
-
     def redirect_to(response, location)
       Raptor.log("Redirecting to #{location}")
       response.status = 302
