@@ -13,6 +13,20 @@ def disallow_injector_use
   Raptor::Injector.stub(:new).and_raise(InjectorNotAllowed)
 end
 
+class RedirectToMatcher
+  def initialize(expected_location)
+    @expected_location = expected_location
+  end
+  def matches?(response)
+    response.status.should == 302
+    response['Location'].should == @expected_location
+  end
+end
+
+def redirect_to(expected)
+  RedirectToMatcher.new(expected)
+end
+
 # The first instantiation of these is very slow for some reason. Do it here so
 # it doesn't pollute test runtimes.
 Rack::Request.new({})

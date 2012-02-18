@@ -18,14 +18,12 @@ describe Raptor::RedirectResponder do
 
   it "fills route variables with record methods" do
     response = redirect_to_action(:show, stub('record', :id => 1))
-    response.status.should == 302
-    response['Location'].should == "/my_resource/1"
+    response.should redirect_to('/my_resource/1')
   end
 
   it "redirects to routes without variables in them" do
     response = redirect_to_action(:index, stub('record'))
-    response.status.should == 302
-    response['Location'].should == "/my_resource"
+    response.should redirect_to('/my_resource')
   end
 
   def redirect_to_action(action, record)
