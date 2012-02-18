@@ -53,7 +53,7 @@ Routes can:
 - render views.
 - apply presenters before rendering.
 
-The `update` route in the above example uses the default update behavior we know and love: the same stuff you've written in a hundred Rails controller actions. This behavior is the default in Raptor, but is completely overrideable. Here we've overriden it to redirect to index instead of show, and to only work for admins. The request lifecycle is:
+The `update` route in the above example uses the default update behavior we know and love: the same stuff you've written in a hundred Rails controller actions. This behavior is the default in Raptor, but is completely overridable. Here we've overridden it to redirect to index instead of show, and to only work for admins. The request lifecycle is:
 
 1. Match PUT "/article/:id".
 1. Enforce the `:admin` requirement, defined by us in `MyApp::Requirements::Admin`. If the user isn't an admin, stop. The route doesn't match, even though the verb and path do.
