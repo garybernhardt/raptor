@@ -12,22 +12,31 @@ module Raptor
   end
 
   class RedirectResponder
-    def initialize(app_module, target_route_name)
+    def initialize(app_module, target)
       @app_module = app_module
-      @target_route_name = target_route_name
+      @target = target
     end
 
     def respond(route, subject, injector)
       response = Rack::Response.new
-      path = route.neighbor_named(@target_route_name).path
+      if @target.is_a?(String)
+        path = @target
+      else
+        path = resource_path(route, subject)
+      end
+      redirect_to(response, path)
+      response
+    end
+
+    def resource_path(route, subject)
+      path = route.neighbor_named(@target).path
       if subject
         path = path.gsub(/:\w+/) do |match|
           # XXX: Untrusted send
           subject.send(match.sub(/^:/, '')).to_s
         end
       end
-      redirect_to(response, path)
-      response
+      path
     end
 
     def redirect_to(response, location)

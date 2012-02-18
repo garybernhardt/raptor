@@ -28,6 +28,12 @@ describe Raptor::RedirectResponder do
     response['Location'].should == "/my_resource"
   end
 
+  it "redirects to other places when given a string" do
+    response = redirect_to_action("http://google.com", stub)
+    response.status.should == 302
+    response['Location'].should == "http://google.com"
+  end
+
   def redirect_to_action(action, record)
     responder = Raptor::RedirectResponder.new(app_module, action)
     response = responder.respond(route, record, Raptor::Injector.new)
