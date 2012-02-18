@@ -23,8 +23,10 @@ class RedirectToMatcher
   end
 end
 
-def redirect_to(expected)
-  RedirectToMatcher.new(expected)
+module RSpec::Matchers
+  def redirect_to(expected)
+    RedirectToMatcher.new(expected)
+  end
 end
 
 # The first instantiation of these is very slow for some reason. Do it here so
