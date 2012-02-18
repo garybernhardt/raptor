@@ -11,7 +11,7 @@ module Raptor
     end
   end
 
-  class RedirectResponder
+  class ActionRedirectResponder
     def initialize(app_module, target)
       @app_module = app_module
       @target = target

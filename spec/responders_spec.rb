@@ -2,7 +2,7 @@ require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
 
-describe Raptor::RedirectResponder do
+describe Raptor::ActionRedirectResponder do
   before { Raptor.stub(:log) }
 
   let(:app_module) { stub(:app_module) }
@@ -28,14 +28,8 @@ describe Raptor::RedirectResponder do
     response['Location'].should == "/my_resource"
   end
 
-  it "redirects to other places when given a string" do
-    response = redirect_to_action("http://google.com", stub)
-    response.status.should == 302
-    response['Location'].should == "http://google.com"
-  end
-
   def redirect_to_action(action, record)
-    responder = Raptor::RedirectResponder.new(app_module, action)
+    responder = Raptor::ActionRedirectResponder.new(app_module, action)
     response = responder.respond(route, record, Raptor::Injector.new)
   end
 end

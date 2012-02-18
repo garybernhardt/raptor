@@ -171,7 +171,7 @@ module Raptor
       template_path = @params[:render]
 
       if redirect
-        RedirectResponder.new(@app_module, redirect)
+        ActionRedirectResponder.new(@app_module, redirect)
       elsif text
         PlaintextResponder.new(text)
       elsif template_path
