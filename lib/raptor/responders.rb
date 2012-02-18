@@ -1,4 +1,4 @@
-require "erb"
+require "tilt"
 
 module Raptor
   class PlaintextResponder
@@ -96,25 +96,12 @@ module Raptor
   end
 
   class Template
-    def initialize(presenter, template_path)
-      @presenter = presenter
-      @template_path = template_path
-    end
-
     def self.render(presenter, template_path)
-      new(presenter, template_path).render
+      path = full_template_path(template_path)
+      Tilt.new(path).render(presenter)
     end
 
-    def render
-      template.result(@presenter.instance_eval { binding })
-    end
-
-    def template
-      ERB.new(File.new(full_template_path).read)
-    end
-
-    def full_template_path
-      template_path = @template_path
+    def self.full_template_path(template_path)
       template_path = "/#{template_path}" unless template_path =~ /^\//
       "views#{template_path}"
     end

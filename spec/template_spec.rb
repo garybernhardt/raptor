@@ -5,10 +5,8 @@ require_relative "../lib/raptor/responders"
 describe Raptor::Template do
   it "raises an error when templates access undefined methods" do
     presenter = Object.new
-    File.stub(:new) { StringIO.new("<% undefined_method %>") }
-
     expect do
-      Raptor::Template.render(presenter, "/posts/show.html.erb").render
+      Raptor::Template.render(presenter, "with_undefined_method_call_in_index/index.html.erb").render
     end.to raise_error(NameError,
                        /undefined local variable or method `undefined_method'/)
   end
