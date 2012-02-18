@@ -1,6 +1,6 @@
 require "rack"
 require_relative "spec_helper"
-require_relative "../lib/raptor/responders"
+require_relative "../lib/raptor/templates"
 
 describe Raptor::Template do
   it "raises an error when templates access undefined methods" do
