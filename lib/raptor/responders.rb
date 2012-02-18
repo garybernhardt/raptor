@@ -18,14 +18,12 @@ module Raptor
     end
 
     def respond(route, subject, injector)
-      response = Rack::Response.new
       if @target.is_a?(String)
         path = @target
       else
         path = resource_path(route, subject)
       end
-      redirect_to(response, path)
-      response
+      RedirectResponder.new(path).respond(route, subject, injector)
     end
 
     def resource_path(route, subject)
@@ -38,11 +36,19 @@ module Raptor
       end
       path
     end
+  end
 
-    def redirect_to(response, location)
-      Raptor.log("Redirecting to #{location}")
+  class RedirectResponder
+    def initialize(location)
+      @location = location
+    end
+
+    def respond(route, subject, injector)
+      response = Rack::Response.new
+      Raptor.log("Redirecting to #{@location}")
       response.status = 302
-      response["Location"] = location
+      response["Location"] = @location
+      response
     end
   end
 
