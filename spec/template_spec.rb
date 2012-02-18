@@ -26,3 +26,11 @@ describe Raptor::Template do
   end
 end
 
+describe Raptor::Layout do
+  it "renders a yielded template" do
+    inner = stub(:render => 'inner')
+    rendered = Raptor::Layout.new('spec/fixtures/layout.html.erb').
+      render(inner)
+    rendered.strip.should == "<div>inner</div>"
+  end
+end
