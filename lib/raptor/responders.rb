@@ -18,11 +18,7 @@ module Raptor
     end
 
     def respond(route, subject, injector)
-      if @target.is_a?(String)
-        path = @target
-      else
-        path = resource_path(route, subject)
-      end
+      path = resource_path(route, subject)
       RedirectResponder.new(path).respond(route, subject, injector)
     end
 

@@ -50,6 +50,24 @@ describe Raptor::RouteOptions do
         app_module, parent_path, :present => "post", :render => "show")
       options.responder.should == template_responder
     end
+
+    it "delegates to an action if :redirect is a symbol" do
+      action_redirecter = stub
+      Raptor::ActionRedirectResponder.stub(:new).
+        with(app_module, :index) { action_redirecter }
+      options = Raptor::RouteOptions.new(
+        app_module, parent_path, :redirect => :index)
+      options.responder.should == action_redirecter
+    end
+
+    it "delegates to a url directly is :redirect is a string" do
+      redirecter = stub
+      Raptor::RedirectResponder.stub(:new).with('http://google.com') { redirecter }
+      options = Raptor::RouteOptions.new(
+        app_module, parent_path, :redirect => 'http://google.com')
+      options.responder.should == redirecter
+    end
+
   end
 
   it "delegates to nothing when there's no :to" do

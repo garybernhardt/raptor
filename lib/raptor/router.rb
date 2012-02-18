@@ -170,7 +170,9 @@ module Raptor
       presenter = @params[:present].to_s
       template_path = @params[:render]
 
-      if redirect
+      if redirect.is_a?(String)
+        RedirectResponder.new(redirect)
+      elsif redirect
         ActionRedirectResponder.new(@app_module, redirect)
       elsif text
         PlaintextResponder.new(text)
