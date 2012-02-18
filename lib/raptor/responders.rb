@@ -44,10 +44,11 @@ module Raptor
   end
 
   class TemplateResponder
-    def initialize(app_module, presenter_name, template_path)
+    def initialize(app_module, presenter_name, template_path, path)
       @app_module = app_module
       @presenter_name = presenter_name
       @template_path = template_path
+      @path = path
     end
 
     def respond(route, subject, injector)
@@ -56,7 +57,9 @@ module Raptor
     end
 
     def render(presenter)
-      Template.render(presenter, template_path)
+      layout = FindsLayouts.find(@path)
+      template = Template.from_path(presenter, template_path)
+      layout.render(template)
     end
 
     def template_path
@@ -85,7 +88,8 @@ module Raptor
     def respond(route, subject, injector)
       responder = TemplateResponder.new(@app_module,
                                         @presenter_name,
-                                        template_path)
+                                        template_path,
+                                        @parent_path)
       responder.respond(route, subject, injector)
     end
 
@@ -95,9 +99,36 @@ module Raptor
     end
   end
 
+  class FindsLayouts
+    LAYOUT_FILENAME = 'layout.html.erb'
+    def self.find(path)
+      in_same_dir = File.join('view', path, LAYOUT_FILENAME)
+      in_root_dir = File.join('view', LAYOUT_FILENAME)
+      if File.exist?(in_same_dir)
+        Layout.new(in_same_dir)
+      elsif File.exist?(in_root_dir)
+        Layout.new(in_root_dir)
+      else
+        NullLayout
+      end
+    end
+  end
+
+  class NullLayout
+    def self.render(inner)
+      inner.render
+    end
+  end
+
   class Layout
+    attr_reader :path
     def initialize(path)
       @path = path
+    end
+
+    def ==(other)
+      other.is_a?(Layout) &&
+        other.path == path
     end
 
     def render(inner)
@@ -115,10 +146,10 @@ module Raptor
       @tilt.render(@presenter)
     end
 
-    def self.render(presenter, template_path)
+    def self.from_path(presenter, template_path)
       path = full_template_path(template_path)
       tilt = Tilt.new(path)
-      new(presenter, tilt).render
+      new(presenter, tilt)
     end
 
     def self.full_template_path(template_path)

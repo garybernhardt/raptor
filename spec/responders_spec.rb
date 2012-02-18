@@ -41,8 +41,10 @@ describe Raptor::ActionTemplateResponder do
     record = stub
     route = stub
     injector = Raptor::Injector.new([])
-    Raptor::Template.stub(:render).with(PostPresenter.new, "posts/show.html.erb").
-      and_return("it worked")
+    Raptor::Template.stub(:from_path).with(PostPresenter.new, "posts/show.html.erb")
+    layout = stub(:layout)
+    layout.stub(:render) { "it worked" }
+    Raptor::FindsLayouts.stub(:find).with('posts') { layout }
     response = responder.respond(route, record, injector)
     response.body.join.strip.should == "it worked"
   end
