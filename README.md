@@ -1,4 +1,4 @@
-# Raptor
+# Raptor [![Build Status](https://secure.travis-ci.org/garybernhardt/raptor.png)](http://travis-ci.org/garybernhardt/raptor) [![Dependency Status](https://gemnasium.com/garybernhardt/raptor.png)](https://gemnasium.com/garybernhardt/raptor)
 
 https://github.com/garybernhardt/raptor
 
