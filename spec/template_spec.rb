@@ -37,13 +37,13 @@ end
 
 describe Raptor::FindsLayouts do
   it "finds a layout in the path directory" do
-    path = 'view/post/layout.html.erb'
+    path = 'views/post/layout.html.erb'
     File.stub(:exist?).with(path) { true }
     Raptor::FindsLayouts.find('post').should == Raptor::Layout.new(path)
   end
 
   it "finds a layout in the root views directory" do
-    path = 'view/layout.html.erb'
+    path = 'views/layout.html.erb'
     File.stub(:exist?) { false }
     File.stub(:exist?).with(path) { true }
     Raptor::FindsLayouts.find('post').should == Raptor::Layout.new(path)
