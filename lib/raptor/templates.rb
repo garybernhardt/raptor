@@ -4,8 +4,8 @@ module Raptor
   class FindsLayouts
     LAYOUT_FILENAME = 'layout.html.erb'
     def self.find(path)
-      in_same_dir = File.join('view', path, LAYOUT_FILENAME)
-      in_root_dir = File.join('view', LAYOUT_FILENAME)
+      in_same_dir = File.join('views', path, LAYOUT_FILENAME)
+      in_root_dir = File.join('views', LAYOUT_FILENAME)
       if File.exist?(in_same_dir)
         Layout.new(in_same_dir)
       elsif File.exist?(in_root_dir)
