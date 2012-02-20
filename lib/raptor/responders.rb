@@ -1,5 +1,3 @@
-require "erb"
-
 module Raptor
   class PlaintextResponder
     def initialize(text)
@@ -11,43 +9,49 @@ module Raptor
     end
   end
 
-  class RedirectResponder
-    def initialize(app_module, target_route_name)
+  class ActionRedirectResponder
+    def initialize(app_module, target)
       @app_module = app_module
-      @target_route_name = target_route_name
+      @target = target
     end
 
     def respond(route, subject, injector)
-      response = Rack::Response.new
-      path = route.neighbor_named(@target_route_name).path
+      path = resource_path(route, subject)
+      RedirectResponder.new(path).respond(route, subject, injector)
+    end
+
+    def resource_path(route, subject)
+      path = route.neighbor_named(@target).path
       if subject
         path = path.gsub(/:\w+/) do |match|
           # XXX: Untrusted send
           subject.send(match.sub(/^:/, '')).to_s
         end
       end
-      redirect_to(response, path)
-      response
+      path
+    end
+  end
+
+  class RedirectResponder
+    def initialize(location)
+      @location = location
     end
 
-    def target_path
-      @route_neighbors.select do |route|
-        route.name == @target_route_name
-      end
-    end
-
-    def redirect_to(response, location)
-      Raptor.log("Redirecting to #{location}")
+    def respond(route, subject, injector)
+      response = Rack::Response.new
+      Raptor.log("Redirecting to #{@location}")
       response.status = 302
-      response["Location"] = location
+      response["Location"] = @location
+      response
     end
   end
 
   class TemplateResponder
-    def initialize(app_module, presenter_name, template_path)
+    def initialize(app_module, presenter_name, template_path, path)
       @app_module = app_module
       @presenter_name = presenter_name
       @template_path = template_path
+      @path = path
     end
 
     def respond(route, subject, injector)
@@ -56,7 +60,9 @@ module Raptor
     end
 
     def render(presenter)
-      Template.render(presenter, template_path)
+      layout = FindsLayouts.find(@path)
+      template = Template.from_path(presenter, template_path)
+      layout.render(template)
     end
 
     def template_path
@@ -85,7 +91,8 @@ module Raptor
     def respond(route, subject, injector)
       responder = TemplateResponder.new(@app_module,
                                         @presenter_name,
-                                        template_path)
+                                        template_path,
+                                        @parent_path)
       responder.respond(route, subject, injector)
     end
 
@@ -95,29 +102,5 @@ module Raptor
     end
   end
 
-  class Template
-    def initialize(presenter, template_path)
-      @presenter = presenter
-      @template_path = template_path
-    end
-
-    def self.render(presenter, template_path)
-      new(presenter, template_path).render
-    end
-
-    def render
-      template.result(@presenter.instance_eval { binding })
-    end
-
-    def template
-      ERB.new(File.new(full_template_path).read)
-    end
-
-    def full_template_path
-      template_path = @template_path
-      template_path = "/#{template_path}" unless template_path =~ /^\//
-      "views#{template_path}"
-    end
-  end
 end
 

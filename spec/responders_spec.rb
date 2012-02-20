@@ -2,7 +2,7 @@ require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
 
-describe Raptor::RedirectResponder do
+describe Raptor::ActionRedirectResponder do
   before { Raptor.stub(:log) }
 
   let(:app_module) { stub(:app_module) }
@@ -27,7 +27,7 @@ describe Raptor::RedirectResponder do
   end
 
   def redirect_to_action(action, record)
-    responder = Raptor::RedirectResponder.new(app_module, action)
+    responder = Raptor::ActionRedirectResponder.new(app_module, action)
     response = responder.respond(route, record, Raptor::Injector.new)
   end
 end
@@ -41,8 +41,10 @@ describe Raptor::ActionTemplateResponder do
     record = stub
     route = stub
     injector = Raptor::Injector.new([])
-    Raptor::Template.stub(:render).with(PostPresenter.new, "posts/show.html.erb").
-      and_return("it worked")
+    Raptor::Template.stub(:from_path).with(PostPresenter.new, "posts/show.html.erb")
+    layout = stub(:layout)
+    layout.stub(:render) { "it worked" }
+    Raptor::FindsLayouts.stub(:find).with('posts') { layout }
     response = responder.respond(route, record, injector)
     response.body.join.strip.should == "it worked"
   end
