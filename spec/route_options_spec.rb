@@ -44,10 +44,10 @@ describe Raptor::RouteOptions do
     it "uses the explicit template if one is given" do
       template_responder = stub
       Raptor::TemplateResponder.stub(:new).
-        with(app_module, "post", "show").
+        with(app_module, "post", "show", "/show").
         and_return(template_responder)
       options = Raptor::RouteOptions.new(
-        app_module, parent_path, :present => "post", :render => "show")
+        app_module, parent_path, :present => "post", :render => "show", :path => "/show")
       options.responder.should == template_responder
     end
 

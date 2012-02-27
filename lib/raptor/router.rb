@@ -177,7 +177,7 @@ module Raptor
       elsif text
         PlaintextResponder.new(text)
       elsif template_path
-        TemplateResponder.new(@app_module, presenter, template_path)
+        TemplateResponder.new(@app_module, presenter, template_path, path)
       else
         ActionTemplateResponder.new(@app_module, presenter, @parent_path, action)
       end
