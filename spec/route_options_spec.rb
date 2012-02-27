@@ -47,7 +47,8 @@ describe Raptor::RouteOptions do
         with(app_module, "post", "show", "/show").
         and_return(template_responder)
       options = Raptor::RouteOptions.new(
-        app_module, parent_path, :present => "post", :render => "show", :path => "/show")
+        app_module, parent_path,
+        :present => "post", :render => "show", :path => "/show")
       options.responder.should == template_responder
     end
 
