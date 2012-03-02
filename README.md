@@ -25,7 +25,7 @@ module MyApp
   module Requirements
     class Admin
       def match?(params)
-        Records::Article.find_by_id(params[:user_id]).admin?
+        Records::User.find_by_id(params[:user_id]).admin?
       end
     end
   end
