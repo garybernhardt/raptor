@@ -181,16 +181,16 @@ module Raptor
       end
     end
 
-    def requirements
-      standard_requirements + custom_requirements
+    def constraints
+      standard_constraints + custom_constraints
     end
 
-    def standard_requirements
+    def standard_constraints
       [HttpMethodConstraint.new(http_method),
        PathConstraint.new(path)]
     end
 
-    def custom_requirements
+    def custom_constraints
       return [] unless @params.has_key?(:require)
       name = @params.fetch(:require).to_s
       Constraints.new(@app_module).matching(name)
@@ -236,7 +236,7 @@ module Raptor
       options = RouteOptions.new(app_module, parent_path, params)
       new(options.action,
           options.path,
-          options.requirements,
+          options.constraints,
           options.delegator,
           options.responder,
           options.exception_actions)
