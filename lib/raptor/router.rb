@@ -193,17 +193,17 @@ module Raptor
     def custom_requirements
       return [] unless @params.has_key?(:require)
       name = @params.fetch(:require).to_s
-      Requirements.new(@app_module).matching(name)
+      Constraints.new(@app_module).matching(name)
     end
   end
 
-  class Requirements
+  class Constraints
     def initialize(app_module)
       @app_module = app_module
     end
 
     def matching(name)
-      requirement = @app_module::Requirements.const_get(Util.camel_case(name))
+      requirement = @app_module::Constraints.const_get(Util.camel_case(name))
       [requirement]
     end
   end
