@@ -203,8 +203,8 @@ module Raptor
     end
 
     def matching(name)
-      requirement = @app_module::Constraints.const_get(Util.camel_case(name))
-      [requirement]
+      constraint = @app_module::Constraints.const_get(Util.camel_case(name))
+      [constraint]
     end
   end
 
@@ -256,8 +256,8 @@ module Raptor
     end
 
     def match?(injector, request)
-      @constraints.all? do |requirement|
-        injector.call(requirement.method(:match?))
+      @constraints.all? do |constraint|
+        injector.call(constraint.method(:match?))
       end
     end
   end
