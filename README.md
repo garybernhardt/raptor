@@ -12,7 +12,7 @@ module MyApp
     path "article" do
       show
       index
-      update :require => :admin, :redirect => :index
+      update :if => :admin, :redirect => :index
     end
   end
 
@@ -22,7 +22,7 @@ module MyApp
     end
   end
 
-  module Requirements
+  module Constraints
     class Admin
       def match?(params)
         Records::Article.find_by_id(params[:user_id]).admin?
@@ -56,7 +56,7 @@ Routes can:
 The `update` route in the above example uses the default update behavior we know and love: the same stuff you've written in a hundred Rails controller actions. This behavior is the default in Raptor, but is completely overridable. Here we've overridden it to redirect to index instead of show, and to only work for admins. The request lifecycle is:
 
 1. Match PUT "/article/:id".
-1. Enforce the `:admin` requirement, defined by us in `MyApp::Requirements::Admin`. If the user isn't an admin, stop. The route doesn't match, even though the verb and path do.
+1. Enforce the `:admin` constraint, defined by us in `MyApp::Constraints::Admin`. If the user isn't an admin, stop. The route doesn't match, even though the verb and path do.
 1. Call `MyApp::Records::Article.find_and_update`. It takes `id` and `params`. Raptor's dependency injector notices this, extracts the ID from the URL, as well as the params from the request, and passes them in.
 1. Redirect to `/article`, the index path. By default it would've gone to the show path, but we overrode it.
 
