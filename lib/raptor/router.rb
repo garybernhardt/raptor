@@ -186,8 +186,8 @@ module Raptor
     end
 
     def standard_requirements
-      [HttpMethodRequirement.new(http_method),
-       PathRequirement.new(path)]
+      [HttpMethodConstraint.new(http_method),
+       PathConstraint.new(path)]
     end
 
     def custom_requirements
@@ -262,7 +262,7 @@ module Raptor
     end
   end
 
-  class HttpMethodRequirement
+  class HttpMethodConstraint
     def initialize(http_method)
       @http_method = http_method
     end
@@ -272,7 +272,7 @@ module Raptor
     end
   end
 
-  class PathRequirement
+  class PathConstraint
     def initialize(path)
       @path = path
     end
