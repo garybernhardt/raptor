@@ -52,6 +52,15 @@ describe Raptor::RouteOptions do
     end
   end
 
+  it "knows a custom constraint" do
+    admin_constraint = stub
+    constraints = stub(:matching => [admin_constraint])
+    Raptor::Constraints.stub(:new) { constraints }
+    options = Raptor::RouteOptions.new(
+      app_module, parent_path, :if => :admin, :http_method => "arbitrary", :path => "arbitrary")
+    options.constraints.should include(admin_constraint)
+  end
+
   it "delegates to nothing when there's no :to" do
     options = Raptor::RouteOptions.new(Object, parent_path, {})
     injector = stub(:injector)

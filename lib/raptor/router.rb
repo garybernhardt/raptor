@@ -191,8 +191,8 @@ module Raptor
     end
 
     def custom_constraints
-      return [] unless @params.has_key?(:require)
-      name = @params.fetch(:require).to_s
+      return [] unless @params.has_key?(:if)
+      name = @params.fetch(:if).to_s
       Constraints.new(@app_module).matching(name)
     end
   end
