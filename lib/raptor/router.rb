@@ -213,11 +213,11 @@ module Raptor
   class Route
     attr_reader :name, :path
 
-    def initialize(name, path, requirements, delegator, responder,
+    def initialize(name, path, constraints, delegator, responder,
                    exception_actions)
       @name = name
       @path = path
-      @requirements = requirements
+      @constraints = constraints
       @delegator = delegator
       @responder = responder
       @exception_actions = exception_actions
@@ -256,7 +256,7 @@ module Raptor
     end
 
     def match?(injector, request)
-      @requirements.all? do |requirement|
+      @constraints.all? do |requirement|
         injector.call(requirement.method(:match?))
       end
     end
