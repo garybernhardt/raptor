@@ -23,8 +23,11 @@ module Raptor
 
     def args(method)
       method = injection_method(method)
+
       parameters(method).select do |type, name|
         name && type != :rest && type != :block
+      end.reject do |type, name|
+        type == :opt && sources[name].nil?
       end.map do |type, name|
         source_proc = sources[name] or raise UnknownInjectable.new(name)
         source_proc.call
