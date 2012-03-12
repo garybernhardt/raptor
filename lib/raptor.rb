@@ -10,17 +10,16 @@ require_relative 'raptor/delegation'
 require_relative 'raptor/validation'
 
 module Raptor
-  def self.routes(app_module, &block)
-    Router.build(app_module, &block)
-  end
-
   class App
-    def initialize(app_module)
+    attr_reader :routes
+
+    def initialize(app_module, &block)
       @app_module = app_module
+      @routes = Router.build(app_module, &block)
     end
 
     def call(env)
-      return Rack::MethodOverride.new(@app_module::Routes).call(env)
+      return Rack::MethodOverride.new(@routes).call(env)
     end
 
     def presenters
