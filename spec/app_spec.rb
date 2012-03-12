@@ -2,19 +2,23 @@ require "rack"
 require_relative "spec_helper"
 require_relative "../lib/raptor"
 
-describe Raptor::App do
-  module App
-    Routes = Raptor.routes(self) do
-      path 'post' do
-        index :to => "Object.new"
+describe Raptor::App, "integrated" do
+  before do
+    module App
+      Routes = Raptor.routes(self) do
+        path 'post' do
+          index :to => "Object.new"
+        end
       end
-    end
 
-    module Presenters
-      class PostList
+      module Presenters
+        class PostList
+        end
       end
     end
   end
+
+  after { Object.send(:remove_const, :App) }
 
   let(:app) { Raptor::App.new(App) }
 
@@ -41,6 +45,37 @@ describe Raptor::App do
       and_return(stub(:render => "Template content"))
     env = env('GET', '/post')
     app.call(env).body.join('').strip.should == "Template content"
+  end
+end
+
+describe Raptor::App, "app wrapping" do
+  before do
+    module App
+      module Presenters
+        class Post
+        end
+      end
+    end
+
+    module EmptyApp
+    end
+  end
+
+  after do
+    Object.send(:remove_const, :App)
+    Object.send(:remove_const, :EmptyApp)
+  end
+
+  describe "#presenters" do
+    it "lists presenters" do
+      app = Raptor::App.new(App)
+      app.presenters.should == {:Post => App::Presenters::Post}
+    end
+
+    it "lists nothing when the app has no presenter module" do
+      app = Raptor::App.new(EmptyApp)
+      app.presenters.should == {}
+    end
   end
 end
 

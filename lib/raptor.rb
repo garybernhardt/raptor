@@ -25,6 +25,16 @@ module Raptor
     def call(env)
       return Rack::MethodOverride.new(@app_module::Routes).call(env)
     end
+
+    def presenters
+      return {} unless @app_module.const_defined?(:Presenters)
+      presenters = @app_module::Presenters
+      Hash[
+        presenters.constants.map do |const_name|
+          [const_name, presenters.const_get(const_name)]
+        end
+      ]
+    end
   end
 
   class ValidationError < RuntimeError; end
