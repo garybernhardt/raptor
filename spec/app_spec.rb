@@ -55,6 +55,11 @@ describe Raptor::App, "app wrapping" do
         class Post
         end
       end
+
+      module Injectables
+        module Fruit
+        end
+      end
     end
 
     module EmptyApp
@@ -75,6 +80,18 @@ describe Raptor::App, "app wrapping" do
     it "lists nothing when the app has no presenter module" do
       app = Raptor::App.new(EmptyApp)
       app.presenters.should == {}
+    end
+  end
+
+  describe "#injectables" do
+    it "lists injectables" do
+      app = Raptor::App.new(App)
+      app.injectables.should == [App::Injectables::Fruit]
+    end
+
+    it "lists nothing when the app has no injectables module" do
+      app = Raptor::App.new(EmptyApp)
+      app.injectables.should == []
     end
   end
 end

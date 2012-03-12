@@ -35,6 +35,14 @@ module Raptor
         end
       ]
     end
+
+    def injectables
+      return [] unless @app_module.const_defined?(:Injectables)
+      presenters = @app_module::Injectables
+      presenters.constants.map do |const_name|
+        presenters.const_get(const_name)
+      end
+    end
   end
 
   class ValidationError < RuntimeError; end
