@@ -9,7 +9,7 @@ describe Raptor::Injector do
   def method_taking_only_a_block(&block); 'nothing' end
   def method_taking_subject(subject); subject; end
   def method_taking_optional_id(id = 0); id; end
-  def method_taking_optional_arg(arg = 0); arg; end
+  def method_taking_optional_arg(uninjectable_optional_arg = 0); uninjectable_optional_arg; end
 
   let(:injector) do
     Raptor::Injector.new([Raptor::Injectables::Fixed.new(:id, 5)])
