@@ -48,45 +48,47 @@ module Raptor
     end
 
     def show(params={})
-      params[:to] = "#{record_module}.find_by_id" unless params.key?(:to)
       route(:show, "GET", "/:id",
-            {:present => default_single_presenter}.merge(params))
+            {:present => default_single_presenter,
+             :to => "#{record_module}.find_by_id"}.merge(params))
     end
 
     def new(params={})
-      params[:to] = "#{record_module}.new" unless params.key?(:to)
       route(:new, "GET", "/new",
-            {:present => default_single_presenter}.merge(params))
+            {:present => default_single_presenter,
+             :to => "#{record_module}.new"}.merge(params))
     end
 
     def index(params={})
-      params[:to] = "#{record_module}.all" unless params.key?(:to)
       route(:index, "GET", "/",
-            {:present => default_list_presenter}.merge(params))
+            {:present => default_list_presenter,
+             :to => "#{record_module}.all"}.merge(params))
     end
 
     def create(params={})
-      params[:to] = "#{record_module}.create" unless params.key?(:to)
       route(:create, "POST", "/",
-            {:redirect => :show, ValidationError => :new}.merge(params))
+            {:redirect => :show,
+             ValidationError => :new,
+             :to => "#{record_module}.create"}.merge(params))
     end
 
     def edit(params={})
-      params[:to] = "#{record_module}.find_by_id" unless params.key?(:to)
       route(:edit, "GET", "/:id/edit",
-            {:present => default_single_presenter}.merge(params))
+            {:present => default_single_presenter,
+             :to => "#{record_module}.find_by_id"}.merge(params))
     end
 
     def update(params={})
-      params[:to] = "#{record_module}.find_and_update" unless params.key?(:to)
       route(:update, "PUT", "/:id",
-            {:redirect => :show, ValidationError => :edit}.merge(params))
+            {:redirect => :show,
+             ValidationError => :edit,
+             :to => "#{record_module}.find_and_update"}.merge(params))
     end
 
     def destroy(params={})
-      params[:to] = "#{record_module}.destroy" unless params.key?(:to)
       route(:destroy, "DELETE", "/:id",
-            {:redirect => :index}.merge(params))
+            {:redirect => :index,
+             :to => "#{record_module}.destroy"}.merge(params))
     end
   end
 
