@@ -4,8 +4,8 @@ module Raptor
       @injectables = injectables
     end
 
-    def self.for_app_module(app_module)
-      Injector.new([CustomInjectable.new(app_module)])
+    def self.for_app(app)
+      Injector.new([CustomInjectable.new(app)])
     end
 
     def sources
@@ -23,8 +23,11 @@ module Raptor
 
     def args(method)
       method = injection_method(method)
+
       parameters(method).select do |type, name|
         name && type != :rest && type != :block
+      end.reject do |type, name|
+        type == :opt && sources[name].nil?
       end.map do |type, name|
         source_proc = sources[name] or raise UnknownInjectable.new(name)
         source_proc.call
@@ -67,8 +70,8 @@ module Raptor
   end
 
   class CustomInjectable
-    def initialize(app_module)
-      @app_module = app_module
+    def initialize(app)
+      @app = app
     end
 
     def sources(injector)
@@ -78,17 +81,7 @@ module Raptor
     end
 
     def injectables(injector)
-      begin
-        injectables_module = @app_module::Injectables
-      rescue NameError
-        return []
-      end
-
-      injectables_module.constants.map do |const_name|
-        injectables_module.const_get(const_name)
-      end.select do |const|
-        const.is_a?(Class)
-      end.map do |const|
+      @app.injectables.map do |const|
         injector.call(const.method(:new))
       end
     end

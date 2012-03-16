@@ -8,6 +8,8 @@ describe Raptor::Injector do
   def method_taking_nothing; 'nothing' end
   def method_taking_only_a_block(&block); 'nothing' end
   def method_taking_subject(subject); subject; end
+  def method_taking_optional_id(id = 0); id; end
+  def method_taking_optional_arg(uninjectable_optional_arg = 0); uninjectable_optional_arg; end
 
   let(:injector) do
     Raptor::Injector.new([Raptor::Injectables::Fixed.new(:id, 5)])
@@ -27,6 +29,14 @@ describe Raptor::Injector do
 
   it "injects [] when the method takes only a block" do
     injector.call(method(:method_taking_only_a_block)).should == 'nothing'
+  end
+
+  it "injects required arguments even if they are optional" do
+    injector.call(method(:method_taking_optional_id)).should == 5
+  end
+
+  it "uses the default value if the argument was optional and nothing was passed for it" do
+    injector.call(method(:method_taking_optional_arg)).should == 0
   end
 
   it "injects arguments from initialize for the new method" do
@@ -82,16 +92,9 @@ describe Raptor::Injector do
 
     it "injects custom injectables" do
       def takes_watermelon(watermelon); watermelon; end
-      injector = Raptor::Injector.for_app_module(WithInjectables)
+      app = stub(:app, :injectables => [WithInjectables::Injectables::Fruit])
+      injector = Raptor::Injector.for_app(app)
       injector.call(method(:takes_watermelon)).should == "fruity"
-    end
-
-    it "doesn't require the Injectables module to exist" do
-      def takes_request(rack_request); rack_request; end
-      request = stub(:request)
-      injector = Raptor::Injector.for_app_module(WithoutInjectables)
-      injector = injector.add_request(request)
-      injector.call(method(:takes_request)).should == request
     end
   end
 end

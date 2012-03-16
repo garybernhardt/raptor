@@ -3,11 +3,11 @@ require_relative "spec_helper"
 require "raptor"
 
 describe Raptor::RouteOptions do
-  let(:app_module) { stub(:app_module) }
+  let(:app) { stub(:app) }
   let(:parent_path) { "posts" }
 
   it "knows actions for exceptions" do
-    options = Raptor::RouteOptions.new(app_module,
+    options = Raptor::RouteOptions.new(app,
                                        "posts",
                                        :redirect => :show,
                                        IndexError => :index)
@@ -22,9 +22,9 @@ describe Raptor::RouteOptions do
     it "creates responders for action templates" do
       responder = stub
       Raptor::ActionTemplateResponder.stub(:new).
-        with(app_module, "post", parent_path, :show).
+        with(app, "post", parent_path, :show).
         and_return(responder)
-      options = Raptor::RouteOptions.new(app_module,
+      options = Raptor::RouteOptions.new(app,
                                          parent_path,
                                          :action => :show, :present => "post")
       options.responder.should == responder
@@ -33,9 +33,9 @@ describe Raptor::RouteOptions do
     it "renders the action's template by default" do
       template_responder = stub
       Raptor::ActionTemplateResponder.stub(:new).
-        with(app_module, "post", parent_path, :show).
+        with(app, "post", parent_path, :show).
         and_return(template_responder)
-      options = Raptor::RouteOptions.new(app_module,
+      options = Raptor::RouteOptions.new(app,
                                          parent_path,
                                          :action => :show, :present => "post")
       options.responder.should == template_responder
@@ -44,10 +44,10 @@ describe Raptor::RouteOptions do
     it "uses the explicit template if one is given" do
       template_responder = stub
       Raptor::TemplateResponder.stub(:new).
-        with(app_module, "post", "show", "/show").
+        with(app, "post", "show", "/show").
         and_return(template_responder)
       options = Raptor::RouteOptions.new(
-        app_module, parent_path,
+        app, parent_path,
         :present => "post", :render => "show", :path => "/show")
       options.responder.should == template_responder
     end
@@ -55,9 +55,9 @@ describe Raptor::RouteOptions do
     it "delegates to an action if :redirect is a symbol" do
       action_redirecter = stub
       Raptor::ActionRedirectResponder.stub(:new).
-        with(app_module, :index) { action_redirecter }
+        with(app, :index) { action_redirecter }
       options = Raptor::RouteOptions.new(
-        app_module, parent_path, :redirect => :index)
+        app, parent_path, :redirect => :index)
       options.responder.should == action_redirecter
     end
 
@@ -65,19 +65,26 @@ describe Raptor::RouteOptions do
       redirecter = stub
       Raptor::RedirectResponder.stub(:new).with('http://google.com') { redirecter }
       options = Raptor::RouteOptions.new(
-        app_module, parent_path, :redirect => 'http://google.com')
+        app, parent_path, :redirect => 'http://google.com')
       options.responder.should == redirecter
     end
 
   end
 
+  it "knows a custom constraint" do
+    admin_constraint = stub
+    constraints = stub(:matching => [admin_constraint])
+    Raptor::Constraints.stub(:new) { constraints }
+    options = Raptor::RouteOptions.new(
+      app, parent_path, :if => :admin, :http_method => "arbitrary", :path => "arbitrary")
+    options.constraints.should include(admin_constraint)
+  end
+
   it "delegates to nothing when there's no :to" do
-    options = Raptor::RouteOptions.new(Object, parent_path, {})
-    injector = stub(:injector)
-    the_delegate = stub(:the_delegate)
-    injector.stub(:call).with(Raptor::NullDelegate.method(:do_nothing)).
-      and_return(the_delegate)
-    options.delegator.delegate(injector).should == the_delegate
+    app = Raptor::App.new(Object) {}
+    options = Raptor::RouteOptions.new(app, parent_path, {})
+    injector = Raptor::Injector.new([])
+    options.delegator.delegate(injector).should == nil
   end
 end
 

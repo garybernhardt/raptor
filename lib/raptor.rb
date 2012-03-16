@@ -10,20 +10,38 @@ require_relative 'raptor/delegation'
 require_relative 'raptor/validation'
 
 module Raptor
-  # XXX: Instead of giving the resource when a route is defined, pass it in
-  # when the app calls the route. That simplifies route declaration and will
-  # probably simplify the object graph as well.
-  def self.routes(app_module, &block)
-    Router.build(app_module, &block)
-  end
-
   class App
-    def initialize(app_module)
+    attr_reader :routes
+
+    def initialize(app_module, &block)
       @app_module = app_module
+      @routes = Router.build(self, &block)
     end
 
     def call(env)
-      return Rack::MethodOverride.new(@app_module::Routes).call(env)
+      return Rack::MethodOverride.new(@routes).call(env)
+    end
+
+    def presenters
+      return {} unless @app_module.const_defined?(:Presenters)
+      presenters = @app_module::Presenters
+      Hash[
+        presenters.constants.map do |const_name|
+          [const_name.to_s, presenters.const_get(const_name)]
+        end
+      ]
+    end
+
+    def injectables
+      return [] unless @app_module.const_defined?(:Injectables)
+      presenters = @app_module::Injectables
+      presenters.constants.map do |const_name|
+        presenters.const_get(const_name)
+      end
+    end
+
+    def find_method(method_path)
+      DelegateFinder.new(@app_module, method_path).find
     end
   end
 
