@@ -73,7 +73,7 @@ describe Raptor::RouteOptions do
 
   it "delegates to nothing when there's no :to" do
     options = Raptor::RouteOptions.new(Object, parent_path, {})
-    injector = stub(:injector)
+    injector = Raptor::Injector.new([])
     the_delegate = stub(:the_delegate)
     injector.stub(:call).with(Raptor::NullDelegate.method(:do_nothing)).
       and_return(the_delegate)
