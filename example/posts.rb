@@ -4,7 +4,7 @@ module Blog
   module Presenters
     class Post
       takes :subject
-      let(:id) { p @subject; @subject.id }
+      let(:id) { @subject.id }
       let(:title) { @subject.title }
     end
 
