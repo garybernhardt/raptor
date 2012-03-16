@@ -39,7 +39,7 @@ module RouterTestApp
     end
   end
 
-  Routes = Raptor::Router.build(self) do
+  App = Raptor::App.new(self) do
     path "post" do
       new; show; index; create; edit; update; destroy
     end
@@ -54,7 +54,7 @@ end
 describe "default routes" do
   it "allows overriding of redirect in default routes" do
     env = env("GET", "/post_with_redirect/new")
-    response = RouterTestApp::Routes.call(env)
+    response = RouterTestApp::App.call(env)
     response.status.should == 302
     # XXX: Why is there a trailing slash on this URL?
     response["Location"].should == "/post_with_redirect/"
@@ -63,7 +63,7 @@ describe "default routes" do
   context "index" do
     it "finds all records" do
       env = env('GET', '/post')
-      body = RouterTestApp::Routes.call(env).body.join('').strip
+      body = RouterTestApp::App.call(env).body.join('').strip
       body.should match /record 1\s+record 2/
     end
   end
@@ -71,7 +71,7 @@ describe "default routes" do
   context "show" do
     it "retrieves a single record" do
       env = env('GET', '/post/2')
-      response = RouterTestApp::Routes.call(env)
+      response = RouterTestApp::App.call(env)
       response.body.join('').strip.should == "It's RECORD 2!"
     end
   end
@@ -79,7 +79,7 @@ describe "default routes" do
   context "new" do
     it "renders a template" do
       env = env('GET', '/post/new')
-      response = RouterTestApp::Routes.call(env)
+      response = RouterTestApp::App.call(env)
       response.body.join('').strip.should == "<form>New</form>"
     end
   end
@@ -93,11 +93,11 @@ describe "default routes" do
 
     it "creates records" do
       RouterTestApp::Records::Post.should_receive(:create)
-      RouterTestApp::Routes.call(req)
+      RouterTestApp::App.call(req)
     end
 
     it "redirects to show" do
-      response = RouterTestApp::Routes.call(req)
+      response = RouterTestApp::App.call(req)
       response.status.should == 302
       response['Location'].should == "/post/1"
     end
@@ -105,7 +105,7 @@ describe "default routes" do
     it "re-renders new on errors" do
       RouterTestApp::Records::Post.stub(:create).
         and_raise(Raptor::ValidationError)
-      response = RouterTestApp::Routes.call(req)
+      response = RouterTestApp::App.call(req)
       response.body.join('').strip.should == "<form>New</form>"
     end
   end
@@ -113,7 +113,7 @@ describe "default routes" do
   context "edit" do
     it "renders a template" do
       env = env('GET', '/post/1/edit')
-      response = RouterTestApp::Routes.call(env)
+      response = RouterTestApp::App.call(env)
       response.body.join('').strip.should == "<form>Edit</form>"
     end
   end
@@ -129,11 +129,11 @@ describe "default routes" do
 
     it "updates records" do
       RouterTestApp::Records::Post.should_receive(:find_and_update)
-      RouterTestApp::Routes.call(req)
+      RouterTestApp::App.call(req)
     end
 
     it "redirects to show" do
-      response = RouterTestApp::Routes.call(req)
+      response = RouterTestApp::App.call(req)
       response.status.should == 302
       response['Location'].should == "/post/1"
     end
@@ -141,7 +141,7 @@ describe "default routes" do
     it "re-renders edit on failure" do
       RouterTestApp::Records::Post.stub(:find_and_update).
         and_raise(Raptor::ValidationError)
-      response = RouterTestApp::Routes.call(req)
+      response = RouterTestApp::App.call(req)
       response.body.join('').strip.should == "<form>Edit</form>"
     end
   end
@@ -151,12 +151,12 @@ describe "default routes" do
 
     it "destroys records" do
       RouterTestApp::Records::Post.should_receive(:destroy)
-      RouterTestApp::Routes.call(req)
+      RouterTestApp::App.call(req)
     end
 
     it "redirects to index" do
       RouterTestApp::Records::Post.stub(:destroy)
-      response = RouterTestApp::Routes.call(req)
+      response = RouterTestApp::App.call(req)
       response.status.should == 302
       # XXX: Why is there a trailing slash on this URL?
       response['Location'].should == "/post/"

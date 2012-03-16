@@ -23,21 +23,21 @@ module Raptor
   end
 
   class Delegator
-    def initialize(starting_module, delegate_name)
-      @starting_module = starting_module
-      @delegate_name = delegate_name
+    def initialize(app, delegate_path)
+      @app = app
+      @delegate_path = delegate_path
     end
 
     def delegate(injector)
-      return nil if @delegate_name.nil?
-      Raptor.log("Delegating to #{@delegate_name.inspect}")
+      return nil if @delegate_path.nil?
+      Raptor.log("Delegating to #{@delegate_path.inspect}")
       record = injector.call(delegate_method)
       Raptor.log("Delegate returned #{record.inspect}")
       record
     end
 
     def delegate_method
-      DelegateFinder.new(@starting_module, @delegate_name).find
+      @app.find_method(@delegate_path)
     end
   end
 end

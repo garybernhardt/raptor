@@ -5,7 +5,7 @@ require_relative "../lib/raptor"
 describe Raptor::ActionRedirectResponder do
   before { Raptor.stub(:log) }
 
-  let(:app_module) { stub(:app_module) }
+  let(:app) { stub(:app) }
 
   let(:route) do
     route = stub
@@ -27,17 +27,15 @@ describe Raptor::ActionRedirectResponder do
   end
 
   def redirect_to_action(action, record)
-    responder = Raptor::ActionRedirectResponder.new(app_module, action)
+    responder = Raptor::ActionRedirectResponder.new(app, action)
     response = responder.respond(route, record, Raptor::Injector.new)
   end
 end
 
 describe Raptor::ActionTemplateResponder do
   it "renders templates" do
-    app_module = Module.new
-    app_module::Presenters = Module.new
-    app_module::Presenters::Post = PostPresenter
-    responder = Raptor::ActionTemplateResponder.new(app_module, 'post', 'posts', :show)
+    app = stub(:presenters => {"Post" => PostPresenter})
+    responder = Raptor::ActionTemplateResponder.new(app, 'post', 'posts', :show)
     record = stub
     route = stub
     injector = Raptor::Injector.new([])

@@ -1,19 +1,19 @@
 module Raptor
   class Router
-    def initialize(app_module, routes)
-      @app_module = app_module
+    def initialize(app, routes)
+      @app = app
       @routes = routes
     end
 
-    def self.build(app_module, &block)
-      routes = BuildsRoutes.new(app_module).build(&block)
-      new(app_module, routes)
+    def self.build(app, &block)
+      routes = BuildsRoutes.new(app).build(&block)
+      new(app, routes)
     end
 
     def call(env)
       request = Rack::Request.new(env)
       Raptor.log "App: routing #{request.request_method} #{request.path_info}"
-      injector = Injector.for_app_module(@app_module).
+      injector = Injector.for_app(@app).
         add_request(request)
       injector = Injector.new.add_request(request)
       begin
@@ -93,8 +93,8 @@ module Raptor
   class BuildsRoutes
     include StandardRoutes
 
-    def initialize(app_module, parent_path="")
-      @app_module = app_module
+    def initialize(app, parent_path="")
+      @app = app
       @parent_path = parent_path
       @routes = []
     end
@@ -105,7 +105,7 @@ module Raptor
     end
 
     def path(sub_path_name, &block)
-      routes = BuildsRoutes.new(@app_module, "/" + sub_path_name).build(&block)
+      routes = BuildsRoutes.new(@app, "/" + sub_path_name).build(&block)
       routes.each { |route| route.add_neighbors(routes) }
       @routes += routes
     end
@@ -132,7 +132,7 @@ module Raptor
       params = params.merge(:action => action,
                             :http_method => http_method,
                             :path => path)
-      route = Route.for_app_module(@app_module, @parent_path, params)
+      route = Route.for_app(@app, @parent_path, params)
       @routes << route
       route
     end
@@ -143,8 +143,8 @@ module Raptor
   class RouteOptions
     NULL_DELEGATE_NAME = "Raptor::NullDelegate.do_nothing"
 
-    def initialize(app_module, parent_path, params)
-      @app_module = app_module
+    def initialize(app, parent_path, params)
+      @app = app
       @parent_path = parent_path
       @params = params
     end
@@ -155,7 +155,7 @@ module Raptor
 
     def delegator
       delegate_name = @params.fetch(:to, NULL_DELEGATE_NAME)
-      Raptor::Delegator.new(@app_module, delegate_name)
+      Raptor::Delegator.new(@app, delegate_name)
     end
 
     def exception_actions
@@ -173,13 +173,13 @@ module Raptor
       if redirect.is_a?(String)
         RedirectResponder.new(redirect)
       elsif redirect
-        ActionRedirectResponder.new(@app_module, redirect)
+        ActionRedirectResponder.new(@app, redirect)
       elsif text
         PlaintextResponder.new(text)
       elsif template_path
-        TemplateResponder.new(@app_module, presenter, template_path, path)
+        TemplateResponder.new(@app, presenter, template_path, path)
       else
-        ActionTemplateResponder.new(@app_module, presenter, @parent_path, action)
+        ActionTemplateResponder.new(@app, presenter, @parent_path, action)
       end
     end
 
@@ -195,17 +195,17 @@ module Raptor
     def custom_requirements
       return [] unless @params.has_key?(:require)
       name = @params.fetch(:require).to_s
-      Requirements.new(@app_module).matching(name)
+      Requirements.new(@app).matching(name)
     end
   end
 
   class Requirements
-    def initialize(app_module)
-      @app_module = app_module
+    def initialize(app)
+      @app = app
     end
 
     def matching(name)
-      requirement = @app_module::Requirements.const_get(Util.camel_case(name))
+      requirement = @app::Requirements.const_get(Util.camel_case(name))
       [requirement]
     end
   end
@@ -234,8 +234,8 @@ module Raptor
       @neighbors.find { |route| route.name == name }
     end
 
-    def self.for_app_module(app_module, parent_path, params)
-      options = RouteOptions.new(app_module, parent_path, params)
+    def self.for_app(app, parent_path, params)
+      options = RouteOptions.new(app, parent_path, params)
       new(options.action,
           options.path,
           options.requirements,

@@ -79,7 +79,7 @@ describe Raptor::App, "app wrapping" do
   describe "#presenters" do
     it "lists presenters" do
       app = AwesomeSite::App
-      app.presenters.should == {:Post => AwesomeSite::Presenters::Post}
+      app.presenters.should == {"Post" => AwesomeSite::Presenters::Post}
     end
 
     it "lists nothing when the app has no presenter module" do

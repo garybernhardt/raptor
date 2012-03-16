@@ -82,16 +82,9 @@ describe Raptor::Injector do
 
     it "injects custom injectables" do
       def takes_watermelon(watermelon); watermelon; end
-      injector = Raptor::Injector.for_app_module(WithInjectables)
+      app = stub(:app, :injectables => [WithInjectables::Injectables::Fruit])
+      injector = Raptor::Injector.for_app(app)
       injector.call(method(:takes_watermelon)).should == "fruity"
-    end
-
-    it "doesn't require the Injectables module to exist" do
-      def takes_request(rack_request); rack_request; end
-      request = stub(:request)
-      injector = Raptor::Injector.for_app_module(WithoutInjectables)
-      injector = injector.add_request(request)
-      injector.call(method(:takes_request)).should == request
     end
   end
 end

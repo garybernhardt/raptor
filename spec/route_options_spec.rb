@@ -72,7 +72,8 @@ describe Raptor::RouteOptions do
   end
 
   it "delegates to nothing when there's no :to" do
-    options = Raptor::RouteOptions.new(Object, parent_path, {})
+    app = Raptor::App.new(Object) {}
+    options = Raptor::RouteOptions.new(app, parent_path, {})
     injector = Raptor::Injector.new([])
     options.delegator.delegate(injector).should == nil
   end

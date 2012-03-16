@@ -2,14 +2,13 @@ require "rack"
 require "spec_helper"
 require "raptor"
 
-module AModule; end
-
 describe Raptor::Route do
   it "errors if redirect target doesn't exist"
 
   it "can render text" do
+    app = Raptor::App.new(Object) {}
     injector = Raptor::Injector.new
-    route = Raptor::BuildsRoutes.new(AModule).root(:text => "the text")
+    route = Raptor::BuildsRoutes.new(app).root(:text => "the text")
     req = request("GET", "/posts")
     response = route.respond_to_request(injector, req)
     response.body.join.strip.should == "the text"

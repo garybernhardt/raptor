@@ -29,7 +29,8 @@ describe Raptor::Delegator do
   end
 
   it "calls the named method" do
-    delegator = Raptor::Delegator.new(Object, "Hash.new")
+    app = Raptor::App.new(Object) {}
+    delegator = Raptor::Delegator.new(app, "Hash.new")
     injector = Raptor::Injector.new([])
     delegator.delegate(injector).should == {}
   end

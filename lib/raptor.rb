@@ -15,7 +15,7 @@ module Raptor
 
     def initialize(app_module, &block)
       @app_module = app_module
-      @routes = Router.build(app_module, &block)
+      @routes = Router.build(self, &block)
     end
 
     def call(env)
@@ -27,7 +27,7 @@ module Raptor
       presenters = @app_module::Presenters
       Hash[
         presenters.constants.map do |const_name|
-          [const_name, presenters.const_get(const_name)]
+          [const_name.to_s, presenters.const_get(const_name)]
         end
       ]
     end
@@ -38,6 +38,10 @@ module Raptor
       presenters.constants.map do |const_name|
         presenters.const_get(const_name)
       end
+    end
+
+    def find_method(method_path)
+      DelegateFinder.new(@app_module, method_path).find
     end
   end
 

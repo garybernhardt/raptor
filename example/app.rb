@@ -4,7 +4,7 @@ require_relative '../lib/raptor'
 require_relative 'posts'
 
 module Blog
-  Routes = Raptor.routes(self) do
+  App = Raptor::App.new(self) do
     root :render => "root", :present => :post_list
     path "post" do
       index
@@ -16,7 +16,5 @@ module Blog
       destroy
     end
   end
-
-  App = Raptor::App.new(self)
 end
 

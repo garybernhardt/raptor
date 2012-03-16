@@ -10,8 +10,8 @@ module Raptor
   end
 
   class ActionRedirectResponder
-    def initialize(app_module, target)
-      @app_module = app_module
+    def initialize(app, target)
+      @app = app
       @target = target
     end
 
@@ -47,8 +47,8 @@ module Raptor
   end
 
   class TemplateResponder
-    def initialize(app_module, presenter_name, template_path, path)
-      @app_module = app_module
+    def initialize(app, presenter_name, template_path, path)
+      @app = app
       @presenter_name = presenter_name
       @template_path = template_path
       @path = path
@@ -76,20 +76,20 @@ module Raptor
 
     def presenter_class
       constant_name = Raptor::Util.camel_case(@presenter_name)
-      @app_module::Presenters.const_get(constant_name)
+      @app.presenters.fetch(constant_name)
     end
   end
 
   class ActionTemplateResponder
-    def initialize(app_module, presenter_name, parent_path, template_name)
-      @app_module = app_module
+    def initialize(app, presenter_name, parent_path, template_name)
+      @app = app
       @presenter_name = presenter_name
       @parent_path = parent_path
       @template_name = template_name
     end
 
     def respond(route, subject, injector)
-      responder = TemplateResponder.new(@app_module,
+      responder = TemplateResponder.new(@app,
                                         @presenter_name,
                                         template_path,
                                         @parent_path)
