@@ -299,7 +299,7 @@ module Raptor
 
   class NullDelegate
     def self.do_nothing
-      self
+      nil
     end
   end
 end
