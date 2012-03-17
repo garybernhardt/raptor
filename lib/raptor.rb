@@ -34,9 +34,9 @@ module Raptor
 
     def injectables
       return [] unless @app_module.const_defined?(:Injectables)
-      presenters = @app_module::Injectables
-      presenters.constants.map do |const_name|
-        presenters.const_get(const_name)
+      injectables = @app_module::Injectables
+      injectables.constants.map do |const_name|
+        injectables.const_get(const_name)
       end
     end
 
