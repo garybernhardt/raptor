@@ -3,6 +3,7 @@ PATH
   specs:
     raptor (0.0.1)
       rack
+      tilt
 
 GEM
   remote: http://rubygems.org/
@@ -25,4 +26,3 @@ PLATFORMS
 DEPENDENCIES
   raptor!
   rspec
-  tilt
