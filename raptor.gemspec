@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec"
   s.add_dependency "rack"
+  s.add_dependency "tilt"
 
   s.require_path = "lib"
   s.required_rubygems_version = ">= 1.3.6"
