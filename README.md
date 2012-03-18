@@ -8,7 +8,7 @@ Raptor is an experimental web framework that encourages simple, decoupled object
 
 ```ruby
 module MyApp
-  Routes = Raptor.routes(self) do
+  App = Raptor::App.new(self) do
     path "article" do
       show
       index
