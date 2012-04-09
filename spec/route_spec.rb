@@ -17,7 +17,6 @@ describe Raptor::Route do
   it "routes to nested routes"
   it "stores templates in templates directory, not views"
   it "allows overriding of the presenter class"
-  it "uses consistent degelate terminology instead of sometimes calling them records"
   it "doesn't require .html.erb on template names"
   it "includes type definitions in routes so they can be casted before injection"
 end

@@ -36,14 +36,14 @@ describe Raptor::TemplateResponder do
   it "renders templates" do
     app = stub(:presenters => {"Post" => PostPresenter})
     responder = Raptor::TemplateResponder.action_template(app, 'post', 'posts', :show)
-    record = stub
+    subject = stub
     route = stub
     injector = Raptor::Injector.new([])
     Raptor::Template.stub(:from_path).with("posts/show.html.erb")
     layout = stub(:layout)
     layout.stub(:render) { "it worked" }
     Raptor::FindsLayouts.stub(:find).with('posts') { layout }
-    response = responder.respond(route, record, injector)
+    response = responder.respond(route, subject, injector)
     response.body.join.strip.should == "it worked"
   end
 end

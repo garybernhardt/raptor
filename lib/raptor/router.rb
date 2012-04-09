@@ -249,8 +249,8 @@ module Raptor
     def respond_to_request(injector, request)
       Raptor.log("Routing #{request.path_info.inspect} to #{path.inspect}")
       injector = injector.add_route_path(request, @path)
-      record = @delegator.delegate(injector)
-      @responder.respond(self, record, injector)
+      subject = @delegator.delegate(injector)
+      @responder.respond(self, subject, injector)
     end
 
     def action_for_exception(e)
