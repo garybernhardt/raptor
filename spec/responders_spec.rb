@@ -39,7 +39,7 @@ describe Raptor::ActionTemplateResponder do
     record = stub
     route = stub
     injector = Raptor::Injector.new([])
-    Raptor::Template.stub(:from_path).with(PostPresenter.new, "posts/show.html.erb")
+    Raptor::Template.stub(:from_path).with("posts/show.html.erb")
     layout = stub(:layout)
     layout.stub(:render) { "it worked" }
     Raptor::FindsLayouts.stub(:find).with('posts') { layout }

@@ -61,8 +61,8 @@ module Raptor
 
     def render(presenter)
       layout = FindsLayouts.find(@path)
-      template = Template.from_path(presenter, template_path)
-      layout.render(template)
+      template = Template.from_path(template_path)
+      layout.render(template, presenter)
     end
 
     def template_path

@@ -17,8 +17,8 @@ module Raptor
   end
 
   class NullLayout
-    def self.render(inner)
-      inner.render
+    def self.render(inner, presenter)
+      inner.render(presenter)
     end
   end
 
@@ -33,25 +33,24 @@ module Raptor
         other.path == path
     end
 
-    def render(inner)
-      Tilt.new(@path).render { inner.render }
+    def render(inner, presenter)
+      Tilt.new(@path).render { inner.render(presenter) }
     end
   end
 
   class Template
-    def initialize(presenter, tilt)
-      @presenter = presenter
+    def initialize(tilt)
       @tilt = tilt
     end
 
-    def render
-      @tilt.render(@presenter)
+    def render(presenter)
+      @tilt.render(presenter)
     end
 
-    def self.from_path(presenter, template_path)
+    def self.from_path(template_path)
       path = full_template_path(template_path)
       tilt = Tilt.new(path)
-      new(presenter, tilt)
+      new(tilt)
     end
 
     def self.full_template_path(template_path)
