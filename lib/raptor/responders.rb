@@ -60,9 +60,9 @@ module Raptor
     end
 
     def render(presenter)
-      layout = FindsLayouts.find(@path)
-      template = Template.from_path(template_path)
-      layout.render(template, presenter)
+      @layout ||= FindsLayouts.find(@path)
+      @template ||= Template.from_path(template_path)
+      @layout.render(@template, presenter)
     end
 
     def template_path
@@ -86,14 +86,14 @@ module Raptor
       @presenter_name = presenter_name
       @parent_path = parent_path
       @template_name = template_name
-    end
-
-    def respond(route, subject, injector)
-      responder = TemplateResponder.new(@app,
+      @responder = TemplateResponder.new(@app,
                                         @presenter_name,
                                         template_path,
                                         @parent_path)
-      responder.respond(route, subject, injector)
+    end
+
+    def respond(route, subject, injector)
+      @responder.respond(route, subject, injector)
     end
 
     def template_path
