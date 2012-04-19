@@ -4,8 +4,8 @@ start=$1
 end=$2
 
 run() {
-    echo "Hash,XXX Count,Require Time,Prod Lines,Spec Lines,Spec Count,Spec Runtime,Spec End-to-End,Test doubles"
-    full_command="echo $hash,$xxx_count,$require_time,$prod_lines,$spec_lines,$spec_count,$spec_runtime,$spec_end_to_end,$test_doubles"
+    echo "Hash,XXX Count,Require Time,Ping Time,Prod Lines,Spec Lines,Spec Count,Spec Runtime,Spec End-to-End,Test doubles"
+    full_command="echo $hash,$xxx_count,$require_time,$ping_time,$prod_lines,$spec_lines,$spec_count,$spec_runtime,$spec_end_to_end,$test_doubles"
     $(dirname $0)/run-command-on-git-revisions -v $start $end "$full_command"
 }
 
@@ -17,7 +17,11 @@ xxx_count='`grep -ri XXX --include="*.rb" . | wc -l`'
 
 # The runtime as reported by the perf specs (don't exist for the first
 # hundredish commits)
-require_time='`rspec perf | grep RAPTOR_REQUIRE_RUNTIME | cut -d " " -f 2`'
+require_time='`rspec perf/raptor_load_perf_spec.rb | grep RAPTOR_REQUIRE_RUNTIME | cut -d " " -f 2`'
+
+# The runtime for 1000 'ping' requests as reported by the perf specs (don't
+# exist for the first four hundredish commits)
+ping_time='`rspec perf/ping_perf_spec.rb | grep RAPTOR_PING_RUNTIME | cut -d " " -f 2`'
 
 # Lines of code
 prod_lines='`find lib -iname "*.rb" | xargs cat | wc -l`'

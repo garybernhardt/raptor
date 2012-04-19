@@ -26,7 +26,7 @@ end
 describe "ping" do
   it "is fast" do
     Ping::App.call(env('GET', '/ping/')).inspect
-    benchmark 'RAPTOR::PING_RUNTIME' do
+    benchmark 'RAPTOR_PING_RUNTIME' do
       1000.times do
         Ping::App.call(env('GET', '/ping/')).inspect
       end
