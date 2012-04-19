@@ -1,4 +1,4 @@
-require 'benchmark'
+require_relative 'perf_helper'
 
 describe "Loading raptor" do
   it "is fast" do
@@ -6,10 +6,5 @@ describe "Loading raptor" do
       require_relative '../lib/raptor'
     end
   end
-end
-
-def benchmark(spec_name, &block)
-  time = Benchmark.realtime(&block)
-  puts "#{spec_name}: #{time}"
 end
 
