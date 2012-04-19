@@ -32,10 +32,10 @@ describe Raptor::ActionRedirectResponder do
   end
 end
 
-describe Raptor::ActionTemplateResponder do
+describe Raptor::TemplateResponder do
   it "renders templates" do
     app = stub(:presenters => {"Post" => PostPresenter})
-    responder = Raptor::ActionTemplateResponder.new(app, 'post', 'posts', :show)
+    responder = Raptor::TemplateResponder.action_template(app, 'post', 'posts', :show)
     record = stub
     route = stub
     injector = Raptor::Injector.new([])

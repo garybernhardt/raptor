@@ -21,7 +21,7 @@ describe Raptor::RouteOptions do
 
     it "creates responders for action templates" do
       responder = stub
-      Raptor::ActionTemplateResponder.stub(:new).
+      Raptor::TemplateResponder.stub(:action_template).
         with(app, "post", parent_path, :show).
         and_return(responder)
       options = Raptor::RouteOptions.new(app,
@@ -32,7 +32,7 @@ describe Raptor::RouteOptions do
 
     it "renders the action's template by default" do
       template_responder = stub
-      Raptor::ActionTemplateResponder.stub(:new).
+      Raptor::TemplateResponder.stub(:action_template).
         with(app, "post", parent_path, :show).
         and_return(template_responder)
       options = Raptor::RouteOptions.new(app,

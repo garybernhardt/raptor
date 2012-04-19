@@ -181,7 +181,7 @@ module Raptor
       elsif template_path
         TemplateResponder.new(@app, presenter, template_path, path)
       else
-        ActionTemplateResponder.new(@app, presenter, @parent_path, action)
+        TemplateResponder.action_template(@app, presenter, @parent_path, action)
       end
     end
 

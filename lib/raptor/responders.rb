@@ -54,6 +54,15 @@ module Raptor
       @path = path
     end
 
+    def self.action_template(app, presenter_name, parent_path, template_name)
+      # XXX: Support multiple template directories
+      template_path = "#{parent_path}/#{template_name}"
+      new(app,
+          presenter_name,
+          template_path,
+          parent_path)
+    end
+
     def respond(route, subject, injector)
       presenter = create_presenter(subject, injector)
       Rack::Response.new(render(presenter))
@@ -77,28 +86,6 @@ module Raptor
     def presenter_class
       constant_name = Raptor::Util.camel_case(@presenter_name)
       @app.presenters.fetch(constant_name)
-    end
-  end
-
-  class ActionTemplateResponder
-    def initialize(app, presenter_name, parent_path, template_name)
-      @app = app
-      @presenter_name = presenter_name
-      @parent_path = parent_path
-      @template_name = template_name
-      @responder = TemplateResponder.new(@app,
-                                        @presenter_name,
-                                        template_path,
-                                        @parent_path)
-    end
-
-    def respond(route, subject, injector)
-      @responder.respond(route, subject, injector)
-    end
-
-    def template_path
-      # XXX: Support multiple template directories
-      "#{@parent_path}/#{@template_name}"
     end
   end
 
