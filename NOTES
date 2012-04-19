@@ -5,6 +5,8 @@
 - All scripts, and framework loads, will take less than 100 ms
 - Autoreload will happen by killing and restarting, not in-place
 - Releases will follow semantic versioning
+- You only call Raptor when you're constructing stuff to return to the framework.
+- The framework will avoid inheritance as much as possible (both internally and externally).
 
 ## Sanity Notes
 
