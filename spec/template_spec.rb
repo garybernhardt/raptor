@@ -25,12 +25,38 @@ describe Raptor::Template do
 end
 
 describe Raptor::Layout do
+  let(:presenter) { stub }
   it "renders a yielded template" do
     inner = stub(:render => 'inner')
-    presenter = stub
     rendered = Raptor::Layout.new('spec/fixtures/layout.html.erb').
       render(inner, presenter)
     rendered.strip.should == "<div>inner</div>"
+  end
+
+  it "integrates content_for" do
+    inner = Raptor::Template.from_path("../spec/fixtures/provides_content_for.html.erb")
+    layout = Raptor::Layout.new('spec/fixtures/layout_with_content_for.html.erb')
+    rendered = layout.render(inner, presenter)
+    rendered.strip.should include("<script></script")
+  end
+end
+
+describe Raptor::ViewContext do
+  it "delegates to the presenter" do
+    Raptor::ViewContext.new(stub(:cheese => 'walrus')).cheese.should == 'walrus'
+  end
+
+  it "stores content_for" do
+    context = Raptor::ViewContext.new(stub)
+    context.content_for(:head) { 'what' }
+    context.content_for(:head).should == 'what'
+  end
+
+  it "appends multiple content_for blocks" do
+    context = Raptor::ViewContext.new(stub)
+    context.content_for(:head) { 'what' }
+    context.content_for(:head) { 'what' }
+    context.content_for(:head).should == 'whatwhat'
   end
 end
 

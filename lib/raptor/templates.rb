@@ -34,7 +34,29 @@ module Raptor
     end
 
     def render(inner, presenter)
-      Tilt.new(@path).render { inner.render(presenter) }
+      context = ViewContext.new(presenter)
+      rendered = inner.render(context)
+      Tilt.new(@path).render(context) { rendered }
+    end
+  end
+
+  class ViewContext < BasicObject
+    def initialize(presenter)
+      @presenter = presenter
+      @areas = {}
+    end
+
+    def content_for(name, &block)
+      if block
+        @areas[name] ||= []
+        @areas[name] << block.call 
+      else
+        @areas[name].join
+      end
+    end
+
+    def method_missing(name, *args, &block)
+      @presenter.send(name, *args, &block)
     end
   end
 
