@@ -26,16 +26,17 @@ end
 
 describe Raptor::Layout do
   let(:presenter) { stub }
+
   it "renders a yielded template" do
     inner = stub(:render => 'inner')
-    rendered = Raptor::Layout.new('spec/fixtures/layout.html.erb').
+    rendered = Raptor::Layout.from_path('spec/fixtures/layout.html.erb').
       render(inner, presenter)
     rendered.strip.should == "<div>inner</div>"
   end
 
   it "integrates content_for" do
     inner = Raptor::Template.from_path("../spec/fixtures/provides_content_for.html.erb")
-    layout = Raptor::Layout.new('spec/fixtures/layout_with_content_for.html.erb')
+    layout = Raptor::Layout.from_path('spec/fixtures/layout_with_content_for.html.erb')
     rendered = layout.render(inner, presenter)
     rendered.strip.should include("<script></script")
   end
@@ -61,6 +62,12 @@ describe Raptor::ViewContext do
 end
 
 describe Raptor::FindsLayouts do
+  before do
+    Tilt.stub(:new) do |path|
+      path
+    end
+  end
+
   it "finds a layout in the path directory" do
     path = 'views/post/layout.html.erb'
     File.stub(:exist?).with(path) { true }

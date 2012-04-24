@@ -7,9 +7,9 @@ module Raptor
       in_same_dir = File.join('views', path, LAYOUT_FILENAME)
       in_root_dir = File.join('views', LAYOUT_FILENAME)
       if File.exist?(in_same_dir)
-        Layout.new(in_same_dir)
+        Layout.from_path(in_same_dir)
       elsif File.exist?(in_root_dir)
-        Layout.new(in_root_dir)
+        Layout.from_path(in_root_dir)
       else
         NullLayout
       end
@@ -23,20 +23,24 @@ module Raptor
   end
 
   class Layout
-    attr_reader :path
-    def initialize(path)
-      @path = path
+    attr_reader :tilt
+    def initialize(tilt)
+      @tilt = tilt
+    end
+
+    def self.from_path(path)
+      new(Tilt.new(path))
     end
 
     def ==(other)
       other.is_a?(Layout) &&
-        other.path == path
+        other.tilt == tilt
     end
 
     def render(inner, presenter)
       context = ViewContext.new(presenter)
       rendered = inner.render(context)
-      Tilt.new(@path).render(context) { rendered }
+      @tilt.render(context) { rendered }
     end
   end
 
