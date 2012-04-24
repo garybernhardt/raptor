@@ -28,13 +28,19 @@ describe Raptor::Layout do
   it "renders a yielded template" do
     inner = stub(:render => 'inner')
     presenter = stub
-    rendered = Raptor::Layout.new('spec/fixtures/layout.html.erb').
+    rendered = Raptor::Layout.from_path('spec/fixtures/layout.html.erb').
       render(inner, presenter)
     rendered.strip.should == "<div>inner</div>"
   end
 end
 
 describe Raptor::FindsLayouts do
+  before do
+    Tilt.stub(:new) do |path|
+      path
+    end
+  end
+
   it "finds a layout in the path directory" do
     path = 'views/post/layout.html.erb'
     File.stub(:exist?).with(path) { true }
