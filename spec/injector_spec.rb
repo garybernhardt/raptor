@@ -1,5 +1,4 @@
 require "rack"
-require_relative "spec_helper"
 require "raptor"
 
 describe Raptor::Injector do
