@@ -5,14 +5,25 @@ require_relative "../lib/raptor"
 describe Raptor::App, "integrated" do
   before do
     module AwesomeSite
-      App = Raptor::App.new(self) do
-        path 'post' do
-          index :to => "Object.new"
+      module Presenters
+        class PostList
+        end
+        class Post
         end
       end
 
-      module Presenters
-        class PostList
+      module Constraints
+        class OnlyTwos
+          def match?(id)
+            id == '2'
+          end
+        end
+      end
+
+      App = Raptor::App.new(self) do
+        path 'post' do
+          index :to => "Object.new"
+          show :to => "Object.new", :if => :only_twos
         end
       end
     end
@@ -45,6 +56,14 @@ describe Raptor::App, "integrated" do
       and_return(stub(:render => "Template content"))
     env = env('GET', '/post')
     app.call(env).body.join('').strip.should == "Template content"
+  end
+
+  it "matches against custom constraints" do
+    Tilt.stub(:new).with("views/post/show.html.erb").
+      and_return(stub(:render => "Template content"))
+    app.call(env('GET', '/post/1')).status.should == 404
+    app.call(env('GET', '/post/2')).status.should_not == 404
+    app.call(env('GET', '/post/2')).body.join('').strip.should == "Template content"
   end
 end
 
