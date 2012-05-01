@@ -51,6 +51,13 @@ describe Raptor::Injector do
     end.to raise_error(Raptor::UnknownInjectable)
   end
 
+  it "throws an sane error when given no injectables" do
+    klass = Class.new { def f(unknown_argument); end }
+    expect do
+      Raptor::Injector.new.call(klass.new.method(:f))
+    end.to raise_error(Raptor::UnknownInjectable)
+  end
+
   it "injects the subject once it's been given one" do
     subject = stub
     method = method(:method_taking_subject)
