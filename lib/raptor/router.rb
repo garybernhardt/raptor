@@ -260,6 +260,7 @@ module Raptor
     end
 
     def match?(injector, request)
+      injector = injector.add_route_path(request, @path)
       @constraints.all? do |constraint|
         injector.call(constraint.method(:match?))
       end
