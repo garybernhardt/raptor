@@ -61,6 +61,11 @@ describe Raptor::App, "app wrapping" do
         end
       end
 
+      module Constraints
+        class Never
+        end
+      end
+
       App = Raptor::App.new(self) do
       end
     end
@@ -97,6 +102,20 @@ describe Raptor::App, "app wrapping" do
     it "lists nothing when the app has no injectables module" do
       app = EmptySite::App
       app.injectables.should == []
+    end
+  end
+
+  describe "#constraint_named" do
+    it "has the named constraint" do
+      app = AwesomeSite::App
+      app.constraint_named(:Never).should == AwesomeSite::Constraints::Never
+    end
+
+    it "warns of missing constraints" do
+      app = EmptySite::App
+      expect do
+        app.constraint_named(:DoesNotExist)
+      end.to raise_error(Raptor::NoSuchConstraint)
     end
   end
 end

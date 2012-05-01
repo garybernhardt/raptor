@@ -43,9 +43,20 @@ module Raptor
     def find_method(method_path)
       DelegateFinder.new(@app_module, method_path).find
     end
+
+    def constraint_named(name)
+      raise NoSuchConstraint.new(name) unless constraint_exists?(name)
+      @app_module::Constraints.const_get(name)
+    end
+
+    def constraint_exists?(name)
+      @app_module.const_defined?(:Constraints) &&
+        @app_module::Constraints.const_defined?(name)
+    end
   end
 
   class ValidationError < RuntimeError; end
+  class NoSuchConstraint < RuntimeError; end
 
   module Util
     def self.underscore(string)
