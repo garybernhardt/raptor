@@ -12,7 +12,7 @@ module Raptor
       # Merge all injectables' sources into a single hash
       @sources ||= @injectables.map do |injectable|
         injectable.sources(self)
-      end.inject(&:merge)
+      end.inject({}, &:merge)
     end
 
     def call(method)

@@ -5,14 +5,25 @@ require_relative "../lib/raptor"
 describe Raptor::App, "integrated" do
   before do
     module AwesomeSite
-      App = Raptor::App.new(self) do
-        path 'post' do
-          index :to => "Object.new"
+      module Presenters
+        class PostList
+        end
+        class Post
         end
       end
 
-      module Presenters
-        class PostList
+      module Constraints
+        class OnlyTwos
+          def match?(id)
+            id == '2'
+          end
+        end
+      end
+
+      App = Raptor::App.new(self) do
+        path 'post' do
+          index :to => "Object.new"
+          show :to => "Object.new", :if => :only_twos
         end
       end
     end
@@ -46,6 +57,14 @@ describe Raptor::App, "integrated" do
     env = env('GET', '/post')
     app.call(env).body.join('').strip.should == "Template content"
   end
+
+  it "matches against custom constraints" do
+    Tilt.stub(:new).with("views/post/show.html.erb").
+      and_return(stub(:render => "Template content"))
+    app.call(env('GET', '/post/1')).status.should == 404
+    app.call(env('GET', '/post/2')).status.should_not == 404
+    app.call(env('GET', '/post/2')).body.join('').strip.should == "Template content"
+  end
 end
 
 describe Raptor::App, "app wrapping" do
@@ -58,6 +77,11 @@ describe Raptor::App, "app wrapping" do
 
       module Injectables
         module Fruit
+        end
+      end
+
+      module Constraints
+        class Never
         end
       end
 
@@ -97,6 +121,20 @@ describe Raptor::App, "app wrapping" do
     it "lists nothing when the app has no injectables module" do
       app = EmptySite::App
       app.injectables.should == []
+    end
+  end
+
+  describe "#constraint_named" do
+    it "has the named constraint" do
+      app = AwesomeSite::App
+      app.constraint_named(:Never).should == AwesomeSite::Constraints::Never
+    end
+
+    it "warns of missing constraints" do
+      app = EmptySite::App
+      expect do
+        app.constraint_named(:DoesNotExist)
+      end.to raise_error(Raptor::NoSuchConstraint)
     end
   end
 end

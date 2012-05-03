@@ -202,13 +202,13 @@ module Raptor
   end
 
   class Constraints
-    def initialize(app_module)
-      @app_module = app_module
+    def initialize(app)
+      @app = app
     end
 
     def matching(name)
-      constraint = @app_module::Constraints.const_get(Util.camel_case(name))
-      [constraint]
+      constraint = @app.constraint_named(Util.camel_case(name))
+      [constraint.new]
     end
   end
 
@@ -260,6 +260,7 @@ module Raptor
     end
 
     def match?(injector, request)
+      injector = injector.add_route_path(request, @path)
       @constraints.all? do |constraint|
         injector.call(constraint.method(:match?))
       end
