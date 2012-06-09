@@ -80,6 +80,14 @@ describe Raptor::Injector do
     injector_with_route_path.call(method).should == "5"
   end
 
+  it "injects an exception after being given an exception" do
+    def method_taking_exception(exception); exception; end
+    e = RuntimeError.new
+    method = method(:method_taking_exception)
+    injector_with_exception = injector.add_exception(e)
+    injector_with_exception.call(method).should == e
+  end
+
   context "custom injectables" do
     before do
       module WithInjectables

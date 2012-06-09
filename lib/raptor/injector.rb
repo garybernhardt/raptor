@@ -61,6 +61,11 @@ module Raptor
                                                                    route_path)]
       Injector.new(injectables)
     end
+
+    def add_exception(e)
+      injectables = @injectables + [Injectables::Fixed.new(:exception, e)]
+      Injector.new(injectables)
+    end
   end
 
   class UnknownInjectable < RuntimeError
