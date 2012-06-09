@@ -27,6 +27,7 @@ module Raptor
         route.respond_to_request(injector, request)
       rescue Exception => e
         Raptor.log("Looking for a redirect for #{e.inspect}")
+        injector = injector.add_exception(e)
         action = route.action_for_exception(e) or raise
         route_named(action).respond_to_request(injector, request)
       end
