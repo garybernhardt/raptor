@@ -13,9 +13,7 @@ module Raptor
     def call(env)
       request = Rack::Request.new(env)
       Raptor.log "App: routing #{request.request_method} #{request.path_info}"
-      injector = Injector.for_app(@app).
-        add_request(request)
-      injector = Injector.new.add_request(request)
+      injector = Injector.for_app(@app).add_request(request)
       begin
         route = route_for_request(injector, request)
       rescue NoRouteMatches

@@ -7,6 +7,11 @@ describe Raptor::App, "integrated" do
     module AwesomeSite
       module Presenters
         class PostList
+          attr_reader :watermelon
+
+          def initialize(watermelon)
+            @watermelon = watermelon
+          end
         end
         class Post
         end
@@ -16,6 +21,14 @@ describe Raptor::App, "integrated" do
         class OnlyTwos
           def match?(id)
             id == '2'
+          end
+        end
+      end
+
+      module Injectables
+        class Fruit
+          def sources(injector)
+            {:watermelon => lambda { "fruity" } }
           end
         end
       end
@@ -64,6 +77,12 @@ describe Raptor::App, "integrated" do
     app.call(env('GET', '/post/1')).status.should == 404
     app.call(env('GET', '/post/2')).status.should_not == 404
     app.call(env('GET', '/post/2')).body.join('').strip.should == "Template content"
+  end
+
+  it "injects custom injectables" do
+    File.stub(:binread).with("views/post/index.html.erb").
+      and_return("<%= watermelon %>")
+    app.call(env("GET", "/post")).body.join("").strip.should == "fruity"
   end
 end
 
