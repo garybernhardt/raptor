@@ -9,6 +9,8 @@ describe Raptor::Injector do
   def method_taking_subject(subject); subject; end
   def method_taking_optional_id(id = 0); id; end
   def method_taking_optional_arg(uninjectable_optional_arg = 0); uninjectable_optional_arg; end
+  def method_taking_exception(exception); exception; end
+  def method_taking_request(rack_request); rack_request; end
 
   let(:injector) do
     Raptor::Injector.new([Raptor::Injectables::Fixed.new(:id, 5)])
@@ -65,7 +67,6 @@ describe Raptor::Injector do
   end
 
   it "injects requests once it's been given one" do
-    def method_taking_request(rack_request); rack_request; end
     request = stub
     method = method(:method_taking_request)
     injector_with_request = injector.add_request(request)
@@ -73,7 +74,6 @@ describe Raptor::Injector do
   end
 
   it "injects route variables once it's been given the route path" do
-    def method_taking_id(id); id; end
     request = stub(:path_info => "/posts/5")
     method = method(:method_taking_id)
     injector_with_route_path = injector.add_route_path(request, "/posts/:id")
@@ -81,7 +81,6 @@ describe Raptor::Injector do
   end
 
   it "injects an exception after being given an exception" do
-    def method_taking_exception(exception); exception; end
     e = RuntimeError.new
     method = method(:method_taking_exception)
     injector_with_exception = injector.add_exception(e)
