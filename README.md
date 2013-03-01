@@ -62,9 +62,11 @@ The `update` route in the above example uses the default update behavior we know
 
 In addition, if `find_and_update` raised `Raptor::ValidationError`, it would've redirected to `:edit`. If a template had been rendered, it would've gone through `MyApp::Presenters::Article`. The full expansion of the update route is:
 
-    route :update, "PUT", "article/:id",
-      :to => "MyApp::Records::Article.find_and_update",
-      :redirect => :show, ValidationError => :edit`
+```ruby
+route :update, "PUT", "article/:id",
+  :to => "MyApp::Records::Article.find_and_update",
+  :redirect => :show, ValidationError => :edit`
+```
 
 All of the standard Raptor routes are syntactic sugar for these longer forms.
 
