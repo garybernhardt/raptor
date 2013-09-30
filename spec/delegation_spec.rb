@@ -22,16 +22,16 @@ describe Raptor::DelegateFinder do
 end
 
 describe Raptor::Delegator do
+  let(:app) { Raptor::App.new(Object) {} }
+  let(:injector) { Raptor::Injector.new([]) }
+
   it "returns nil if the delegate is nil" do
-    injector = Raptor::Injector.new([])
     delegator = Raptor::Delegator.new(AModule, nil)
     delegator.delegate(injector).should be_nil
   end
 
   it "calls the named method" do
-    app = Raptor::App.new(Object) {}
     delegator = Raptor::Delegator.new(app, "Hash.new")
-    injector = Raptor::Injector.new([])
     delegator.delegate(injector).should == {}
   end
 end
